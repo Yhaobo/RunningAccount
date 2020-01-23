@@ -1,0 +1,45 @@
+/*设置字体*/
+* {
+    font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+}
+/*
+设置
+ */
+#header {
+    position: fixed;
+    width: 100%;
+    margin: 0;
+    height: 50px;
+}
+
+/*用来填充导航栏的位置*/
+body > div:nth-child(2) {
+    height: 50px;
+}
+
+table {
+    width: 100%;
+    margin: 0 auto;
+}
+
+table, td, th {
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+table td {
+    height: 35px;
+    font-size: 1.2em;
+}
+
+table th {
+    font-size: 1.5em;
+}
+
+table caption {
+    font-size: 2.5em;
+    font-weight: bold;
+    text-align: center;
+    color: #0f0f0f;
+}
+

@@ -1,0 +1,5 @@
+/financial_management_system.iml
+/target/
+/.idea/
+/src/main/resources/*.properties
+/src/test/

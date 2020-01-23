@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <title id="title"></title>
+    <link href="bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css"/>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="css/table.css" rel="stylesheet" type="text/css"/>
+    <style>
+        select > option:first-child {
+            color: gray;
+        }
+    </style>
+    <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/util.js"></script>
+
+    <script>
+        var project;
+        var account;
+        var category;
+        var department;
+
+        //加载所有选项
+        function loadSelects() {
+            //获取所有项目
+            $.get("setting/findProjects", function (data) {
+                if (!data.flag) {
+                    location.href = "index.html";
+                }
+                var html = '<option>--请选择项目--</option>';
+                if (data.data.length == 1) {
+                    html = '';
+                }
+                for (var i = 0; i < data.data.length; i++) {
+                    var option = data.data[i];
+                    if (project && option.id == project.id) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#project").html(html);
+            });
+
+            //获取所有账户
+            $.get("setting/findAccounts", function (data) {
+                if (!data.flag) {
+                    location.href = "index.html";
+                }
+                var html = '<option>--请选择账户--</option>';
+                if (data.data.length == 1) {
+                    html = '';
+                }
+                for (var i = 0; i < data.data.length; i++) {
+                    var option = data.data[i];
+                    if (account && option.id == account.id) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#account").html(html);
+            });
+            //获取所有分类
+            $.get("setting/findCategorys", function (data) {
+                if (!data.flag) {
+                    location.href = "index.html";
+                }
+                var html = '<option>--请选择分类--</option>';
+                if (data.data.length == 1) {
+                    html = '';
+                }
+                for (var i = 0; i < data.data.length; i++) {
+                    var option = data.data[i];
+                    if (category && option.id == category.id) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#category").html(html);
+            });
+            //获取所有部门
+            $.get("setting/findDepartments", function (data) {
+                if (!data.flag) {
+                    location.href = "index.html";
+                }
+                var html = '<option>--请选择部门--</option>';
+                if (data.data.length == 1) {
+                    html = '';
+                }
+                for (var i = 0; i < data.data.length; i++) {
+                    var option = data.data[i];
+                    if (department && option.id == department.id) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#department").html(html);
+            });
+        }
+
+        //表单数据回显
+        function loadDetail(id) {
+            $.get("detail/findOne", {"id": id}, function (data) {
+                if (data.flag) {
+                    $("#date").val(dateFormat(new Date(data.data.date), "yyyy-MM-ddTHH:mm"));
+                    $("#description").val(data.data.description);
+                    $("#earning").val(data.data.earning);
+                    $("#expense").val(data.data.expense);
+
+                    project = data.data.project;
+                    account = data.data.account;
+                    category = data.data.category;
+                    department = data.data.department;
+
+                    $("#hidden_id").val(id);
+                    loadSelects();
+                } else {
+                    location.href = "index.html";
+                }
+            });
+        }
+
+        //提交表单
+        function submit(method) {
+            var button = "";
+            var msg = "";
+            if (method == "delete") {
+                button = "delete";
+                msg = "删除!!!!!!!???????";
+            } else {
+                button = "submit";
+                msg = "提交?";
+            }
+            $("#"+button).click(function () {
+                if (!confirm("确认" + msg)) {
+                    return;
+                }
+                //改时间格式
+                var datetime = dateFormat(new Date($("#date").val()), "yyyy-MM-dd HH:mm");
+                $("#hidden_date").val(datetime);
+
+                $.post("detail/" + method, $("#form").serialize(), function (data) {
+                    if (data.flag) {
+                        location.href = "detail_List.html";
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        }
+
+
+        $(function () {
+            if (location.search) {
+                //存在参数
+                //修改标题
+                $("#title").text("修改");
+                $("#caption").text("修改");
+                //数据回显
+                loadDetail(getParameter("id"));
+                //添加点击事件(修改)
+                submit("update");
+                $("#delete").removeClass("hidden");
+                submit("delete");
+            } else {
+                //不存在参数
+                //修改标题
+                $("#title").text("添加");
+                $("#caption").text("添加");
+                // 自动获取当前日期
+                $("#date").val(dateFormat(new Date(), "yyyy-MM-ddTHH:mm"));
+                loadSelects();
+                //添加点击事件(添加)
+                submit("add");
+            }
+        });
+    </script>
+</head>
+<body>
+<header id="header"></header>
+<div></div>
+<form id="form" action="javascript:;">
+    <input type="hidden" name="id" value="0" id="hidden_id"/>
+    <input type="hidden" name="date" id="hidden_date"/>
+    <table class="table table-hover table-bordered">
+        <caption id="caption"></caption>
+        <tr>
+            <th>日期</th>
+            <th>摘要</th>
+            <th>项目</th>
+            <th>账户</th>
+            <th>部门</th>
+            <th>分类</th>
+            <th>收入</th>
+            <th>支出</th>
+            <th>操作</th>
+        </tr>
+        <tr>
+            <td>
+                <input type="datetime-local" class="form-control" id="date">
+            </td>
+            <td>
+                <input type="text" class="form-control" id="description" placeholder="摘要" name="description">
+            </td>
+            <td>
+                <select class="form-control" name="project.id" id="project">
+                </select>
+            </td>
+            <td>
+                <select class="form-control" name="account.id" id="account">
+                </select>
+            </td>
+            <td>
+                <select class="form-control" name="department.id" id="department">
+                </select>
+            </td>
+            <td>
+                <select class="form-control" name="category.id" id="category">
+                </select>
+            </td>
+            <td><input type="number" class="form-control" id="earning" placeholder="收入" name="earning"></td>
+            <td><input type="number" class="form-control" id="expense" placeholder="支出" name="expense"></td>
+
+            <td>
+                <button type="submit" class="btn btn-default" id="submit">提交</button>
+                <button type="submit" class="btn btn-default hidden" id="delete">删除</button>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
