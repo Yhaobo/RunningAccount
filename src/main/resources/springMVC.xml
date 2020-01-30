@@ -9,20 +9,20 @@
     <mvc:default-servlet-handler/><!--处理不了的交给tomcat-->
     <mvc:annotation-driven/><!--开启高级功能-->
     <!--忽略静态资源-->
-    <mvc:resources mapping="/bootstrap/**" location="/bootstrap/"/>
-    <mvc:resources mapping="/js/**" location="/js/"/>
-    <mvc:resources mapping="/css/**" location="/css/"/>
-    <!--配置用户权限拦截器-->
-    <mvc:interceptors>
-        <mvc:interceptor>
-            <mvc:mapping path="/**"/>
-            <mvc:exclude-mapping path="/bootstrap/**"/>
-            <mvc:exclude-mapping path="/js/**"/>
-            <mvc:exclude-mapping path="/css/**"/>
-            <mvc:exclude-mapping path="/user/**"/>
-            <bean class="erp.Interceptor.UserInterceptor"/>
-        </mvc:interceptor>
-    </mvc:interceptors>
+<!--    <mvc:resources mapping="/bootstrap/**" location="/bootstrap/"/>-->
+<!--    <mvc:resources mapping="/js/**" location="/js/"/>-->
+<!--    <mvc:resources mapping="/css/**" location="/css/"/>-->
+    <!--配置用户登录认证拦截器(已使用shiro框架代替)-->
+<!--    <mvc:interceptors>-->
+<!--        <mvc:interceptor>-->
+<!--            <mvc:mapping path="/**"/>-->
+<!--            <mvc:exclude-mapping path="/bootstrap/**"/>-->
+<!--            <mvc:exclude-mapping path="/js/**"/>-->
+<!--            <mvc:exclude-mapping path="/css/**"/>-->
+<!--            <mvc:exclude-mapping path="/user/**"/>-->
+<!--            <bean class="erp.Interceptor.UserInterceptor"/>-->
+<!--        </mvc:interceptor>-->
+<!--    </mvc:interceptors>-->
     <!--配置文件上传解析器-->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 </beans>

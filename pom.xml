@@ -18,7 +18,18 @@
     </properties>
 
     <dependencies>
-        <!--导入导出excel格式-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        <!--Shiro权限认证框架-->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-all</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <!--导入导出excel-->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
@@ -100,16 +111,16 @@
             <version>3.5.2</version>
         </dependency>
         <!--ehcache缓存框架-->
-<!--        <dependency>-->
-<!--            <groupId>net.sf.ehcache</groupId>-->
-<!--            <artifactId>ehcache-core</artifactId>-->
-<!--            <version>2.6.11</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.mybatis.caches</groupId>-->
-<!--            <artifactId>mybatis-ehcache</artifactId>-->
-<!--            <version>1.1.0</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>net.sf.ehcache</groupId>-->
+        <!--            <artifactId>ehcache-core</artifactId>-->
+        <!--            <version>2.6.11</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.mybatis.caches</groupId>-->
+        <!--            <artifactId>mybatis-ehcache</artifactId>-->
+        <!--            <version>1.1.0</version>-->
+        <!--        </dependency>-->
         <!-- mybatis和spring的整合依赖 -->
         <dependency>
             <groupId>org.mybatis</groupId>

@@ -37,6 +37,10 @@
           class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>
     </bean>
+    <!--开启注解配置事务-->
+    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"/>
+
+    <!--    整合MyBatis-->
     <!--配置sqlSession工厂-->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
@@ -46,6 +50,45 @@
         <property name="basePackage" value="erp.dao"/>
     </bean>
 
-    <!--使用注解配置事务-->
-    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"/>
+    <!--    整合Shiro-->
+    <!--配置securityManger-->
+    <bean id="securityManger" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="realm" ref="realm"/>
+    </bean>
+    <!--配置cacheManager-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+    <!--配置realm-->
+    <bean id="realm" class="erp.shiro.realms.realm">
+        <property name="credentialsMatcher" >
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <property name="hashAlgorithmName" value="MD5"/>
+                <property name="hashIterations" value="7"/>
+            </bean>
+        </property>
+    </bean>
+    <!--配置LifecycleBeanPostProcessor-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+    <!--启用shiro的注解(必须配置LifecycleBeanPostProcessor)-->
+<!--    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"-->
+<!--          depends-on="lifecycleBeanPostProcessor"/>-->
+<!--    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">-->
+<!--        <property name="securityManager" ref="securityManger"/>-->
+<!--    </bean>-->
+    <!--配置shiroFilter-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManger"/>
+        <property name="loginUrl" value="/index.html"/>
+        <property name="successUrl" value="/detail_list.html"/>
+        <property name="unauthorizedUrl" value="/unauthorized.html"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /index.html = anon
+                /user/exit = logout
+                /static/** = anon
+                /user/* = anon
+                /** = authc
+            </value>
+        </property>
+    </bean>
 </beans>
