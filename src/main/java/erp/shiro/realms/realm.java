@@ -4,11 +4,15 @@ import erp.domain.User;
 import erp.service.UserService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Yhaobo 2020/1/30
@@ -20,7 +24,15 @@ public class realm extends AuthorizingRealm {
     //授权
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        return null;
+        Object principal = principalCollection.getPrimaryPrincipal();
+        Set<String> roles = new HashSet<>();
+        if (principal.equals(0)) {
+            roles.add("writer");
+            roles.add("reader");
+        } else if (principal.equals(1)) {
+            roles.add("reader");
+        }
+        return new SimpleAuthorizationInfo(roles);
     }
 
     //认证

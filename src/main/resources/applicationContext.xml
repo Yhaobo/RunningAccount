@@ -60,7 +60,7 @@
     <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
     <!--配置realm-->
     <bean id="realm" class="erp.shiro.realms.realm">
-        <property name="credentialsMatcher" >
+        <property name="credentialsMatcher">
             <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
                 <property name="hashAlgorithmName" value="MD5"/>
                 <property name="hashIterations" value="7"/>
@@ -70,24 +70,31 @@
     <!--配置LifecycleBeanPostProcessor-->
     <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
     <!--启用shiro的注解(必须配置LifecycleBeanPostProcessor)-->
-<!--    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"-->
-<!--          depends-on="lifecycleBeanPostProcessor"/>-->
-<!--    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">-->
-<!--        <property name="securityManager" ref="securityManger"/>-->
-<!--    </bean>-->
+    <!--    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"-->
+    <!--          depends-on="lifecycleBeanPostProcessor"/>-->
+    <!--    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">-->
+    <!--        <property name="securityManager" ref="securityManger"/>-->
+    <!--    </bean>-->
     <!--配置shiroFilter-->
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
         <property name="securityManager" ref="securityManger"/>
         <property name="loginUrl" value="/index.html"/>
         <property name="successUrl" value="/detail_list.html"/>
-        <property name="unauthorizedUrl" value="/unauthorized.html"/>
+        <property name="unauthorizedUrl" value="/unauthorized.json"/>
         <property name="filterChainDefinitions">
             <value>
+                /detail/add = roles[writer,reader]
+                /detail/update = roles[writer,reader]
+                /detail/delete = roles[writer,reader]
+                /detail/updateBalance = roles[writer,reader]
+                /setting/add* = roles[writer,reader]
+                /setting/update* = roles[writer,reader]
+
                 /index.html = anon
                 /user/exit = logout
                 /static/** = anon
                 /user/* = anon
-                /** = authc
+                /** = authc,roles[reader]
             </value>
         </property>
     </bean>
