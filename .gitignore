@@ -3,4 +3,4 @@
 /.idea/
 /src/main/resources/*.properties
 /src/test/
-/src/webapp/test.html
+/src/main/webapp/test.html

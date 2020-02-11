@@ -20,61 +20,7 @@
             font-size: 1.9em;
         }
     </style>
-    <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
-    <script src="static/js/jquery-3.4.1.js"></script>
-    <script src="static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="static/js/util.js"></script>
-    <script>
-        $(function () {
-            var path = getParameter("path");//二级路径
-            //加载所有
-            $.get("setting/find" + path + "s", function (data) {
-                if (data.flag) {
-                    var html = ' <tr>' +
-                        '        <th id="tab_th"></th>' +
-                        '        <th>操作</th>' +
-                        '    </tr>';
-                    for (var i = 0; i < data.data.length; i++) {
-                        var item = data.data[i];
-                        html += ' <tr>' +
-                            '        <td>' + item.name + '</td>' +
-                            '        <td><a href="update_setting.html' + location.search + '&id=' + item.id + '&name=' + item.name + '">修改</a></td>' +
-                            '    </tr>';
-                    }
 
-                    html += '<tr><td>' +
-                        '            <input type="text" class="form-control" id="input" placeholder="新增"  style="width: 150px;margin: 5px auto"/></td>' +
-                        '            <td><button  type="button" class="btn btn-default" id="submit">提交</button>' +
-                        '    </td></tr>';
-                    $("#table").append(html);
-
-                    //加载标题
-                    var name = decodeURIComponent(getParameter("title"));
-                    $("#title").text(name);
-                    $("#tab_th").text(name);
-                    $("#caption").text(name);
-
-                    //添加操作
-                    $("#submit").click(function () {
-                        if (!confirm("确认提交?")) {
-                            return;
-                        }
-                        var value = $("#input").val();
-                        $.post("setting/add" + path, {"name": value}, function (data) {
-                            if (data.flag) {
-                                location.reload();
-                            } else {
-                                alert(data.message);
-                            }
-                        });
-                    });
-                } else {
-                    location.href = "index.html";
-                }
-
-            });
-        });
-    </script>
 </head>
 <body>
 <header id="header"></header>
@@ -82,5 +28,61 @@
 <table id="table" class="table-hover">
     <caption></caption>
 </table>
+
+<!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
+<script src="static/js/jquery-3.4.1.js"></script>
+<script src="static/bootstrap/js/bootstrap.min.js"></script>
+<script src="static/js/util.js"></script>
+<script>
+
+    var path = getParameter("path");//二级路径
+    //加载所有
+    $.get("setting/find" + path + "s", function (data) {
+        if (data.flag) {
+            var html = ' <tr>' +
+                '        <th id="tab_th"></th>' +
+                '        <th>操作</th>' +
+                '    </tr>';
+            for (var i = 0; i < data.data.length; i++) {
+                var item = data.data[i];
+                html += ' <tr>' +
+                    '        <td>' + item.name + '</td>' +
+                    '        <td><a href="update_setting.html' + location.search + '&id=' + item.id + '&name=' + item.name + '">修改</a></td>' +
+                    '    </tr>';
+            }
+
+            html += '<tr><td>' +
+                '            <input type="text" class="form-control" id="input" placeholder="新增"  style="width: 150px;margin: 5px auto"/></td>' +
+                '            <td><button  type="button" class="btn btn-default" id="submit">提交</button>' +
+                '    </td></tr>';
+            $("#table").append(html);
+
+            //加载标题
+            var name = decodeURIComponent(getParameter("title"));
+            $("#title").text(name);
+            $("#tab_th").text(name);
+            $("#caption").text(name);
+
+            //添加操作
+            $("#submit").click(function () {
+                if (!confirm("确认提交?")) {
+                    return;
+                }
+                var value = $("#input").val();
+                $.post("setting/add" + path, {"name": value}, function (data) {
+                    if (data.flag) {
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        } else {
+            location.href = "index.html";
+        }
+
+    });
+
+</script>
 </body>
 </html>

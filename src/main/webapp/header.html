@@ -3,66 +3,85 @@
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display 主名称-->
         <div class="navbar-header">
-<!--            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"-->
-<!--                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
-<!--                <span class="sr-only">Toggle navigation</span>-->
-<!--                <span class="icon-bar"></span>-->
-<!--                <span class="icon-bar"></span>-->
-<!--                <span class="icon-bar"></span>-->
-<!--            </button>-->
-            <a class="navbar-brand dropdown-toggle" data-toggle="dropdown" role="button"
+            <!--            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"-->
+            <!--                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
+            <!--                <span class="sr-only">Toggle navigation</span>-->
+            <!--                <span class="icon-bar"></span>-->
+            <!--                <span class="icon-bar"></span>-->
+            <!--                <span class="icon-bar"></span>-->
+            <!--            </button>-->
+            <a class="navbar-brand dropdown-toggle " data-toggle="dropdown" role="button"
                aria-haspopup="true"
                aria-expanded="false">峰众财务管理系统</a>
             <ul class="dropdown-menu">
-                <li><a href="excel/export">导出为Excel</a></li>
-                <li><a href="user/exit">备份并退出</a></li>
+                <li><a href="excel/export" class="glyphicon glyphicon-export"> 导出为Excel</a></li>
+                <li><a href="user/exit" class="glyphicon glyphicon-off"> 备份并退出</a></li>
             </ul>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li id="header_detail"><a href="detail_List.html">收支明细 <span class="sr-only">(current)</span></a></li>
-                <li><a href="monthly_list.html?title=收支每月汇总">收支每月汇总 <span class="sr-only">(current)</span></a></li>
+                <li id="header_detail"><a href="detail_list.html">收支明细 <span class="sr-only">(current)</span></a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">项目每月汇总 <span class="caret"></span></a>
-                    <ul class="dropdown-menu" id="header_project">
+                       aria-expanded="false">每月汇总 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="monthly_list.html?title=收支每月汇总">收支每月汇总 <span class="sr-only">(current)</span></a>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">项目每月汇总</a>
+                            <ul class="dropdown-menu" id="header_project">
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">账户每月汇总</a>
+                            <ul class="dropdown-menu" id="header_account">
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">部门每月汇总</a>
+                            <ul class="dropdown-menu" id="header_department">
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">分类每月汇总</a>
+                            <ul class="dropdown-menu" id="header_category">
+                            </ul>
+                        </li>
                     </ul>
                 </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">账户每月汇总 <span class="caret"></span></a>
-                    <ul class="dropdown-menu" id="header_account">
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">部门每月汇总 <span class="caret"></span></a>
-                    <ul class="dropdown-menu" id="header_department">
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">分类每月汇总 <span class="caret"></span></a>
-                    <ul class="dropdown-menu" id="header_category">
-                    </ul>
-                </li>
+
             </ul>
 
-            <form class="navbar-form navbar-left" action="excel/importing" style="margin-left: 100px;"
+            <form id="header_file_form" class="navbar-form navbar-left" action="excel/importing"
+                  style="margin-left: 50px;width: 350px"
                   enctype="multipart/form-data" method="post">
                 <!--                    <div class="form-group">-->
-                <input type="file" class="form-control" placeholder="Search" name="file" style="width: 200px;">
+                <input id="header_file_input" type="file" class="form-control hidden" placeholder="Search" name="file"
+                       style="width: 200px;">
                 <!--                    </div>-->
-                <button type="submit" class="btn btn-default" onclick="return confirm('确认导入Excel吗?');">导入Excel</button>
+                <button type="submit" class="btn btn-default glyphicon glyphicon-import"
+                        onclick="return confirm('确认导入Excel吗?');">导入Excel
+                </button>
             </form>
 
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="detail_Item.html">添加记录<span class="sr-only">(current)</span></a></li>
+                <li><a href="detail_Item.html" class="glyphicon glyphicon-plus">添加<span class="sr-only">(current)</span></a>
+                </li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">基础设置 <span class="caret"></span></a>
+                    <a href="#" class="dropdown-toggle glyphicon glyphicon-cog" data-toggle="dropdown" role="button"
+                       aria-haspopup="true"
+                       aria-expanded="false">设置<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="basic_setting.html?title=项目&path=Project">项目</a></li>
                         <li role="separator" class="divider"></li>
@@ -72,15 +91,17 @@
                         <li role="separator" class="divider"></li>
                         <li><a href="basic_setting.html?title=分类&path=Category">分类</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><a href="javascript:;" id="updateBalance">更新所有结存</a></li>
+                        <li><a href="javascript:;" id="updateBalance" class="glyphicon glyphicon-refresh"> 更新所有结存</a>
+                        </li>
                     </ul>
                 </li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>
+
 <script>
-    //导入excel
+    //导入excel功能
     $("#updateBalance").click(function () {
         if (!confirm("确定更新吗?此操作建议慎用!")) {
             return;
@@ -94,6 +115,7 @@
             }
         });
     });
+
     //获取所有项目
     $.get("setting/findProjects", function (data) {
         var html = '';
@@ -147,6 +169,14 @@
         }
     });
 
+    //隐藏文件选择框, 鼠标悬停激活
+    const fileInput = $("#header_file_input");
+    const fileForm = $("#header_file_form");
+    fileForm.hover(function () {
+        fileInput.removeClass("hidden");
+    }, function () {
+        fileInput.addClass("hidden");
+    });
 
     //处理明细账单是否激活状态
     // if (location.href.indexOf("detail_List") >= 0) {
@@ -154,4 +184,5 @@
     // } else {
     //     $("#header_detail").removeClass("active");
     // }
+
 </script>

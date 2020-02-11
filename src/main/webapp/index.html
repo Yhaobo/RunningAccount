@@ -13,25 +13,6 @@
         }
 
     </style>
-    <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
-    <script src="static/js/jquery-3.4.1.js"></script>
-    <script src="static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="static/js/util.js"></script>
-    <script>
-        $(function () {
-            $("#submit").click(function () {
-                var data = $("#form").serialize();
-                $.post("user/login", data, function (data) {
-                    if (data.flag) {
-                        location.href = "detail_List.html";
-                    } else {
-                        $("#msg").text(data.message);
-                    }
-                });
-                return false;
-            });
-        })
-    </script>
 
 </head>
 <body>
@@ -46,17 +27,36 @@
         <form style="text-align: center;margin:auto" id="form" action="javascript:;">
             <div class="input-group input-group-lg">
                 <span class="input-group-addon" id="sizing-addon1">用户</span>
-                <input type="text" class="form-control" placeholder="用户名" aria-describedby="sizing-addon1" name="u_username">
+                <input type="text" class="form-control" placeholder="用户名" aria-describedby="sizing-addon1"
+                       name="u_username">
             </div>
             <div class="input-group input-group-lg">
                 <span class="input-group-addon" id="sizing-addon2">密码</span>
-                <input type="password" class="form-control" placeholder="密码" aria-describedby="sizing-addon2" name="u_password">
+                <input type="password" class="form-control" placeholder="密码" aria-describedby="sizing-addon2"
+                       name="u_password">
             </div>
             <button type="submit" class="btn btn-default" id="submit">登录</button>
-<!--            <button type="button" class="btn btn-default">更换密码</button>-->
+            <!--            <button type="button" class="btn btn-default">更换密码</button>-->
         </form>
     </div>
 </div>
 
+<!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
+<script src="static/js/jquery-3.4.1.js"></script>
+<script src="static/bootstrap/js/bootstrap.min.js"></script>
+<script src="static/js/util.js"></script>
+<script>
+    $("#submit").click(function () {
+        var data = $("#form").serialize();
+        $.post("user/login", data, function (data) {
+            if (data.flag) {
+                location.href = "detail_list.html";
+            } else {
+                $("#msg").text(data.message);
+            }
+        });
+        return false;
+    });
+</script>
 </body>
 </html>

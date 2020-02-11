@@ -40,7 +40,7 @@ public class ExcelController {
         if (!file.isEmpty()) {
             try {
                 service.importing(file.getInputStream());
-                response.sendRedirect(request.getContextPath() + "/detail_List.html");
+                response.sendRedirect(request.getContextPath() + "/detail_list.html");
             } catch (NoSuchFieldException e) {
                 e.printStackTrace();
             } catch (InstantiationException e) {

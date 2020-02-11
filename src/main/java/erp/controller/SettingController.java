@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -45,9 +44,14 @@ public class SettingController {
     }
 
     @RequestMapping("/updateCategory")
-    public void updateCategory(Category category, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        settingService.updateCategory(category);
-        response.sendRedirect(request.getContextPath() + "/basic_setting.html?title=" + URLEncoder.encode("分类", "utf-8") + "&path=Category");
+    @ResponseBody
+    public ResultInfo updateCategory(Category category, HttpServletRequest request) throws IOException {
+        try {
+            settingService.updateCategory(category);
+            return new ResultInfo(true);
+        } catch (Exception e) {
+            return new ResultInfo(false, "修改失败!");
+        }
     }
 
     @RequestMapping("/findDepartments")
@@ -72,9 +76,14 @@ public class SettingController {
     }
 
     @RequestMapping("/updateDepartment")
-    public void updateDepartment(Department department, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        settingService.updateDepartment(department);
-        response.sendRedirect(request.getContextPath() + "/basic_setting.html?title=" + URLEncoder.encode("部门", "utf-8") + "&path=Department");
+    @ResponseBody
+    public ResultInfo updateDepartment(Department department, HttpServletResponse response, HttpServletRequest request) throws IOException {
+        try {
+            settingService.updateDepartment(department);
+            return new ResultInfo(true);
+        } catch (Exception e) {
+            return new ResultInfo(false, "修改失败!");
+        }
     }
 
     @RequestMapping("/findAccounts")
@@ -100,9 +109,14 @@ public class SettingController {
     }
 
     @RequestMapping("/updateAccount")
-    public void updateAccount(Account account, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        settingService.updateAccount(account);
-        response.sendRedirect(request.getContextPath() + "/basic_setting.html?title=" + URLEncoder.encode("账户", "utf-8") + "&path=Account");
+    @ResponseBody
+    public ResultInfo updateAccount(Account account, HttpServletResponse response, HttpServletRequest request) throws IOException {
+        try {
+            settingService.updateAccount(account);
+            return new ResultInfo(true);
+        } catch (Exception e) {
+            return new ResultInfo(false, "修改失败!");
+        }
     }
 
     @RequestMapping("/findProjects")
@@ -127,8 +141,13 @@ public class SettingController {
     }
 
     @RequestMapping("/updateProject")
-    public void updateProject(Project project, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        settingService.updateProject(project);
-        response.sendRedirect(request.getContextPath() + "/basic_setting.html?title=" + URLEncoder.encode("项目", "utf-8") + "&path=Project");
+    @ResponseBody
+    public ResultInfo updateProject(Project project, HttpServletResponse response, HttpServletRequest request) throws IOException {
+        try {
+            settingService.updateProject(project);
+            return new ResultInfo(true);
+        } catch (Exception e) {
+            return new ResultInfo(false, "修改失败!");
+        }
     }
 }
