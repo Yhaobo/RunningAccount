@@ -1,10 +1,13 @@
-package erp.domain;
+package erp.util;
 
 import java.io.Serializable;
 
 public class ResultInfo implements Serializable {
+
     private boolean flag;
+
     private String message;
+
     private Object data;
 
     public ResultInfo() {

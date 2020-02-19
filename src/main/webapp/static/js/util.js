@@ -1,8 +1,3 @@
-//加载导航栏
-// $.get("header.html", function (data) {
-//     $("#header").html(data);
-// });
-$("#header").load("header.html");
 
 //日期格式化方法
 // Date.prototype.format = function(fmt) {

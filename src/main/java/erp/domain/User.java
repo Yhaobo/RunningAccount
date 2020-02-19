@@ -1,11 +1,14 @@
 package erp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 
 public class User implements Serializable {
     private String u_username;
+    @JsonIgnore
     private String u_password;
-    private int u_level;
+    private Integer u_level;
 
     public User() {
     }
@@ -15,11 +18,11 @@ public class User implements Serializable {
         this.u_password = password;
     }
 
-    public int getU_level() {
+    public Integer getU_level() {
         return u_level;
     }
 
-    public void setU_level(int u_level) {
+    public void setU_level(Integer u_level) {
         this.u_level = u_level;
     }
 

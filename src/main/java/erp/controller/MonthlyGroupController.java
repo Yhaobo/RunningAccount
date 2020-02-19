@@ -1,7 +1,7 @@
 package erp.controller;
 
 import erp.domain.Detail;
-import erp.domain.ResultInfo;
+import erp.util.ResultInfo;
 import erp.service.GroupQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,9 @@ import java.util.List;
 @RequestMapping("/group")
 public class MonthlyGroupController {
     @Autowired
-    GroupQueryService service;
+    private GroupQueryService service;
+
+//    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping("/findDepartment")
     @ResponseBody

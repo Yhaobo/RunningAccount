@@ -3,10 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
-<!--    <servlet-mapping>-->
-<!--        <servlet-name>default</servlet-name>-->
-<!--        <url-pattern>*.html</url-pattern>-->
-<!--    </servlet-mapping>-->
     <!--配置spring加载器-->
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -59,4 +55,8 @@
         <filter-name>shiroFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    <!--配置备份数据监听器-->
+    <listener>
+        <listener-class>erp.listener.BackupsListener</listener-class>
+    </listener>
 </web-app>

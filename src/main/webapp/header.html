@@ -15,7 +15,7 @@
                aria-expanded="false">峰众财务管理系统</a>
             <ul class="dropdown-menu">
                 <li><a href="excel/export" class="glyphicon glyphicon-export"> 导出为Excel</a></li>
-                <li><a href="user/exit" class="glyphicon glyphicon-off"> 备份并退出</a></li>
+                <li><a href="user/exit" class="glyphicon glyphicon-off"> 登出</a></li>
             </ul>
         </div>
 
@@ -76,7 +76,7 @@
             </form>
 
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="detail_Item.html" class="glyphicon glyphicon-plus">添加<span class="sr-only">(current)</span></a>
+                <li><a href="javascript:;" class="glyphicon glyphicon-plus hidden" onclick="add()" id="header_addBtn">添加<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle glyphicon glyphicon-cog" data-toggle="dropdown" role="button"
@@ -99,23 +99,7 @@
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>
-
 <script>
-    //导入excel功能
-    $("#updateBalance").click(function () {
-        if (!confirm("确定更新吗?此操作建议慎用!")) {
-            return;
-        }
-        $.get("detail/updateBalance", function (data) {
-            if (data.flag) {
-                alert("更新成功!");
-                location.reload();
-            } else {
-                alert(data.message);
-            }
-        });
-    });
-
     //获取所有项目
     $.get("setting/findProjects", function (data) {
         var html = '';
@@ -168,6 +152,20 @@
             location.href = "index.html";
         }
     });
+    //手动更新结存功能
+    $("#updateBalance").click(function () {
+        if (!confirm("正常情况下结存会自动计算,此操作用于特殊情况,慎用!")) {
+            return;
+        }
+        $.get("detail/updateBalance", function (data) {
+            if (data.flag) {
+                alert("更新成功!");
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        });
+    });
 
     //隐藏文件选择框, 鼠标悬停激活
     const fileInput = $("#header_file_input");
@@ -178,11 +176,7 @@
         fileInput.addClass("hidden");
     });
 
-    //处理明细账单是否激活状态
-    // if (location.href.indexOf("detail_List") >= 0) {
-    //     $("#header_detail").addClass("active");
-    // } else {
-    //     $("#header_detail").removeClass("active");
-    // }
+
+
 
 </script>

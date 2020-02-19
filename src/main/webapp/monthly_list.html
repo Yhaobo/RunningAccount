@@ -6,37 +6,36 @@
 
     <link href="static/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css"/>
     <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="static/css/table.css" rel="stylesheet" type="text/css"/>
+    <link href="static/css/global.css" rel="stylesheet" type="text/css"/>
 
 
 </head>
 <body>
 <header id="header"></header>
-<div></div>
 <table id="table">
-    <caption id="caption"></caption>
+
 </table>
 
 <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
-<script src="static/js/jquery-3.4.1.js"></script>
+<script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
 <script src="static/js/util.js"></script>
+<script src="static/js/load.js"></script>
 <script>
     function tableAppend(data) {
-        var html = ' <tr>\n' +
+        var html = '<caption>' + decodeURIComponent(getParameter("title")) + '</caption>' +
+            '       <tr>' +
             '            <th>月份</th>\n' +
-            // '            <th>期初</th>\n' +
             '            <th>收入</th>\n' +
             '            <th>支出</th>\n' +
             '            <th>结存</th>\n' +
-            '        </tr>';
+            '       </tr>';
         var earning_total = 0;
         var expense_total = 0;
         for (var i = 0; i < data.data.length; i++) {
             var item = data.data[i];
             html += '<tr>\n' +
                 '            <td>' + dateFormat(new Date(item.date), "yyyy-MM") + '</td>\n' +
-                // '            <td>' + qiChu + '</td>\n' +
                 '            <td>' + item.formatEarning + '</td>\n' +
                 '            <td>' + item.formatExpense + '</td>\n' +
                 '            <td>' + item.formatBalance + '</td>\n' +
@@ -44,13 +43,12 @@
             earning_total += item.earning * 100;
             expense_total += item.expense * 100;
         }
-        html += '<tr><td>合计</td><td>￥' + earning_total / 100 + '</td><td>￥' + expense_total / 100 + '</td></tr>'
-        $("#table").append(html).addClass("table-hover");
+        html += '<tr><td>合计</td><td>￥' + earning_total / 100 + '</td><td>￥' + expense_total / 100 + '</td><td></td></tr>'
+        $("#table").html(html).addClass("table-hover");
     }
 
 
     $("#title").text(decodeURIComponent(getParameter("title")));
-    $("#caption").text(decodeURIComponent(getParameter("title")));
 
     if (getParameter("dep_id")) {
         $.get("group/findDepartment", {"dep_id": getParameter("dep_id")}, function (data) {

@@ -11,7 +11,7 @@ import java.util.Date;
  * 此类的所有BigDecimal类型的属性setter时,会舍弃小数点2位之后的部分
  */
 public class Detail implements Serializable {
-    private int id;
+    private Integer id;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private Date date;
     private String description;
@@ -58,11 +58,11 @@ public class Detail implements Serializable {
         this.category = category;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -111,8 +111,9 @@ public class Detail implements Serializable {
     }
 
     public void setEarning(BigDecimal earning) {
-        if (earning != null)
+        if (earning != null) {
             this.earning = earning.setScale(2, BigDecimal.ROUND_DOWN);
+        }
     }
 
     public BigDecimal getExpense() {
@@ -120,8 +121,9 @@ public class Detail implements Serializable {
     }
 
     public void setExpense(BigDecimal expense) {
-        if (expense != null)
+        if (expense != null) {
             this.expense = expense.setScale(2, BigDecimal.ROUND_DOWN);
+        }
     }
 
     public BigDecimal getBalance() {
@@ -129,8 +131,9 @@ public class Detail implements Serializable {
     }
 
     public void setBalance(BigDecimal balance) {
-        if (balance != null)
+        if (balance != null) {
             this.balance = balance.setScale(2, BigDecimal.ROUND_DOWN);
+        }
     }
 
     @Override

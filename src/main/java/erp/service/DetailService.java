@@ -31,9 +31,14 @@ public class DetailService {
     }
 
     public void add(Detail form) {
+
         //处理null值
-        if (form.getEarning() == null) form.setEarning(new BigDecimal(0));
-        if (form.getExpense() == null) form.setExpense(new BigDecimal(0));
+        if (form.getEarning() == null) {
+            form.setEarning(new BigDecimal(0));
+        }
+        if (form.getExpense() == null) {
+            form.setExpense(new BigDecimal(0));
+        }
         //设置结存
         handleBalance(form);
         //添加到数据库
@@ -55,8 +60,12 @@ public class DetailService {
             throw new MyException("请刷新页面,重新操作!");
         }
         //处理null值
-        if (form.getEarning() == null) form.setEarning(new BigDecimal(0));
-        if (form.getExpense() == null) form.setExpense(new BigDecimal(0));
+        if (form.getEarning() == null) {
+            form.setEarning(new BigDecimal(0));
+        }
+        if (form.getExpense() == null) {
+            form.setExpense(new BigDecimal(0));
+        }
         //获取被修改之前的旧记录
         Detail old = detailDao.findOne(form.getId());
         //处理修改时间

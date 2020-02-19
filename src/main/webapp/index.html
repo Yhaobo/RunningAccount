@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ch">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>登录</title>
@@ -42,13 +42,11 @@
 </div>
 
 <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
-<script src="static/js/jquery-3.4.1.js"></script>
+<script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
-<script src="static/js/util.js"></script>
 <script>
     $("#submit").click(function () {
-        var data = $("#form").serialize();
-        $.post("user/login", data, function (data) {
+        $.post("user/login", $("#form").serialize(), function (data) {
             if (data.flag) {
                 location.href = "detail_list.html";
             } else {

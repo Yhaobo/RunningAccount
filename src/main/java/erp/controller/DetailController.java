@@ -1,9 +1,11 @@
 package erp.controller;
 
 import erp.domain.Detail;
-import erp.domain.ResultInfo;
+import erp.util.ResultInfo;
 import erp.service.DetailService;
 import erp.util.MyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,8 @@ public class DetailController {
     @Autowired
     private DetailService detailService;
 
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
     @RequestMapping("/getAll")
     @ResponseBody
     public ResultInfo getAll() {
@@ -34,7 +38,7 @@ public class DetailController {
             detailService.add(form);
             return new ResultInfo(true);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[method:add]"+e.getMessage());
             return new ResultInfo(false, "添加失败!");
         }
     }
@@ -52,9 +56,10 @@ public class DetailController {
         try {
             detailService.update(form);
         } catch (MyException e) {
+            log.error("[method:update]"+e.getMessage());
             return new ResultInfo(false, e.getMessage());
         } catch (Exception e) {
-            System.out.println(e.getCause().getMessage());
+            log.error("[method:update]"+e.getMessage());
             return new ResultInfo(false, "修改失败!");
         }
         return new ResultInfo(true);
@@ -67,7 +72,8 @@ public class DetailController {
             detailService.delete(form);
             return new ResultInfo(true);
         } catch (Throwable t) {
-            return new ResultInfo(false,"删除失败!");
+            log.error("[method:delete]"+t.getMessage());
+            return new ResultInfo(false, "删除失败!");
         }
     }
 
@@ -78,7 +84,8 @@ public class DetailController {
             detailService.updateBalance();
             return new ResultInfo(true);
         } catch (Throwable t) {
-            return new ResultInfo(false,"更新结存失败!");
+            log.error("[method:updateBalance]"+t.getMessage());
+            return new ResultInfo(false, "更新结存失败!");
         }
     }
 }

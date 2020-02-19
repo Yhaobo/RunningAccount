@@ -2,6 +2,9 @@ package erp.controller;
 
 import erp.domain.*;
 import erp.service.SettingService;
+import erp.util.ResultInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +24,8 @@ public class SettingController {
     @Autowired
     private SettingService settingService;
 
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
     @RequestMapping("/findCategorys")
     @ResponseBody
     public ResultInfo findCategorys() {
@@ -39,6 +44,7 @@ public class SettingController {
             settingService.addCategory(category);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:addCategory]" + e.getMessage());
             return new ResultInfo(false, "添加失败!");
         }
     }
@@ -50,6 +56,7 @@ public class SettingController {
             settingService.updateCategory(category);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:updateCategory]" + e.getMessage());
             return new ResultInfo(false, "修改失败!");
         }
     }
@@ -71,6 +78,8 @@ public class SettingController {
             settingService.addDepartment(department);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:addDepartment]" + e.getMessage());
+
             return new ResultInfo(false, "添加失败!");
         }
     }
@@ -82,6 +91,8 @@ public class SettingController {
             settingService.updateDepartment(department);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:updateDepartment]" + e.getMessage());
+
             return new ResultInfo(false, "修改失败!");
         }
     }
@@ -104,6 +115,8 @@ public class SettingController {
             settingService.addAccount(account);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:addAccount]" + e.getMessage());
+
             return new ResultInfo(false, "添加失败!");
         }
     }
@@ -115,6 +128,8 @@ public class SettingController {
             settingService.updateAccount(account);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:updateAccount]" + e.getMessage());
+
             return new ResultInfo(false, "修改失败!");
         }
     }
@@ -136,6 +151,8 @@ public class SettingController {
             settingService.addProject(project);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:addProject]" + e.getMessage());
+
             return new ResultInfo(false, "添加失败!");
         }
     }
@@ -147,6 +164,8 @@ public class SettingController {
             settingService.updateProject(project);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:updateProject]" + e.getMessage());
+
             return new ResultInfo(false, "修改失败!");
         }
     }

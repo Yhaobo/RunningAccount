@@ -3,7 +3,7 @@ package erp.domain;
 import java.io.Serializable;
 
 public class Department implements Serializable {
-    private int id;
+    private Integer id;
     private String name;
 
     public Department() {
@@ -13,11 +13,11 @@ public class Department implements Serializable {
         this.name = name;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
