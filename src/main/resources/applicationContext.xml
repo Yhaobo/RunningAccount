@@ -69,12 +69,14 @@
     </bean>
     <!--配置LifecycleBeanPostProcessor-->
     <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
     <!--启用shiro的注解(必须配置LifecycleBeanPostProcessor)-->
     <!--    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"-->
     <!--          depends-on="lifecycleBeanPostProcessor"/>-->
     <!--    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">-->
     <!--        <property name="securityManager" ref="securityManger"/>-->
     <!--    </bean>-->
+
     <!--配置shiroFilter-->
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
         <property name="securityManager" ref="securityManger"/>

@@ -44,6 +44,7 @@ public class realm extends AuthorizingRealm {
         if (null == user) {
             throw new UnknownAccountException("此用户不存在");
         } else {
+            //使用用户名为盐值
             ByteSource salt = ByteSource.Util.bytes(user.getU_username());
             return new SimpleAuthenticationInfo(user.getU_level(), user.getU_password(), salt, user.getU_username());
         }
@@ -51,7 +52,7 @@ public class realm extends AuthorizingRealm {
 
     //hash加密
     public static void main(String[] args) {
-        SimpleHash result = new SimpleHash("md5", "123", "yc8858", 7);
+        SimpleHash result = new SimpleHash("md5", "ycyc8858", "yc8858", 7);
         System.out.println(result);
     }
 }
