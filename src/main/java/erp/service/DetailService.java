@@ -3,7 +3,6 @@ package erp.service;
 import erp.dao.DetailDao;
 import erp.domain.Detail;
 import erp.util.MyException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +14,12 @@ import java.util.Locale;
 
 @Service
 public class DetailService {
-    @Autowired
+
     private DetailDao detailDao;
+
+    public DetailService(DetailDao detailDao) {
+        this.detailDao = detailDao;
+    }
 
     public List<Detail> findAll() {
         List<Detail> details = detailDao.findAll();
@@ -30,6 +33,7 @@ public class DetailService {
         return details;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void add(Detail form) {
 
         //处理null值
@@ -43,9 +47,8 @@ public class DetailService {
         handleBalance(form);
         //添加到数据库
         detailDao.add(form);
-        //如果是插入之前的记录,就需要调整插入之后的所有记录
+        //如果是插入以前,就需要调整本次插入记录之后的所有记录的结存
         BigDecimal balanceDifference = form.getEarning().subtract(form.getExpense());
-        //得到新插入记录后面的所有记录并更新
         handleLaterBalance(form.getDate(), balanceDifference);
     }
 
@@ -68,7 +71,7 @@ public class DetailService {
         }
         //获取被修改之前的旧记录
         Detail old = detailDao.findOne(form.getId());
-        //处理修改时间
+        //处理修改时间之后的不一致
         if (form.getDate().compareTo(old.getDate()) < 0) {
             //时间提前
             handleAlterDate(form, old, true);
@@ -76,7 +79,7 @@ public class DetailService {
             //时间推后
             handleAlterDate(form, old, false);
         }
-        //处理修改收入支出
+        //处理修改收入支出之后的不一致
         if (form.getEarning().compareTo(old.getEarning()) != 0 || form.getExpense().compareTo(old.getExpense()) != 0) {
             //修改了收入支出,这条记录以后的所有记录的余额都要修改
             BigDecimal earningDifference = form.getEarning().subtract(old.getEarning());
@@ -100,8 +103,7 @@ public class DetailService {
         Detail previous = detailDao.findBeforeOne(detail.getDate());//获取前一条记录
         BigDecimal qi_chu = previous == null ? new BigDecimal(0) : previous.getBalance();
         //设置结存(当前结存=之前结存+当前收入-当前支出)
-        BigDecimal balance = qi_chu.add(detail.getEarning()).subtract(detail.getExpense());
-        detail.setBalance(balance);
+        detail.setBalance(qi_chu.add(detail.getEarning()).subtract(detail.getExpense()));
     }
 
     /**
@@ -109,23 +111,17 @@ public class DetailService {
      *
      * @param current   修改后的条目
      * @param previous  被修改之前的条目
-     * @param isForward 日期是否往前移
+     * @param isForward 日期是否往提前
      */
     private void handleAlterDate(Detail current, Detail previous, boolean isForward) {
-        BigDecimal difference = previous.getEarning().subtract(previous.getExpense());//要修改的结存差值
-        List<Detail> details;//需要修改的所有条目
+        //要修改的结存差值
+        BigDecimal difference = previous.getEarning().subtract(previous.getExpense());
         if (isForward) {
-            details = detailDao.findBetweenList(current.getDate(), previous.getDate());
+            //日期提前
+            detailDao.updateDuring(difference, current.getDate(), previous.getDate());
         } else {
-            details = detailDao.findBetweenList(previous.getDate(), current.getDate());
-        }
-        for (Detail item : details) {
-            if (isForward) {
-                item.setBalance(item.getBalance().add(difference));
-            } else {
-                item.setBalance(item.getBalance().subtract(difference));
-            }
-            detailDao.update(item);
+            //日期推后
+            detailDao.updateDuring(difference.negate(), previous.getDate(), current.getDate());
         }
     }
 
@@ -136,11 +132,7 @@ public class DetailService {
      * @param balanceDifference 要修改的结存差值
      */
     private void handleLaterBalance(Date date, BigDecimal balanceDifference) {
-        List<Detail> laterDetails = detailDao.findLaterList(date);
-        for (Detail item : laterDetails) {
-            item.setBalance(item.getBalance().add(balanceDifference));
-            detailDao.update(item);
-        }
+        detailDao.updateLater(balanceDifference, date);
     }
 
     /**
@@ -161,7 +153,7 @@ public class DetailService {
     public void updateBalance() {
         List<Detail> detailList = detailDao.findAll();
         BigDecimal balance = new BigDecimal(0);
-        for (int i=detailList.size()-1;i>=0;i--) {
+        for (int i = detailList.size() - 1; i >= 0; i--) {
             balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));
             detailList.get(i).setBalance(balance);
             detailDao.update(detailList.get(i));

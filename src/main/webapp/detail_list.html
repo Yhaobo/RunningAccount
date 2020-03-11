@@ -84,6 +84,7 @@
 <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
 <script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
+<script src="static/layer/layer.js"></script>
 <script src="static/js/util.js"></script>
 <script src="static/js/load.js"></script>
 <script>
@@ -91,7 +92,9 @@
     init();
 
     function init() {
+        let index = layer.load(2);
         $.get("detail/getAll", function (data) {
+            layer.close(index);
             if (data.flag) {
                 var html = '<caption>收支明细</caption><tr>\n' +
                     '            <th>日期</th>\n' +
@@ -277,21 +280,23 @@
             msg = "删除!!!!!!!???????";
         }
         $("#" + button).off().click(function () {
-            if (!confirm("确认" + msg)) {
-                return;
-            }
-            $('#modal').modal('hide');
-            //改时间格式
-            var datetime = dateFormat(new Date($("#date").val()), "yyyy-MM-dd HH:mm");
-            $("#hidden_date").val(datetime);
+            layer.confirm("确认" + msg, {icon: 3}, function () {
+                const load = layer.load();
+                //改时间格式
+                var datetime = dateFormat(new Date($("#date").val()), "yyyy-MM-dd HH:mm");
+                $("#hidden_date").val(datetime);
 
-            $.post("detail/" + method, $("#form").serialize(), function (data) {
-                if (data.flag) {
-                    $("#form")[0].reset();
-                    init();
-                } else {
-                    alert(data.message);
-                }
+                $.post("detail/" + method, $("#form").serialize(), function (data) {
+                    $('#modal').modal('hide');
+                    layer.close(load);
+                    if (data.flag) {
+                        layer.msg('操作成功', {icon: 6});
+                        $("#form")[0].reset();
+                        init();
+                    } else {
+                        layer.alert(data.message, {icon: 5});
+                    }
+                });
             });
         });
     }

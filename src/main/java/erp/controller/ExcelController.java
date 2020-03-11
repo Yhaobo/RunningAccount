@@ -1,14 +1,15 @@
 package erp.controller;
 
 import erp.service.ExcelService;
+import erp.util.ResultInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -32,18 +33,19 @@ public class ExcelController {
     }
 
     @RequestMapping("/importing")
-    public void importing(MultipartFile file, HttpServletResponse response, HttpServletRequest request) throws IOException {
+    @ResponseBody
+    public ResultInfo importing(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/detail_list.html");
-            return;
+            return new ResultInfo(false);
         }
         try {
             service.importing(file.getInputStream());
+            return new ResultInfo(true);
         } catch (Exception e) {
             log.error("[method:importing]" + e.getMessage());
+            return new ResultInfo(false);
         } finally {
             file.getInputStream().close();
-            response.sendRedirect(request.getContextPath() + "/detail_list.html");
         }
     }
 }

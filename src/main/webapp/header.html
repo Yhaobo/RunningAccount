@@ -63,20 +63,22 @@
 
             </ul>
 
-            <form id="header_file_form" class="navbar-form navbar-left" action="excel/importing"
-                  style="margin-left: 50px;width: 350px"
-                  enctype="multipart/form-data" method="post">
-                <!--                    <div class="form-group">-->
-                <input id="header_file_input" type="file" class="form-control hidden" placeholder="Search" name="file"
-                       style="width: 200px;">
-                <!--                    </div>-->
-                <button type="submit" class="btn btn-default glyphicon glyphicon-import"
-                        onclick="return confirm('确认导入Excel吗?');">导入Excel
+            <!--导入Excel-->
+            <form id="header_file_form" class="navbar-form navbar-left" action="javascript:;"
+                  style="margin-left: 50px;width: 350px">
+
+                <div class="form-group">
+                    <input id="header_file_input" type="file" class="form-control hidden" placeholder="Search"
+                           name="file" style="width: 200px;">
+                </div>
+                <button class="btn btn-default glyphicon glyphicon-import"
+                        onclick="submitExcel()">导入Excel
                 </button>
             </form>
 
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="javascript:;" class="glyphicon glyphicon-plus hidden" onclick="add()" id="header_addBtn">添加<span class="sr-only">(current)</span></a>
+                <li><a href="javascript:;" class="glyphicon glyphicon-plus hidden" onclick="add()" id="header_addBtn">添加<span
+                        class="sr-only">(current)</span></a>
                 </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle glyphicon glyphicon-cog" data-toggle="dropdown" role="button"
@@ -100,70 +102,103 @@
     </div><!-- /.container-fluid -->
 </nav>
 <script>
-    //获取所有项目
-    $.get("setting/findProjects", function (data) {
-        var html = '';
-        if (data.flag) {
-            for (var i = 0; i < data.data.length; i++) {
-                var item = data.data[i];
-                html += '<li><a href="monthly_list.html?p_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
-            }
-            $("#header_project").html(html);
-        } else {
-            location.href = "index.html";
-        }
-    });
-    //获取所有分类
-    $.get("setting/findCategorys", function (data) {
-        var html = '';
-        if (data.flag) {
-            for (var i = 0; i < data.data.length; i++) {
-                var item = data.data[i];
-                html += '<li><a href="monthly_list.html?c_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
-            }
-            $("#header_category").html(html);
-        } else {
-            location.href = "index.html";
-        }
-    });
-    //获取所有部门
-    $.get("setting/findDepartments", function (data) {
-        var html = '';
-        if (data.flag) {
-            for (var i = 0; i < data.data.length; i++) {
-                var item = data.data[i];
-                html += '<li><a href="monthly_list.html?dep_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
-            }
-            $("#header_department").html(html);
-        } else {
-            location.href = "index.html";
-        }
-    });
-    //获取所有账户
-    $.get("setting/findAccounts", function (data) {
-        var html = '';
-        if (data.flag) {
-            for (var i = 0; i < data.data.length; i++) {
-                var item = data.data[i];
-                html += '<li><a href="monthly_list.html?a_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
-            }
-            $("#header_account").html(html);
-        } else {
-            location.href = "index.html";
-        }
-    });
-    //手动更新结存功能
-    $("#updateBalance").click(function () {
-        if (!confirm("正常情况下结存会自动计算,此操作用于特殊情况,慎用!")) {
+    load();
+    //导入Excel文件
+    function submitExcel() {
+        if (!$('#header_file_input').val()) {
+            layer.alert('没有选中文件!', {icon: 5});
             return;
         }
-        $.get("detail/updateBalance", function (data) {
+        layer.confirm("确认导入Excel吗?", {icon: 3}, function () {
+            const data = new FormData($('#header_file_form')[0]);
+            $.ajax({
+                type: 'post',
+                url: 'excel/importing',
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (result) {
+                    if (result.flag) {
+                        layer.msg('导入成功!', {icon: 6});
+                    } else {
+                        layer.msg('导入失败!', {icon: 5});
+                    }
+                },
+                error: function () {
+                    layer.msg('导入失败!', {icon: 5});
+                }
+            })
+        });
+    }
+
+    function load() {
+        //获取所有项目
+        $.get("setting/findProjects", function (data) {
+            var html = '';
             if (data.flag) {
-                alert("更新成功!");
-                location.reload();
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '<li><a href="monthly_list.html?p_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+                }
+                $("#header_project").html(html);
             } else {
-                alert(data.message);
+                location.href = "index.html";
             }
+        });
+        //获取所有分类
+        $.get("setting/findCategorys", function (data) {
+            var html = '';
+            if (data.flag) {
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '<li><a href="monthly_list.html?c_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+                }
+                $("#header_category").html(html);
+            } else {
+                location.href = "index.html";
+            }
+        });
+        //获取所有部门
+        $.get("setting/findDepartments", function (data) {
+            var html = '';
+            if (data.flag) {
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '<li><a href="monthly_list.html?dep_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+                }
+                $("#header_department").html(html);
+            } else {
+                location.href = "index.html";
+            }
+        });
+        //获取所有账户
+        $.get("setting/findAccounts", function (data) {
+            var html = '';
+            if (data.flag) {
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '<li><a href="monthly_list.html?a_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+                }
+                $("#header_account").html(html);
+            } else {
+                location.href = "index.html";
+            }
+        });
+    }
+
+    //手动更新结存功能
+    $("#updateBalance").click(function () {
+        layer.confirm("正常情况下结存会自动计算,此操作用于特殊情况,慎用!", {icon: 0}, function () {
+            const load = layer.load(2);
+            $.get("detail/updateBalance", function (data) {
+                layer.close(load);
+                if (data.flag) {
+                    layer.msg("更新成功!",{icon:6});
+                    init();
+                } else {
+                    layer.alert(data.message,{icon:5});
+                }
+            });
         });
     });
 
@@ -175,8 +210,6 @@
     }, function () {
         fileInput.addClass("hidden");
     });
-
-
 
 
 </script>

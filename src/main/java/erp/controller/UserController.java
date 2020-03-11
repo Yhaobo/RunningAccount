@@ -33,7 +33,6 @@ public class UserController {
             return new ResultInfo(true);
         } catch (AuthenticationException e) {
             log.error("[method:login]" + e.getMessage());
-
             return new ResultInfo(false, "用户名或密码错误!");
         }
     }

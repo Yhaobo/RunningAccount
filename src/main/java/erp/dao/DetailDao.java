@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-
 public interface DetailDao {
     /**
      * 查询所有
@@ -53,6 +52,7 @@ public interface DetailDao {
 
     /**
      * 添加一条记录
+     *
      * @param detail 从excel解析得到的实体类(外键引用的属性只有name, 没有id)
      */
     @Insert("insert into detail values(null,#{date},#{description}," +
@@ -100,6 +100,23 @@ public interface DetailDao {
     void update(Detail detail);
 
     /**
+     * 修改两个时间之间(不包括边界值)的所有记录的结存
+     *
+     * @param change
+     * @param late
+     * @param before
+     */
+    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{before} and d_date<#{late}")
+    void updateDuring(@Param("change") BigDecimal change,@Param("before") Date before,@Param("late") Date late);
+
+    /**
+     * 修改date时间之后的所有记录的结存
+     * @param change
+     * @param date
+     */
+    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{date}")
+    void updateLater(@Param("change") BigDecimal change,@Param("date") Date date);
+    /**
      * 查询date之前的一条记录
      *
      * @param date
@@ -120,6 +137,11 @@ public interface DetailDao {
     @ResultMap("detailMap")
     List<Detail> findBetweenList(@Param("before") Date before, @Param("late") Date late);
 
+    /**
+     * 根据id删除一天记录
+     *
+     * @param id
+     */
     @Select("delete from detail where d_id=#{id}")
     void delete(int id);
 }

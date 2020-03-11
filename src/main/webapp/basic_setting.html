@@ -47,15 +47,19 @@
 <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
 <script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
+<script src="static/layer/layer.js"></script>
 <script src="static/js/util.js"></script>
 <script src="static/js/load.js"></script>
 <script>
 
     const path = getParameter("path");//二级路径
     init();
+
     //加载
     function init() {
+        let load = layer.load(2);
         $.get("setting/find" + path + "s", function (data) {
+            layer.close(load);
             if (data.flag) {
                 var html = ' <tr>' +
                     '        <th id="tab_th"></th>' +
@@ -89,16 +93,19 @@
 
     //添加操作
     function add() {
-        if (!confirm("确认提交?")) {
-            return;
-        }
-        var value = $("#input").val();
-        $.post("setting/add" + path, {"name": value}, function (data) {
-            if (data.flag) {
-                location.reload();
-            } else {
-                alert(data.message);
-            }
+        layer.confirm("确认提交?", {icon: 3}, function () {
+            const load = layer.load();
+            var value = $("#input").val();
+            $.post("setting/add" + path, {"name": value}, function (data) {
+                layer.close(load);
+                if (data.flag) {
+                    layer.msg('添加成功', {icon: 6});
+                    //刷新整个页面
+                    location.reload();
+                } else {
+                    layer.alert(data.message, {icon: 5});
+                }
+            });
         });
     }
 
@@ -114,18 +121,24 @@
             show: true,
             backdrop: false
         });
+
         const url = "setting/update" + path;
+
         $("#modal_submit").off().click(function () {
-            if (confirm("提交此修改吗?")) {
+            layer.confirm("提交此修改吗?", {icon: 3}, function () {
+                let load = layer.load();
                 $.post(url, $("#modal_form").serialize(), function (data) {
+                    layer.close(load);
                     if (data.flag) {
-                        $("#modal").modal('hide');
+                        // $("#modal").modal('hide');
+                        layer.msg('添加成功', {icon: 6});
+                        // 刷新页面
                         location.reload();
                     } else {
-                        alert(data.message);
+                        layer.alert(data.message, {icon: 5});
                     }
                 });
-            }
+            });
             return false;
         });
     }
