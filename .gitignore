@@ -1,6 +1,7 @@
-/financial_management_system.iml
+/*.iml
 /target/
 /.idea/
-/src/main/resources/*.properties
+/src/main/resources/druid.properties
 /src/test/
-/src/main/webapp/test.html
+/src/main/resources/static/test.html
+/src/main/resources/application-private.yml

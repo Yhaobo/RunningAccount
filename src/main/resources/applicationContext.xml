@@ -59,7 +59,7 @@
     <!--配置cacheManager-->
     <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
     <!--配置realm-->
-    <bean id="realm" class="erp.shiro.realms.realm">
+    <bean id="realm" class="erp.shiro.realms.Realm">
         <property name="credentialsMatcher">
             <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
                 <property name="hashAlgorithmName" value="MD5"/>

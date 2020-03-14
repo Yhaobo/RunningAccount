@@ -1,12 +1,15 @@
 package erp.dao;
 
+import erp.dao.provider.DetailDaoProvider;
 import erp.domain.Detail;
+import erp.vo.req.DetailFilterVo;
 import org.apache.ibatis.annotations.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+@Mapper
 public interface DetailDao {
     /**
      * 查询所有
@@ -107,15 +110,17 @@ public interface DetailDao {
      * @param before
      */
     @Update("update detail set d_balance=d_balance+#{change} where d_date>#{before} and d_date<#{late}")
-    void updateDuring(@Param("change") BigDecimal change,@Param("before") Date before,@Param("late") Date late);
+    void updateDuring(@Param("change") BigDecimal change, @Param("before") Date before, @Param("late") Date late);
 
     /**
      * 修改date时间之后的所有记录的结存
+     *
      * @param change
      * @param date
      */
     @Update("update detail set d_balance=d_balance+#{change} where d_date>#{date}")
-    void updateLater(@Param("change") BigDecimal change,@Param("date") Date date);
+    void updateLater(@Param("change") BigDecimal change, @Param("date") Date date);
+
     /**
      * 查询date之前的一条记录
      *
@@ -142,6 +147,16 @@ public interface DetailDao {
      *
      * @param id
      */
-    @Select("delete from detail where d_id=#{id}")
+    @Delete("delete from detail where d_id=#{id}")
     void delete(int id);
+
+    /**
+     * 根据条件来获取记录
+     *
+     * @param vo
+     * @return
+     */
+    @SelectProvider(type = DetailDaoProvider.class, method = "listByFilterSql")
+    @ResultMap("detailMap")
+    List<Detail> listByFilter(DetailFilterVo vo);
 }

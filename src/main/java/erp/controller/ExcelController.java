@@ -43,7 +43,7 @@ public class ExcelController {
             return new ResultInfo(true);
         } catch (Exception e) {
             log.error("[method:importing]" + e.getMessage());
-            return new ResultInfo(false);
+            return new ResultInfo(false,"导入失败!");
         } finally {
             file.getInputStream().close();
         }

@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/erp?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    type: com.alibaba.druid.pool.DruidDataSource
+  application:
+    name: erp
+server:
+  port: 8080

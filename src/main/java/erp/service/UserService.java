@@ -14,7 +14,7 @@ public class UserService {
         return userDao.findOne(form);
     }
 
-    public User findUsername(String username) {
+    public User findByUsername(String username) {
         User user = userDao.findUsername(username);
         return user;
     }

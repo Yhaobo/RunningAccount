@@ -13,7 +13,7 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_HOME}/error/${HOSTNAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- 根据日志文件按天回滚，保存时间为30天，30天之前的都将被清理掉 -->
-            <maxHistory>30</maxHistory>
+            <maxHistory>365</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>20MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -29,7 +29,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-    <root level="error">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ERRORAPPENDER"/>
     </root>

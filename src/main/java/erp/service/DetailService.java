@@ -3,6 +3,7 @@ package erp.service;
 import erp.dao.DetailDao;
 import erp.domain.Detail;
 import erp.util.MyException;
+import erp.vo.req.DetailFilterVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +22,8 @@ public class DetailService {
         this.detailDao = detailDao;
     }
 
-    public List<Detail> findAll() {
-        List<Detail> details = detailDao.findAll();
+    public List<Detail> findAll(DetailFilterVo vo) {
+        List<Detail> details = detailDao.listByFilter(vo);
         //格式化所有数字
         NumberFormat format = NumberFormat.getCurrencyInstance(Locale.CHINA);
         for (Detail i : details) {
@@ -57,7 +58,7 @@ public class DetailService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void update(Detail form) throws MyException {
+    public void update(Detail form) throws Exception {
         //判断id是否为表单默认值0
         if (form.getId() == 0) {
             throw new MyException("请刷新页面,重新操作!");
@@ -91,6 +92,8 @@ public class DetailService {
         //更新当前记录
         handleBalance(form);
         detailDao.update(form);
+
+        throw new Exception("测试事务");
     }
 
     /**
@@ -159,4 +162,5 @@ public class DetailService {
             detailDao.update(detailList.get(i));
         }
     }
+
 }

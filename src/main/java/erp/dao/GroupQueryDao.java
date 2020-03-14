@@ -1,10 +1,12 @@
 package erp.dao;
 
 import erp.domain.Detail;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+@Mapper
 public interface GroupQueryDao {
     @Select("SELECT 0 balance, DATE_FORMAT(d_date,'%Y-%m') monthly, SUM(d_earning) earning, SUM(d_expense) expense,MAX(d_date) date FROM detail " +
             "WHERE dep_id=#{id} GROUP BY monthly " +

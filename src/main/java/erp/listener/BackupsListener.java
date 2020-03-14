@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.Properties;
 /**
  * 当服务器关闭时, 自动备份所有财务数据
  */
+@WebListener
 public class BackupsListener implements ServletContextListener {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());

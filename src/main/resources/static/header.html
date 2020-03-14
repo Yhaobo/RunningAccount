@@ -1,0 +1,211 @@
+<!--导航栏-->
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display 主名称-->
+        <div class="navbar-header">
+            <!--            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"-->
+            <!--                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
+            <!--                <span class="sr-only">Toggle navigation</span>-->
+            <!--                <span class="icon-bar"></span>-->
+            <!--                <span class="icon-bar"></span>-->
+            <!--                <span class="icon-bar"></span>-->
+            <!--            </button>-->
+            <a class="navbar-brand dropdown-toggle " data-toggle="dropdown" role="button"
+               aria-haspopup="true"
+               aria-expanded="false">峰众财务管理系统</a>
+            <ul class="dropdown-menu">
+                <li><a href="excel/export" class="glyphicon glyphicon-export"> 导出为Excel</a></li>
+                <li><a href="user/exit" class="glyphicon glyphicon-off"> 登出</a></li>
+            </ul>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li id="header_detail"><a href="detail_list.html">收支明细 <span class="sr-only">(current)</span></a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">收支每月汇总<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="monthly_list.html?title=收支每月汇总">所有<span class="sr-only">(current)</span></a>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">按项目</a>
+                            <ul class="dropdown-menu" id="header_project">
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">按账户</a>
+                            <ul class="dropdown-menu" id="header_account">
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">按部门</a>
+                            <ul class="dropdown-menu" id="header_department">
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">按分类</a>
+                            <ul class="dropdown-menu" id="header_category">
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <!--导入Excel-->
+                    <form id="header_file_form" class="navbar-form navbar-right" action="javascript:;"
+                          style="width: 350px;margin-right: 50px">
+                        <button class="btn btn-default glyphicon glyphicon-import"
+                                onclick="submitExcel()">导入Excel
+                        </button>
+                        <div class="form-group">
+                            <input id="header_file_input" type="file" class="form-control hidden" placeholder="Search"
+                                   name="file" style="width: 200px;">
+                        </div>
+                    </form>
+                </li>
+                <li><a href="javascript:;" class="glyphicon glyphicon-plus hidden" onclick="add()" id="header_addBtn">添加<span
+                        class="sr-only">(current)</span></a>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle glyphicon glyphicon-cog" data-toggle="dropdown" role="button"
+                       aria-haspopup="true"
+                       aria-expanded="false">设置<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="basic_setting.html?title=项目&path=Project">项目</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="basic_setting.html?title=账户&path=Account">账户</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="basic_setting.html?title=部门&path=Department">部门</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="basic_setting.html?title=分类&path=Category">分类</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="javascript:;" id="updateBalance" class="glyphicon glyphicon-refresh"> 更新所有结存</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<script>
+    load();
+
+    //导入Excel文件
+    function submitExcel() {
+        if (!$('#header_file_input').val()) {
+            layer.alert('没有选中文件!', {icon: 5});
+            return;
+        }
+        layer.confirm("确认导入Excel吗?", {icon: 3}, function () {
+            const data = new FormData($('#header_file_form')[0]);
+            $.ajax({
+                type: 'post',
+                url: 'excel/importing',
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (result) {
+                    if (result.flag) {
+                        layer.msg('导入成功!', {icon: 6});
+                    } else {
+                        layer.msg(result.message, {icon: 5});
+                    }
+                },
+                error: function () {
+                    layer.msg('导入失败!', {icon: 5});
+                }
+            })
+        });
+    }
+
+    function load() {
+        //获取所有项目
+        $.get("setting/findProjects", function (data) {
+            var html = '';
+            if (data.flag) {
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '' + item.id + '<li><a href="monthly_list.html?p_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
+                }
+                $("#header_project").html(html);
+            }
+        });
+        //获取所有分类
+        $.get("setting/findCategorys", function (data) {
+            var html = '';
+            if (data.flag) {
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '' + item.id + '<li><a href="monthly_list.html?c_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
+                }
+                $("#header_category").html(html);
+            }
+        });
+        //获取所有部门
+        $.get("setting/findDepartments", function (data) {
+            var html = '';
+            if (data.flag) {
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '' + item.id + '<li><a href="monthly_list.html?dep_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
+                }
+                $("#header_department").html(html);
+            }
+        });
+        //获取所有账户
+        $.get("setting/findAccounts", function (data) {
+            var html = '';
+            if (data.flag) {
+                for (var i = 0; i < data.data.length; i++) {
+                    var item = data.data[i];
+                    html += '' + item.id + '<li><a href="monthly_list.html?a_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
+                }
+                $("#header_account").html(html);
+            }
+        });
+    }
+
+    //手动更新结存功能
+    $("#updateBalance").click(function () {
+        layer.confirm("正常情况下结存会自动计算,此操作用于特殊情况,慎用!", {icon: 0}, function () {
+            const load = layer.load(2);
+            $.get("detail/updateBalance", function (data) {
+                layer.close(load);
+                if (data.flag) {
+                    layer.msg("更新成功!", {icon: 6});
+                    init();
+                } else {
+                    layer.alert(data.message, {icon: 5});
+                }
+            });
+        });
+    });
+
+    //隐藏文件选择框, 鼠标悬停激活
+    const fileInput = $("#header_file_input");
+    const fileForm = $("#header_file_form");
+    fileForm.hover(function () {
+        fileInput.removeClass("hidden");
+    }, function () {
+        fileInput.addClass("hidden");
+    });
+
+    //如果为收支明细页面,则显示添加按钮
+    if (location.href.indexOf("detail_list.html") >= 0) {
+        $('#header_addBtn').removeClass('hidden');
+    }
+</script>
