@@ -72,22 +72,20 @@
 /*    height: 50px;*/
 /*}*/
 
-.layui-table-view {
-    /*margin-top: 5px;*/
+.layui-table-view .layui-form-select{
+   display: none;
 }
 
 .layui-table-tool-temp select, .layui-table-tool-temp input {
-    display: block;
+    display: inline;
     width: 13%;
-    float: left;
     height: 33px;
 }
 
 .layui-table-tool-temp button {
-    float: left;
-    height: 33px;
+    height: 36px;
+    font-size: 1.1em;
     margin-left: 5px;
-    font-size: 1.1em
 }
 
 table {
@@ -118,7 +116,7 @@ table caption {
     color: #0f0f0f;
 }
 
-
+/*模态框宽度*/
 .modal-slg {
     width: 98%;
 }

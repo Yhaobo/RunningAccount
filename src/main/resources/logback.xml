@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!--定义日志输出目录-->
-    <property name="LOG_HOME" value="d:/cai_wu_shu_jv/logs"/>
+    <!--<property name="LOG_HOME" value="d:/cai_wu_shu_jv/logs"/>-->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -11,7 +11,7 @@
     <!-- 输出error log 至统一日志文件中 -->
     <appender name="ERRORAPPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/error/${HOSTNAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>log/error/${HOSTNAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- 根据日志文件按天回滚，保存时间为30天，30天之前的都将被清理掉 -->
             <maxHistory>365</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">

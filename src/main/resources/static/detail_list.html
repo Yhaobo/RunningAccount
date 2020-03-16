@@ -20,10 +20,10 @@
             <input type="text" class="layui-input duringDate formChildren" placeholder="请选择时间范围" name="date">
             <input type="text" class="form-control formChildren" placeholder="请输入摘要关键字"
                    name="description">
-            <select id="projectFilter" name="projectId" class="formChildren form-control"></select>
-            <select id="accountFilter" name="accountId" class="formChildren form-control"></select>
-            <select id="departmentFilter" name="departmentId" class="formChildren form-control"></select>
-            <select id="categoryFilter" name="categoryId" class="formChildren form-control"></select>
+            <select name="projectId" class="formChildren form-control projectFilter"></select>
+            <select name="accountId" class="formChildren form-control accountFilter"></select>
+            <select name="departmentId" class="formChildren form-control departmentFilter"></select>
+            <select name="categoryId" class="formChildren form-control categoryFilter"></select>
             <button class="btn btn-default glyphicon glyphicon-filter" onclick="filter()">点击过滤</button>
         </form>
     </div>
@@ -109,40 +109,79 @@
 <script src="static/js/util.js"></script>
 <script src="static/js/load.js"></script>
 <script>
+    // 分页数据
     let pageData = {
-        pageNum: 1,
-        pageSize: 100
+        pageNum: 1
+        , pageSize: 20
+        , total: null // 总条数
+        , isRender: true // 是否渲染分页条
+    };
+
+    // 下拉框数据
+    let selectData = {
+        projectOptions: null
+        , accountOptions: null
+        , categoryOptions: null
+        , departmentOptions: null
     };
     init();
 
-    function filter() {
-        copyFormData(true);
-        $.get('detail/getAll', $('.layui-table-tool-temp .filterForm').eq(0).serialize(), function (result) {
-            loadTable(result);
+
+    function pageHandler() {
+        // 渲染分页
+        layui.laypage.render({
+            elem: 'page' // 注意，这里的 test1 是 ID，不用加 # 号
+            , count: pageData.total  // 数据总数
+            , limit: pageData.pageSize
+            , layout: ['prev', 'page', 'next', 'count', 'limit', 'skip']
+            , limits: [20, 40, 60, 80, 100, 1000, 10000, 100000]
+            , jump: function (obj, isFirst) {
+                // obj包含了当前分页的所有参数，比如：
+                pageData.pageNum = obj.curr; //得到当前页，以便向服务端请求对应页的数据。
+                pageData.pageSize = obj.limit; // 得到每页显示的条数
+                // 首次不执行
+                if (!isFirst) {
+                    loadTable();
+                }
+            }
         });
     }
 
+    // 条件查询
+    function filter() {
+        const loadIndex = layer.load(2);
+        copyFormData(true);
+        pageData.isRender = true;
+        loadTable(loadIndex);
+    }
+
+    // 复制表单数据
     function copyFormData(isReverse) {
         const source = $('#filter>form').children('.formChildren');
         const target = $('.layui-table-tool-temp form').children('.formChildren');
         if (isReverse) {
             // 从target到source
             target.each(function (i, e) {
-                // alert($(e).val())
                 source.eq(i).val($(e).val());
             });
         } else {
             // 从source到target
             source.each(function (i, e) {
-                // alert($(e).val())
                 target.eq(i).val($(e).val());
             });
         }
     }
 
-    function loadTable(data) {
-        if (data.flag) {
-            var html = `<caption>收支明细</caption>
+    // 加载表格数据
+    function loadTable(loadIndex) {
+        const data = $('.layui-table-tool-temp .filterForm').serialize() + `&pageNum=${pageData.pageNum}&pageSize=${pageData.pageSize}`;
+        $.get('detail/getAll', data, function (result) {
+            layer.close(loadIndex);
+            if (result.flag) {
+                const pageInfo = result.data;
+                pageData.total = pageInfo.total;
+
+                let html = `<caption>收支明细</caption>
                             <thead>
                                 <tr>
                                     <th lay-data="{field:'date',sort:true}">日期</th>
@@ -159,106 +198,134 @@
                             </thead>
                             <tbody>`;
 
-            for (var i = 0; i < data.data.length; i++) {
-                var detail = data.data[i];
-                html += '<tr>\n' +
-                    '            <td>' + dateFormat(new Date(detail.date), "yyyy-MM-dd") + '</td>\n' +
-                    '            <td>' + detail.description + '</td>\n' +
-                    '            <td>' + detail.project.name + '</td>\n' +
-                    '            <td>' + detail.account.name + '</td>\n' +
-                    '            <td>' + detail.department.name + '</td>\n' +
-                    '            <td>' + detail.category.name + '</td>\n' +
-                    '            <td>' + detail.formatEarning + '</td>\n' +
-                    '            <td>' + detail.formatExpense + '</td>\n' +
-                    '            <td>' + detail.formatBalance + '</td>\n' +
-                    '            <td><a href="javascript:;" style="display: block" onclick="edit(' + detail.id + ')">修改</a></td>\n' +
-                    '    </tr> '
-            }
-            html += '</tbody>';
-            $("#details").html(html);
+                for (let i = 0; i < pageInfo.list.length; i++) {
+                    let detail = pageInfo.list[i];
+                    html += '<tr>\n' +
+                        '            <td>' + dateFormat(new Date(detail.date), "yyyy-MM-dd") + '</td>\n' +
+                        '            <td>' + detail.description + '</td>\n' +
+                        '            <td>' + detail.project.name + '</td>\n' +
+                        '            <td>' + detail.account.name + '</td>\n' +
+                        '            <td>' + detail.department.name + '</td>\n' +
+                        '            <td>' + detail.category.name + '</td>\n' +
+                        '            <td>' + detail.formatEarning + '</td>\n' +
+                        '            <td>' + detail.formatExpense + '</td>\n' +
+                        '            <td>' + detail.formatBalance + '</td>\n' +
+                        '            <td><a href="javascript:;" style="display: block" onclick="edit(' + detail.id + ')">修改</a></td>\n' +
+                        '    </tr> '
+                }
+                html += '</tbody>';
+                $("#details").html(html);
 
-            renderTable();
+                renderTable();
+
+                //只渲染分页条一次
+                if (pageData.isRender) {
+                    pageHandler();
+                    pageData.isRender = false;
+                }
+            }
+        });
+    }
+
+    const promiseData = {
+        num: 0
+    };
+
+    // 保证下拉选项先于表格数据加载
+    function promise(loadIndex) {
+        if (promiseData.num < 3) {
+            promiseData.num++;
+        } else {
+            // 显示添加按钮
+            const addBtn = $('#header_addBtn');
+            if (addBtn.hasClass('hidden')) {
+                addBtn.removeClass('hidden');
+            }
+            // 获取所有账目明细
+            loadTable(loadIndex);
         }
     }
 
     function init() {
-        let index = layer.load(2);
-        // 开始回调地狱(为了让所有下拉选项在表格被渲染前加载完毕)
+        const loadIndex = layer.load(2);
         // 获取所有项目
         $.get("setting/findProjects", function (data) {
-            var html = '<option value="">--请选择项目--</option>';
+            selectData.projectOptions = data.data;
+            let html = '<option value="">--请选择项目--</option>';
             if (data.data.length === 1) {
                 html = '';
             }
-            for (var i = 0; i < data.data.length; i++) {
-                var option = data.data[i];
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
                 if (project && option.id === project.id) {
                     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
                 } else {
                     html += '<option value="' + option.id + '">' + option.name + '</option>';
                 }
             }
-            $("#projectFilter").html(html);
-
-            // 获取所有账户
-            $.get("setting/findAccounts", function (data) {
-                let html = '<option value="">--请选择账户--</option>';
-                if (data.data.length === 1) {
-                    html = '';
+            $(".projectFilter").html(html);
+            $("#project").html(html);
+            promise(loadIndex);
+        });
+        // 获取所有账户
+        $.get("setting/findAccounts", function (data) {
+            selectData.accountOptions = data.data;
+            let html = '<option value="">--请选择账户--</option>';
+            if (data.data.length === 1) {
+                html = '';
+            }
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
+                if (account && option.id === account.id) {
+                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                } else {
+                    html += '<option value="' + option.id + '">' + option.name + '</option>';
                 }
-                for (var i = 0; i < data.data.length; i++) {
-                    var option = data.data[i];
-                    if (account && option.id === account.id) {
-                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                    } else {
-                        html += '<option value="' + option.id + '">' + option.name + '</option>';
-                    }
+            }
+            $(".accountFilter").html(html);
+            $("#account").html(html);
+            promise(loadIndex);
+        });
+        // 获取所有部门
+        $.get("setting/findDepartments", function (data) {
+            selectData.departmentOptions = data.data;
+            let html = '<option value="">--请选择部门--</option>';
+            if (data.data.length === 1) {
+                html = '';
+            }
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
+                if (department && option.id === department.id) {
+                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                } else {
+                    html += '<option value="' + option.id + '">' + option.name + '</option>';
                 }
-                $("#accountFilter").html(html);
-
-                // 获取所有部门
-                $.get("setting/findDepartments", function (data) {
-                    let html = '<option value="">--请选择部门--</option>';
-                    if (data.data.length === 1) {
-                        html = '';
-                    }
-                    for (var i = 0; i < data.data.length; i++) {
-                        var option = data.data[i];
-                        if (department && option.id == department.id) {
-                            html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                        } else {
-                            html += '<option value="' + option.id + '">' + option.name + '</option>';
-                        }
-                    }
-                    $("#departmentFilter").html(html);
-
-                    // 获取所有分类
-                    $.get("setting/findCategorys", function (data) {
-                        if (!data.flag) {
-                            location.href = "index.html";
-                        }
-                        let html = '<option value="">--请选择分类--</option>';
-                        if (data.data.length === 1) {
-                            html = '';
-                        }
-                        for (var i = 0; i < data.data.length; i++) {
-                            var option = data.data[i];
-                            if (category && option.id == category.id) {
-                                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                            } else {
-                                html += '<option value="' + option.id + '">' + option.name + '</option>';
-                            }
-                        }
-                        $("#categoryFilter").html(html);
-
-                        // 获取所有账目明细
-                        $.get("detail/getAll", {pageData}, function (data) {
-                            layer.close(index);
-                            loadTable(data);
-                        });
-                    });
-                });
-            });
+            }
+            $(".departmentFilter").html(html);
+            $("#department").html(html);
+            promise(loadIndex);
+        });
+        // 获取所有分类
+        $.get("setting/findCategorys", function (data) {
+            selectData.categoryOptions = data.data;
+            if (!data.flag) {
+                location.href = "index.html";
+            }
+            let html = '<option value="">--请选择分类--</option>';
+            if (data.data.length === 1) {
+                html = '';
+            }
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
+                if (category && option.id === category.id) {
+                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                } else {
+                    html += '<option value="' + option.id + '">' + option.name + '</option>';
+                }
+            }
+            $(".categoryFilter").html(html);
+            $("#category").html(html);
+            promise(loadIndex);
         });
     }
 
@@ -267,15 +334,9 @@
         // 渲染表格
         layui.table.init('table', {
             title: '收支明细'
-            , limit: 100
+            , limit: pageData.pageSize
             , toolbar: true
         });
-
-        // 分页
-        // layui.laypage.render({
-        //     elem: 'page' // 注意，这里的 test1 是 ID，不用加 # 号
-        //     ,count: 50 // 数据总数，从服务端得到
-        // });
 
         // 将过滤div放入表格头部
         $('.layui-table-tool-temp').html($('#filter').html());
@@ -309,10 +370,11 @@
 
     // 添加记录
     function add() {
+        $('#form')[0].reset();
         $("#modalTitle").text("添加");
         // 自动获取当前日期
         $("#date").val(dateFormat(new Date(), "yyyy-MM-ddTHH:mm"));
-        loadSelects();
+        loadSelects(true);
         if (!$("#delete").hasClass("hidden")) {
             $("#delete").addClass("hidden");
         }
@@ -324,12 +386,11 @@
         submit("add");
     }
 
-
     // 表单数据回显
-    let project;
-    let account;
-    let category;
-    let department;
+    let projectId;
+    let accountId;
+    let categoryId;
+    let departmentId;
 
     function loadDetail(id) {
         $.get("detail/findOne", {"id": id}, function (data) {
@@ -339,98 +400,82 @@
                 $("#earning").val(data.data.earning);
                 $("#expense").val(data.data.expense);
 
-                project = data.data.project;
-                account = data.data.account;
-                category = data.data.category;
-                department = data.data.department;
+                projectId = data.data.project.id;
+                accountId = data.data.account.id;
+                categoryId = data.data.category.id;
+                departmentId = data.data.department.id;
 
                 $("#hidden_id").val(id);
-                loadSelects();
-            } else {
-                location.href = "index.html";
+                loadSelects(false);
             }
         });
     }
 
     // 加载所有选项
-    function loadSelects() {
-        // 获取所有项目
-        $.get("setting/findProjects", function (data) {
-            if (!data.flag) {
-                location.href = "index.html";
+    function loadSelects(isAdd) {
+        // 加载所有项目
+        const projectOptions = selectData.projectOptions;
+        let html = '<option value="">--请选择项目--</option>';
+        if (projectOptions.length === 1) {
+            html = '';
+        }
+        for (let i = 0; i < projectOptions.length; i++) {
+            let option = projectOptions[i];
+            if (!isAdd && projectId && option.id === projectId) {
+                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+            } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
-            var html = '<option value="">--请选择项目--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (var i = 0; i < data.data.length; i++) {
-                var option = data.data[i];
-                if (project && option.id === project.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
-                }
-            }
-            $("#project").html(html);
-        });
+        }
+        $("#project").html(html);
 
-        // 获取所有账户
-        $.get("setting/findAccounts", function (data) {
-            if (!data.flag) {
-                location.href = "index.html";
+        // 加载所有账户
+        const accountOptions = selectData.accountOptions;
+        html = '<option value="">--请选择账户--</option>';
+        if (accountOptions.length === 1) {
+            html = '';
+        }
+        for (let i = 0; i < accountOptions.length; i++) {
+            let option = accountOptions[i];
+            if (!isAdd && accountId && option.id === accountId) {
+                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+            } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
-            let html = '<option value="">--请选择账户--</option>';
-            if (data.data.length === 1) {
-                html = '';
+        }
+        $("#account").html(html);
+
+        // 加载所有分类
+        const categoryOptions = selectData.categoryOptions;
+        html = '<option value="">--请选择分类--</option>';
+        if (categoryOptions.length === 1) {
+            html = '';
+        }
+        for (let i = 0; i < categoryOptions.length; i++) {
+            let option = categoryOptions[i];
+            if (!isAdd && categoryId && option.id === categoryId) {
+                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+            } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
-            for (var i = 0; i < data.data.length; i++) {
-                var option = data.data[i];
-                if (account && option.id === account.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
-                }
+        }
+        $("#category").html(html);
+
+        // 加载所有部门
+        const departmentOptions = selectData.departmentOptions;
+        html = '<option value="">--请选择部门--</option>';
+        if (departmentOptions.length === 1) {
+            html = '';
+        }
+        for (let i = 0; i < departmentOptions.length; i++) {
+            let option = departmentOptions[i];
+            if (!isAdd && departmentId && option.id === departmentId) {
+                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+            } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
-            $("#account").html(html);
-        });
-        // 获取所有分类
-        $.get("setting/findCategorys", function (data) {
-            if (!data.flag) {
-                location.href = "index.html";
-            }
-            let html = '<option value="">--请选择分类--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (var i = 0; i < data.data.length; i++) {
-                var option = data.data[i];
-                if (category && option.id == category.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
-                }
-            }
-            $("#category").html(html);
-        });
-        // 获取所有部门
-        $.get("setting/findDepartments", function (data) {
-            if (!data.flag) {
-                location.href = "index.html";
-            }
-            let html = '<option value="">--请选择部门--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (var i = 0; i < data.data.length; i++) {
-                var option = data.data[i];
-                if (department && option.id == department.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
-                }
-            }
-            $("#department").html(html);
-        });
+        }
+        $("#department").html(html);
     }
 
     // 表单提交
@@ -445,7 +490,7 @@
             layer.confirm("确认" + msg, {icon: 3}, function () {
                 const load = layer.load(2);
                 // 改时间格式
-                var datetime = dateFormat(new Date($("#date").val()), "yyyy-MM-dd HH:mm");
+                let datetime = dateFormat(new Date($("#date").val()), "yyyy-MM-dd HH:mm");
                 $("#hidden_date").val(datetime);
 
                 $.post("detail/" + method, $("#form").serialize(), function (data) {

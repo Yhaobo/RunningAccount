@@ -93,7 +93,6 @@ public class DetailService {
         handleBalance(form);
         detailDao.update(form);
 
-        throw new Exception("测试事务");
     }
 
     /**

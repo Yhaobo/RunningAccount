@@ -15,6 +15,8 @@
                aria-expanded="false">峰众财务管理系统</a>
             <ul class="dropdown-menu">
                 <li><a href="excel/export" class="glyphicon glyphicon-export"> 导出为Excel</a></li>
+                <li><a href="javascript:;" class="glyphicon glyphicon-pencil" onclick="alterPassword(true)"> 修改密码</a>
+                </li>
                 <li><a href="user/exit" class="glyphicon glyphicon-off"> 登出</a></li>
             </ul>
         </div>
@@ -101,8 +103,106 @@
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>
+
+<!-- 修改密码模态框 -->
+<div class="modal fade" id="alterPasswordModal" tabindex="-1" role="dialog" aria-labelledby="alterPasswordModalTitle">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="alterPasswordModalTitle">修改密码</h4>
+            </div>
+            <div class="modal-body">
+                <form id="alterPasswordForm" action="javascript:;">
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="请输入新密码" name="password">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="请再次输入新密码" name="password"
+                               onblur="inputStatusChange()">
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" name="flag" onclick="inputStatusChange()">
+                            <option value="">--请选择要修改的账户--</option>
+                            <option value="0">管理员</option>
+                            <option value="1">参观者</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="alterPassword(false);">提交</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    load();
+    loadHeaderSelects();
+
+    //根据表单校验的结果来改变输入框状态
+    function inputStatusChange() {
+        const formDivs = $('#alterPasswordForm>div');
+        if ($('input[name="password"]').eq(0).val() != $('input[name="password"]').eq(1).val()) {
+            formDivs.eq(0).addClass('has-error');
+            formDivs.eq(1).addClass('has-error');
+        } else {
+            if (formDivs.eq(0).hasClass('has-error')) {
+                formDivs.eq(0).removeClass('has-error');
+                formDivs.eq(1).removeClass('has-error');
+            }
+        }
+    }
+
+    //修改密码
+    function alterPassword(isShow) {
+        if (isShow) {
+            $('#alterPasswordForm')[0].reset();
+            inputStatusChange();
+            $('#alterPasswordModal').modal({
+                show: true,
+                backdrop: false
+            });
+        } else {
+            inputStatusChange();
+            const form = $('#alterPasswordForm')
+            const inputs = $('#alterPasswordForm input');
+            if (inputs.eq(0).val() === '') {
+                layer.alert('密码不能为空', {icon: 5});
+                return;
+            }
+            if (inputs.eq(0).val() === inputs.eq(1).val()) {
+                if ($('#alterPasswordForm select').val() != '') {
+                    const loadIndex = layer.load(2);
+                    $.post('user/alterPassword', form.serialize(), function (result) {
+                        layer.close(loadIndex);
+                        if (result.flag) {
+                            $('#alterPasswordModal').modal('hide');
+                            form[0].reset();
+                            if (result.data == 0) {
+                                layer.alert("修改成功, 请重新登录", {icon: 6},function () {
+                                    location.href = 'user/exit';
+                                });
+                                setTimeout(function () {
+                                    location.href = 'user/exit';
+                                },3000)
+                            } else {
+                                layer.msg('修改成功!', {icon: 6});
+                            }
+                        } else {
+                            layer.msg(result.message, {icon: 5});
+                        }
+                    });
+                } else {
+                    layer.alert('请选择要修改的账户', {icon: 5});
+                }
+            } else {
+                layer.alert('密码不一致,请重新输入', {icon: 5});
+            }
+        }
+    }
 
     //导入Excel文件
     function submitExcel() {
@@ -132,7 +232,7 @@
         });
     }
 
-    function load() {
+    function loadHeaderSelects() {
         //获取所有项目
         $.get("setting/findProjects", function (data) {
             var html = '';
@@ -187,7 +287,7 @@
                 layer.close(load);
                 if (data.flag) {
                     layer.msg("更新成功!", {icon: 6});
-                    init();
+                    loadTable();
                 } else {
                     layer.alert(data.message, {icon: 5});
                 }
@@ -204,8 +304,4 @@
         fileInput.addClass("hidden");
     });
 
-    //如果为收支明细页面,则显示添加按钮
-    if (location.href.indexOf("detail_list.html") >= 0) {
-        $('#header_addBtn').removeClass('hidden');
-    }
 </script>

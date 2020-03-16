@@ -143,7 +143,7 @@ public interface DetailDao {
     List<Detail> findBetweenList(@Param("before") Date before, @Param("late") Date late);
 
     /**
-     * 根据id删除一天记录
+     * 根据id删除一条记录
      *
      * @param id
      */

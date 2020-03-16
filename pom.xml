@@ -59,8 +59,8 @@
         <!-- 分页 -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
-            <artifactId>pagehelper</artifactId>
-            <version>5.1.11</version>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.2.13</version>
         </dependency>
         <!--热部署插件, 需设置idea-->
         <dependency>

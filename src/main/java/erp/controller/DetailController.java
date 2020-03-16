@@ -1,5 +1,7 @@
 package erp.controller;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageSerializable;
 import erp.domain.Detail;
 import erp.service.DetailService;
 import erp.util.MyException;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,28 +31,28 @@ public class DetailController {
 
     @RequestMapping("/getAll")
     @ResponseBody
-    public ResultInfo getAll(DetailFilterVo vo, String date) {
-        System.out.println(vo);
-        if (!StringUtils.isEmpty(date)) {
-            String[] dates = date.split(" - ");
-            System.out.println(Arrays.toString(dates));
-            if (dates.length == 2) {
-                try {
+    public ResultInfo getAll(DetailFilterVo vo, String date, Integer pageNum, Integer pageSize) {
+        try {
+            // 分页
+            PageHelper.startPage(pageNum, pageSize);
+
+            //处理日期格式
+            if (!StringUtils.isEmpty(date)) {
+                String[] dates = date.split(" - ");
+                if (dates.length == 2) {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
                     vo.setFrontDate(simpleDateFormat.parse(dates[0].trim()));
                     vo.setBackDate(simpleDateFormat.parse(dates[1].trim()));
-                    System.out.println(vo);
-                    List<Detail> detailList = detailService.findAll(vo);
-                    return new ResultInfo(true, detailList);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("[method:getAll]" + e.getMessage());
-                    return new ResultInfo(false, "解析日期失败");
                 }
             }
+            List<Detail> detailList = detailService.findAll(vo);
+            PageSerializable<Detail> pageInfo = new PageSerializable<>(detailList);
+            return new ResultInfo(true, pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("[method:getAll]" + e.getMessage());
+            return new ResultInfo(false, "解析日期失败");
         }
-        List<Detail> detailList = detailService.findAll(vo);
-        return new ResultInfo(true, detailList);
     }
 
     @RequestMapping("/add")

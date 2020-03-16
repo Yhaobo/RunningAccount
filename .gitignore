@@ -5,3 +5,4 @@
 /src/test/
 /src/main/resources/static/test.html
 /src/main/resources/application-private.yml
+/log/
