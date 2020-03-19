@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 所有外表(从表)的通用CRU
  */
-@Mapper
+
 public interface ForeignTableDao {
     @Select("select id, name from account where id=#{id}")
     Account findAccountById(int id);

@@ -65,25 +65,23 @@
                                            name="description">
                                 </td>
                                 <td>
-                                    <select class="form-control" name="project.id" id="project">
-                                    </select>
+                                    <select class="form-control" name="project.id" id="project"></select>
                                 </td>
                                 <td>
-                                    <select class="form-control" name="account.id" id="account">
-                                    </select>
+                                    <select class="form-control" name="account.id" id="account"></select>
                                 </td>
                                 <td>
-                                    <select class="form-control" name="department.id" id="department">
-                                    </select>
+                                    <select class="form-control" name="department.id" id="department"></select>
                                 </td>
                                 <td>
-                                    <select class="form-control" name="category.id" id="category">
-                                    </select>
+                                    <select class="form-control" name="category.id" id="category"></select>
                                 </td>
-                                <td><input type="number" class="form-control" id="earning" placeholder="收入"
+                                <td>
+                                    <input type="number" class="form-control" id="earning" placeholder="收入"
                                            name="earning">
                                 </td>
-                                <td><input type="number" class="form-control" id="expense" placeholder="支出"
+                                <td>
+                                    <input type="number" class="form-control" id="expense" placeholder="支出"
                                            name="expense">
                                 </td>
 
@@ -107,12 +105,12 @@
 <script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
 <script src="static/js/util.js"></script>
-<script src="static/js/load.js"></script>
+<script src="static/js/loadHeader.js"></script>
 <script>
     // 分页数据
     let pageData = {
         pageNum: 1
-        , pageSize: 20
+        , pageSize: 25
         , total: null // 总条数
         , isRender: true // 是否渲染分页条
     };
@@ -126,7 +124,6 @@
     };
     init();
 
-
     function pageHandler() {
         // 渲染分页
         layui.laypage.render({
@@ -134,10 +131,10 @@
             , count: pageData.total  // 数据总数
             , limit: pageData.pageSize
             , layout: ['prev', 'page', 'next', 'count', 'limit', 'skip']
-            , limits: [20, 40, 60, 80, 100, 1000, 10000, 100000]
+            , limits: [25, 50, 100, 1000, 10000, 100000]
             , jump: function (obj, isFirst) {
                 // obj包含了当前分页的所有参数，比如：
-                pageData.pageNum = obj.curr; //得到当前页，以便向服务端请求对应页的数据。
+                pageData.pageNum = obj.curr; //得到当前页，以便向服务端请求对应页的数据
                 pageData.pageSize = obj.limit; // 得到每页显示的条数
                 // 首次不执行
                 if (!isFirst) {
@@ -150,6 +147,7 @@
     // 条件查询
     function filter() {
         const loadIndex = layer.load(2);
+        pageData.pageNum = 1;
         copyFormData(true);
         pageData.isRender = true;
         loadTable(loadIndex);
@@ -490,12 +488,11 @@
             layer.confirm("确认" + msg, {icon: 3}, function () {
                 const load = layer.load(2);
                 // 改时间格式
-                let datetime = dateFormat(new Date($("#date").val()), "yyyy-MM-dd HH:mm");
-                $("#hidden_date").val(datetime);
+                $('#hidden_date').val(dateFormat(new Date($('#date').val()), "yyyy-MM-dd HH:mm"));
 
                 $.post("detail/" + method, $("#form").serialize(), function (data) {
-                    $('#modal').modal('hide');
                     layer.close(load);
+                    $('#modal').modal('hide');
                     if (data.flag) {
                         layer.msg('操作成功', {icon: 6});
                         $("#form")[0].reset();

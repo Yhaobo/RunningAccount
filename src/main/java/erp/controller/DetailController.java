@@ -7,13 +7,11 @@ import erp.service.DetailService;
 import erp.util.MyException;
 import erp.util.ResultInfo;
 import erp.vo.req.DetailFilterVo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -21,16 +19,14 @@ import java.util.List;
 /**
  * 收支明细
  */
-@Controller
+@RestController
+@Slf4j
 @RequestMapping("/detail")
 public class DetailController {
     @Autowired
     private DetailService detailService;
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
-
     @RequestMapping("/getAll")
-    @ResponseBody
     public ResultInfo getAll(DetailFilterVo vo, String date, Integer pageNum, Integer pageSize) {
         try {
             // 分页
@@ -56,7 +52,6 @@ public class DetailController {
     }
 
     @RequestMapping("/add")
-    @ResponseBody
     public ResultInfo add(Detail form) {
         try {
             detailService.add(form);
@@ -68,14 +63,12 @@ public class DetailController {
     }
 
     @RequestMapping("/findOne")
-    @ResponseBody
     public ResultInfo findOne(int id) {
         Detail detail = detailService.findOne(id);
         return new ResultInfo(true, detail);
     }
 
     @RequestMapping("/update")
-    @ResponseBody
     public ResultInfo update(Detail form) {
         try {
             detailService.update(form);
@@ -90,7 +83,6 @@ public class DetailController {
     }
 
     @RequestMapping("/delete")
-    @ResponseBody
     public ResultInfo delete(Detail form) {
         try {
             detailService.delete(form);
@@ -102,10 +94,9 @@ public class DetailController {
     }
 
     @RequestMapping("/updateBalance")
-    @ResponseBody
     public ResultInfo updateBalance() {
         try {
-            detailService.updateBalance();
+            detailService.updateAllBalance();
             return new ResultInfo(true);
         } catch (Throwable t) {
             log.error("[method:updateBalance]" + t.getMessage());

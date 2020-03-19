@@ -9,19 +9,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-@Mapper
 public interface DetailDao {
     /**
      * 查询所有
      *
      * @return
      */
-    @Select("SELECT * FROM detail d " +
-            "LEFT JOIN account a ON a.id=d.a_id " +
-            "LEFT JOIN category c ON c.id=d.c_id " +
-            "LEFT JOIN project p ON p.id=d.p_id " +
-            "LEFT JOIN department dep ON dep.id=d.dep_id " +
-            "ORDER BY d_date DESC")
+    @Select("SELECT * FROM detail d " + "ORDER BY d_date DESC")
     @Results(id = "detailMap", value = {
             @Result(id = true, column = "d_id", property = "id"),
             @Result(column = "d_date", property = "date"),

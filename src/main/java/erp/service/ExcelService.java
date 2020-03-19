@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ExcelService {
     @Autowired
     private DetailDao dao;
@@ -31,6 +32,7 @@ public class ExcelService {
 
     /**
      * 导出
+     *
      * @param response
      * @throws InvocationTargetException
      * @throws NoSuchMethodException
@@ -44,6 +46,7 @@ public class ExcelService {
 
     /**
      * 备份
+     *
      * @throws IOException
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
@@ -62,6 +65,7 @@ public class ExcelService {
 
     /**
      * 导入
+     *
      * @param in
      * @throws NoSuchFieldException
      * @throws InstantiationException

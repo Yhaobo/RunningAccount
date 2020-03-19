@@ -1,8 +1,36 @@
 spring:
+  #数据源基本配置
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/erp?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    name: druidDataSource
     type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/erp?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8
+      username: root
+#      password: xxx
+      #配置监控统计拦截的filters,’wall’用于防火墙
+      filters: stat,wall
+      max-active: 5
+      initial-size: 1
+      max-wait: 60000
+      min-idle: 1
+      #1) Destroy线程会检测连接的间隔时间 2) testWhileIdle的判断依据
+      time-between-eviction-runs-millis: 60000
+      #Destory线程中如果检测到当前连接的最后活跃时间和当前时间的差值大于minEvictableIdleTimeMillis，则关闭当前连接。
+      min-evictable-idle-time-millis: 300000
+      #用来检测连接是否有效的sql，要求是一个查询语句。如果validationQuery为null，testOnBorrow、testOnReturn、 testWhileIdle都不会其作用。在mysql中通常为select 'x'，在oracle中通常为select 1 from dual
+      validation-query: select 'x'
+      #建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效
+      test-while-idle: true
+      #申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+      test-on-borrow: false
+      #归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+      test-on-return: false
+      #是否缓存preparedStatement，也就是PSCache。PSCache对支持游标的数据库性能提升巨大，比如说oracle。
+      pool-prepared-statements: true
+      #要启用PSCache，必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true。 在Druid中，不会存在Oracle下PSCache占用内存过多的问题，可以把这个数值配置大一些，比如说100
+      max-open-prepared-statements: 50
+      max-pool-prepared-statement-per-connection-size: 5
   application:
     name: erp
 server:

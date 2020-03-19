@@ -1,12 +1,13 @@
 package erp.service;
 
-import erp.dao.*;
+import erp.dao.ForeignTableDao;
 import erp.domain.Account;
 import erp.domain.Category;
 import erp.domain.Department;
 import erp.domain.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,18 +24,22 @@ public class SettingService {
     @Autowired
     private ForeignTableDao dao;
 
+    @Transactional(readOnly = true)
     public List<Category> findCategorys() {
         return dao.findAllCategory();
     }
 
+    @Transactional(readOnly = true)
     public List<Department> findDepartments() {
         return dao.findAllDepartment();
     }
 
+    @Transactional(readOnly = true)
     public List<Account> findAccounts() {
         return dao.findAllAccount();
     }
 
+    @Transactional(readOnly = true)
     public List<Project> findProjects() {
         return dao.findAllProject();
     }

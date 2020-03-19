@@ -32,10 +32,7 @@ public class Realm extends AuthorizingRealm {
         Object principal = principalCollection.getPrimaryPrincipal();
         Set<String> roles = new HashSet<>();
         if (principal.equals(0)) {
-            roles.add("writer");
-            roles.add("reader");
-        } else if (principal.equals(1)) {
-            roles.add("reader");
+            roles.add("user");
         }
         return new SimpleAuthorizationInfo(roles);
     }

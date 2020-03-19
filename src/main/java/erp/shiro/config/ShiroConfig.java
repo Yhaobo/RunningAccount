@@ -32,14 +32,16 @@ public class ShiroConfig {
         shiroFilterChainDefinition.addPathDefinition("/index.html", "anon");
         shiroFilterChainDefinition.addPathDefinition("/static/**", "anon");
         shiroFilterChainDefinition.addPathDefinition("/user/login", "anon");
-        shiroFilterChainDefinition.addPathDefinition("/detail/add", "roles[writer,reader]");
-        shiroFilterChainDefinition.addPathDefinition("/detail/update*", "roles[writer,reader]");
-        shiroFilterChainDefinition.addPathDefinition("/detail/delete", "roles[writer,reader]");
-        shiroFilterChainDefinition.addPathDefinition("/setting/add*", "roles[writer,reader]");
-        shiroFilterChainDefinition.addPathDefinition("/setting/update*", "roles[writer,reader]");
-        shiroFilterChainDefinition.addPathDefinition("/excel/importing*", "roles[writer,reader]");
+        shiroFilterChainDefinition.addPathDefinition("/druid/**", "anon");
+        shiroFilterChainDefinition.addPathDefinition("/detail/add", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/detail/update*", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/detail/delete", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/setting/add*", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/setting/update*", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/excel/importing*", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/user/alterPassword", "roles[user]");
         shiroFilterChainDefinition.addPathDefinition("/user/exit", "logout");
-        shiroFilterChainDefinition.addPathDefinition("/**", "authc,roles[reader]");
+        shiroFilterChainDefinition.addPathDefinition("/**", "authc");
         return shiroFilterChainDefinition;
     }
 

@@ -3,17 +3,17 @@ package erp.service;
 import erp.dao.DetailDao;
 import erp.domain.Detail;
 import erp.util.MyException;
+import erp.util.MyUtils;
 import erp.vo.req.DetailFilterVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 @Service
+@Transactional(readOnly = true)
 public class DetailService {
 
     private DetailDao detailDao;
@@ -25,13 +25,12 @@ public class DetailService {
     public List<Detail> findAll(DetailFilterVo vo) {
         List<Detail> details = detailDao.listByFilter(vo);
         //格式化所有数字
-        NumberFormat format = NumberFormat.getCurrencyInstance(Locale.CHINA);
-        for (Detail i : details) {
-            i.setFormatEarning(format.format(i.getEarning()));
-            i.setFormatExpense(format.format(i.getExpense()));
-            i.setFormatBalance(format.format(i.getBalance()));
-        }
+        MyUtils.formatNumber(details);
         return details;
+    }
+
+    public Detail findOne(int id) {
+        return detailDao.findOne(id);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -51,10 +50,6 @@ public class DetailService {
         //如果是插入以前,就需要调整本次插入记录之后的所有记录的结存
         BigDecimal balanceDifference = form.getEarning().subtract(form.getExpense());
         handleLaterBalance(form.getDate(), balanceDifference);
-    }
-
-    public Detail findOne(int id) {
-        return detailDao.findOne(id);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -93,6 +88,31 @@ public class DetailService {
         handleBalance(form);
         detailDao.update(form);
 
+    }
+
+    /**
+     * 删除一条记录, 并处理此记录之后的结存不一致
+     *
+     * @param form
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Detail form) {
+        detailDao.delete(form.getId());
+        handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()));
+    }
+
+    /**
+     * 根据每一笔收入支出来更新所有记录的结存
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateAllBalance() {
+        List<Detail> detailList = detailDao.findAll();
+        BigDecimal balance = new BigDecimal(0);
+        for (int i = detailList.size() - 1; i >= 0; i--) {
+            balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));
+            detailList.get(i).setBalance(balance);
+            detailDao.update(detailList.get(i));
+        }
     }
 
     /**
@@ -135,31 +155,6 @@ public class DetailService {
      */
     private void handleLaterBalance(Date date, BigDecimal balanceDifference) {
         detailDao.updateLater(balanceDifference, date);
-    }
-
-    /**
-     * 删除一条记录, 并处理此记录之后的结存不一致
-     *
-     * @param form
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void delete(Detail form) {
-        detailDao.delete(form.getId());
-        handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()));
-    }
-
-    /**
-     * 根据每一笔收入支出来更新所有记录的结存
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void updateBalance() {
-        List<Detail> detailList = detailDao.findAll();
-        BigDecimal balance = new BigDecimal(0);
-        for (int i = detailList.size() - 1; i >= 0; i--) {
-            balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));
-            detailList.get(i).setBalance(balance);
-            detailDao.update(detailList.get(i));
-        }
     }
 
 }

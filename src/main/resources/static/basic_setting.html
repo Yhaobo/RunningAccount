@@ -14,7 +14,7 @@
 </head>
 <body>
 <header id="header"></header>
-<table id="table" >
+<table id="table">
 
 </table>
 
@@ -48,7 +48,7 @@
 <script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
 <script src="static/js/util.js"></script>
-<script src="static/js/load.js"></script>
+<script src="static/js/loadHeader.js"></script>
 <script>
 
     const path = getParameter("path");//二级路径
@@ -93,15 +93,20 @@
 
     //添加操作
     function add() {
+        var value = $("#input").val();
+        if (!value) {
+            layer.alert('不能为空!', {icon: 5});
+        }
         layer.confirm("确认提交?", {icon: 3}, function () {
             const load = layer.load();
-            var value = $("#input").val();
-            $.post("setting/add" + path, {"name": value}, function (data) {
+            $.get("setting/add" + path, {"name": value}, function (data) {
                 layer.close(load);
                 if (data.flag) {
                     layer.msg('添加成功', {icon: 6});
                     //刷新整个页面
-                    location.reload();
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
                 } else {
                     layer.alert(data.message, {icon: 5});
                 }
@@ -127,13 +132,15 @@
         $("#modal_submit").off().click(function () {
             layer.confirm("提交此修改吗?", {icon: 3}, function () {
                 let load = layer.load();
-                $.post(url, $("#modal_form").serialize(), function (data) {
+                $.get(url, $("#modal_form").serialize(), function (data) {
                     layer.close(load);
                     if (data.flag) {
                         // $("#modal").modal('hide');
-                        layer.msg('添加成功', {icon: 6});
+                        layer.msg('修改成功', {icon: 6});
                         // 刷新页面
-                        location.reload();
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
                     } else {
                         layer.alert(data.message, {icon: 5});
                     }

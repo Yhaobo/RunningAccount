@@ -43,9 +43,9 @@ public class UserController {
         if (password[0].equals(password[1])) {
             try {
                 if (flag == 0) {
-                    service.updateByUser(new User("admin", password[0]));
+                    service.updatePasswordByUser(new User("admin", password[0]));
                 } else {
-                    service.updateByUser(new User("visitor", password[0]));
+                    service.updatePasswordByUser(new User("visitor", password[0]));
                 }
                 return new ResultInfo(true, "", SecurityUtils.getSubject().getPrincipal());
             } catch (Exception e) {
