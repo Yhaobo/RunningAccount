@@ -44,7 +44,6 @@
                 <div class="modal-body">
                     <form id="form" action="javascript:;">
                         <input type="hidden" name="id" value="0" id="hidden_id"/>
-                        <input type="hidden" name="date" id="hidden_date"/>
                         <table class="table  table-bordered">
                             <tr>
                                 <th>日期</th>
@@ -58,7 +57,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="datetime-local" class="form-control" id="date">
+                                    <input type="text" class="form-control" id="date" name="date">
                                 </td>
                                 <td>
                                     <input type="text" class="form-control" id="description" placeholder="摘要"
@@ -244,8 +243,16 @@
         }
     }
 
+    function renderDate() {
+        layui.laydate.render({
+            elem: $('#date')[0]
+            ,type:'datetime'
+        });
+
+    }
     function init() {
         const loadIndex = layer.load(2);
+        renderDate();
         // 获取所有项目
         $.get("setting/findProjects", function (data) {
             selectData.projectOptions = data.data;
@@ -339,7 +346,7 @@
         // 将过滤div放入表格头部
         $('.layui-table-tool-temp').html($('#filter').html());
 
-        // 日期范围
+        // 渲染日期范围
         layui.laydate.render({
             elem: $('.layui-table-tool-temp .duringDate')[0]
             , range: true
@@ -371,7 +378,7 @@
         $('#form')[0].reset();
         $("#modalTitle").text("添加");
         // 自动获取当前日期
-        $("#date").val(dateFormat(new Date(), "yyyy-MM-ddTHH:mm"));
+        $("#date").val(dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
         loadSelects(true);
         if (!$("#delete").hasClass("hidden")) {
             $("#delete").addClass("hidden");
@@ -393,7 +400,7 @@
     function loadDetail(id) {
         $.get("detail/findOne", {"id": id}, function (data) {
             if (data.flag) {
-                $("#date").val(dateFormat(new Date(data.data.date), "yyyy-MM-ddTHH:mm"));
+                $("#date").val(dateFormat(new Date(data.data.date), "yyyy-MM-dd HH:mm:ss"));
                 $("#description").val(data.data.description);
                 $("#earning").val(data.data.earning);
                 $("#expense").val(data.data.expense);
@@ -487,9 +494,6 @@
         $("#" + button).off().click(function () {
             layer.confirm("确认" + msg, {icon: 3}, function () {
                 const load = layer.load(2);
-                // 改时间格式
-                $('#hidden_date').val(dateFormat(new Date($('#date').val()), "yyyy-MM-dd HH:mm"));
-
                 $.post("detail/" + method, $("#form").serialize(), function (data) {
                     layer.close(load);
                     $('#modal').modal('hide');
