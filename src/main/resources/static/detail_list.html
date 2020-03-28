@@ -14,17 +14,18 @@
 <header id="header"></header>
 <main>
     <h2 style="margin-top: 55px;text-align: center; font-weight: bold;">收支明细</h2>
-    <!--过滤条件-->
+    <!--条件查询-->
     <div id="filter" hidden>
         <form action="javascript:;" class="filterForm" autocomplete="off">
+            <span style="font-size: 1.2em">条件查询: </span>
             <input type="text" class="layui-input duringDate formChildren" placeholder="请选择时间范围" name="date">
             <input type="text" class="form-control formChildren" placeholder="请输入摘要关键字"
-                   name="description">
-            <select name="projectId" class="formChildren form-control projectFilter"></select>
-            <select name="accountId" class="formChildren form-control accountFilter"></select>
-            <select name="departmentId" class="formChildren form-control departmentFilter"></select>
-            <select name="categoryId" class="formChildren form-control categoryFilter"></select>
-            <button class="btn btn-default glyphicon glyphicon-filter" onclick="filter()">点击过滤</button>
+                   name="description" onchange="filter()">
+            <select name="projectId" class="formChildren form-control projectFilter" onchange="filter()"></select>
+            <select name="accountId" class="formChildren form-control accountFilter" onchange="filter()"></select>
+            <select name="departmentId" class="formChildren form-control departmentFilter" onchange="filter()"></select>
+            <select name="categoryId" class="formChildren form-control categoryFilter" onchange="filter()"></select>
+<!--            <button class="btn btn-default glyphicon glyphicon-filter" onclick="filter()">点击过滤</button>-->
         </form>
     </div>
     <!--列表-->
@@ -252,7 +253,6 @@
     }
     function init() {
         const loadIndex = layer.load(2);
-        renderDate();
         // 获取所有项目
         $.get("setting/findProjects", function (data) {
             selectData.projectOptions = data.data;
@@ -332,6 +332,7 @@
             $("#category").html(html);
             promise(loadIndex);
         });
+        renderDate();
     }
 
     // 使用layui的动态表格
@@ -349,9 +350,13 @@
         // 渲染日期范围
         layui.laydate.render({
             elem: $('.layui-table-tool-temp .duringDate')[0]
-            , range: true
+            , range: '~'
             , type: 'month'
             , theme: 'grid'
+            ,done: function(value, date, endDate){
+                $('.layui-table-tool-temp .duringDate').val(value);
+                filter();
+            }
         });
 
         // 将表单数据从源表单复制到新渲染的表格中

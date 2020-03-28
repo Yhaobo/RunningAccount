@@ -34,7 +34,7 @@ public class DetailController {
 
             //处理日期格式
             if (!StringUtils.isEmpty(date)) {
-                String[] dates = date.split(" - ");
+                String[] dates = date.split(" ~ ");
                 if (dates.length == 2) {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
                     vo.setFrontDate(simpleDateFormat.parse(dates[0].trim()));
