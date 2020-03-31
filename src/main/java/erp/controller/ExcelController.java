@@ -27,8 +27,6 @@ public class ExcelController {
             service.export(response);
         } catch (Exception e) {
             log.error("[method:export]" + e.getMessage());
-        } finally {
-            response.getOutputStream().close();
         }
     }
 

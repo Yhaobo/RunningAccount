@@ -13,7 +13,7 @@ import java.util.Date;
  */
 public class Detail implements Serializable {
     private Integer id;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date date;
     private String description;
     private Project project;

@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 /**
- * 所有外表(从表)的通用CRU
+ * 所有外表(detail表外键所指向的表)的通用CRU
  */
 
 public interface ForeignTableDao {
@@ -38,7 +38,7 @@ public interface ForeignTableDao {
     List<Project> findAllProject();
 
     @Insert("insert into ${tableName}(name) values(#{entity.name})")
-    void add(@Param("tableName") String tableName, @Param("entity") Object entity);
+    void insert(@Param("tableName") String tableName, @Param("entity") Object entity);
 
     @Update("update ${tableName} set name=#{entity.name} where id=#{entity.id}")
     void update(@Param("tableName") String tableName, @Param("entity") Object entity);

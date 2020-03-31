@@ -10,7 +10,7 @@ $.get("header.html", function (data) {
     //     if (data.flag) {
     //         for (var i = 0; i < projects.length; i++) {
     //             var item = projects[i];
-    //             html += '<li><a href="monthly_list.html?p_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+    //             html += '<li><a href="summarize.html?p_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
     //         }
     //         $("#header_project").html(html);
     //         $("#projectFilter").html(html);
@@ -23,7 +23,7 @@ $.get("header.html", function (data) {
     //     if (data.flag) {
     //         for (var i = 0; i < categorys.length; i++) {
     //             var item = categorys[i];
-    //             html += '<li><a href="monthly_list.html?c_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+    //             html += '<li><a href="summarize.html?c_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
     //         }
     //         $("#header_category").html(html);
     //         $("#categoryFilter").html(html);
@@ -36,7 +36,7 @@ $.get("header.html", function (data) {
     //     if (data.flag) {
     //         for (var i = 0; i < departments.length; i++) {
     //             var item = departments[i];
-    //             html += '<li><a href="monthly_list.html?dep_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+    //             html += '<li><a href="summarize.html?dep_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
     //         }
     //         $("#header_department").html(html);
     //         $("#departmentFilter").html(html);
@@ -49,7 +49,7 @@ $.get("header.html", function (data) {
     //     if (data.flag) {
     //         for (var i = 0; i < accounts.length; i++) {
     //             var item = accounts[i];
-    //             html += '<li><a href="monthly_list.html?a_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
+    //             html += '<li><a href="summarize.html?a_id=' + item.id + '&title=' + item.name + '每月汇总">' + item.name + '</a></li>';
     //         }
     //         $("#header_account").html(html);
     //         $("#accountFilter").html(html);

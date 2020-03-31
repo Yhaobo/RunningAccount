@@ -26,12 +26,13 @@ public class ImportExcelUtil {
             if (row.getRowNum() < 1) {
                 continue;
             }
-            //创建实体类并赋值
-            Detail entity = new Detail();
+            //如果获取不到值,则取消循环
             if (row.getCell(0).getStringCellValue() == null) {
                 break;
             }
-            entity.setDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(row.getCell(0).getStringCellValue()));
+            //创建实体类并赋值
+            Detail entity = new Detail();
+            entity.setDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(row.getCell(0).getStringCellValue()));
             entity.setDescription(row.getCell(1).getStringCellValue());
             entity.setProject(new Project(row.getCell(2).getStringCellValue()));
             entity.setAccount(new Account(row.getCell(3).getStringCellValue()));
@@ -45,15 +46,4 @@ public class ImportExcelUtil {
         }
         return list;
     }
-
-//    public static void main(String[] args) {
-//        File dest = new File("d:\\财务数据备份", "2019-11-11.xlsx");
-//        try {
-//            InputStream in = new FileInputStream(dest);
-//            List<Detail> details = ImportExcel.Importing(in);
-//            System.out.println(details);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 }

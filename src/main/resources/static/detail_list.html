@@ -13,19 +13,18 @@
 <body>
 <header id="header"></header>
 <main>
-    <h2 style="margin-top: 55px;text-align: center; font-weight: bold;">收支明细</h2>
+    <h2 style="margin-top: 60px;text-align: center; font-weight: bold;">收支明细</h2>
     <!--条件查询-->
     <div id="filter" hidden>
         <form action="javascript:;" class="filterForm" autocomplete="off">
             <span style="font-size: 1.2em">条件查询: </span>
-            <input type="text" class="layui-input duringDate formChildren" placeholder="请选择时间范围" name="date">
+            <input type="text" class="layui-input duringDate formChildren" placeholder="请选择时间范围" name="duringDate">
             <input type="text" class="form-control formChildren" placeholder="请输入摘要关键字"
                    name="description" onchange="filter()">
             <select name="projectId" class="formChildren form-control projectFilter" onchange="filter()"></select>
             <select name="accountId" class="formChildren form-control accountFilter" onchange="filter()"></select>
             <select name="departmentId" class="formChildren form-control departmentFilter" onchange="filter()"></select>
             <select name="categoryId" class="formChildren form-control categoryFilter" onchange="filter()"></select>
-<!--            <button class="btn btn-default glyphicon glyphicon-filter" onclick="filter()">点击过滤</button>-->
         </form>
     </div>
     <!--列表-->
@@ -146,11 +145,10 @@
 
     // 条件查询
     function filter() {
-        const loadIndex = layer.load(2);
         pageData.pageNum = 1;
         copyFormData(true);
         pageData.isRender = true;
-        loadTable(loadIndex);
+        loadTable();
     }
 
     // 复制表单数据
@@ -171,14 +169,15 @@
     }
 
     // 加载表格数据
-    function loadTable(loadIndex) {
+    function loadTable() {
+        const loadIndex = layer.load(2);
         const data = $('.layui-table-tool-temp .filterForm').serialize() + `&pageNum=${pageData.pageNum}&pageSize=${pageData.pageSize}`;
         $.get('detail/getAll', data, function (result) {
             layer.close(loadIndex);
+
             if (result.flag) {
                 const pageInfo = result.data;
                 pageData.total = pageInfo.total;
-
                 let html = `<caption>收支明细</caption>
                             <thead>
                                 <tr>
@@ -214,6 +213,7 @@
                 html += '</tbody>';
                 $("#details").html(html);
 
+                //渲染原始表格
                 renderTable();
 
                 //只渲染分页条一次
@@ -225,34 +225,17 @@
         });
     }
 
-    const promiseData = {
-        num: 0
-    };
-
-    // 保证下拉选项先于表格数据加载
-    function promise(loadIndex) {
-        if (promiseData.num < 3) {
-            promiseData.num++;
-        } else {
-            // 显示添加按钮
-            const addBtn = $('#header_addBtn');
-            if (addBtn.hasClass('hidden')) {
-                addBtn.removeClass('hidden');
-            }
-            // 获取所有账目明细
-            loadTable(loadIndex);
-        }
-    }
-
+    //渲染日期时间输入框
     function renderDate() {
         layui.laydate.render({
             elem: $('#date')[0]
-            ,type:'datetime'
+            , type: 'datetime'
         });
-
     }
+
     function init() {
-        const loadIndex = layer.load(2);
+        // 加载表格
+        loadTable();
         // 获取所有项目
         $.get("setting/findProjects", function (data) {
             selectData.projectOptions = data.data;
@@ -270,7 +253,6 @@
             }
             $(".projectFilter").html(html);
             $("#project").html(html);
-            promise(loadIndex);
         });
         // 获取所有账户
         $.get("setting/findAccounts", function (data) {
@@ -289,7 +271,6 @@
             }
             $(".accountFilter").html(html);
             $("#account").html(html);
-            promise(loadIndex);
         });
         // 获取所有部门
         $.get("setting/findDepartments", function (data) {
@@ -308,7 +289,6 @@
             }
             $(".departmentFilter").html(html);
             $("#department").html(html);
-            promise(loadIndex);
         });
         // 获取所有分类
         $.get("setting/findCategorys", function (data) {
@@ -330,7 +310,6 @@
             }
             $(".categoryFilter").html(html);
             $("#category").html(html);
-            promise(loadIndex);
         });
         renderDate();
     }
@@ -344,8 +323,11 @@
             , toolbar: true
         });
 
-        // 将过滤div放入表格头部
+        // 将过滤div和添加按钮放入表格头部
         $('.layui-table-tool-temp').html($('#filter').html());
+        $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
+style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
+<i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
 
         // 渲染日期范围
         layui.laydate.render({
@@ -353,7 +335,7 @@
             , range: '~'
             , type: 'month'
             , theme: 'grid'
-            ,done: function(value, date, endDate){
+            , done: function (value, date, endDate) {
                 $('.layui-table-tool-temp .duringDate').val(value);
                 filter();
             }
@@ -501,8 +483,8 @@
                 const load = layer.load(2);
                 $.post("detail/" + method, $("#form").serialize(), function (data) {
                     layer.close(load);
-                    $('#modal').modal('hide');
                     if (data.flag) {
+                        $('#modal').modal('hide');
                         layer.msg('操作成功', {icon: 6});
                         $("#form")[0].reset();
                         init();

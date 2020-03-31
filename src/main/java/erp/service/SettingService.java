@@ -45,19 +45,19 @@ public class SettingService {
     }
 
     public void addCategory(Category category) {
-        dao.add("category", category);
+        dao.insert("category", category);
     }
 
     public void addDepartment(Department department) {
-        dao.add("department", department);
+        dao.insert("department", department);
     }
 
     public void addAccount(Account account) {
-        dao.add("account", account);
+        dao.insert("account", account);
     }
 
     public void addProject(Project project) {
-        dao.add("project", project);
+        dao.insert("project", project);
     }
 
     public void updateCategory(Category category) {

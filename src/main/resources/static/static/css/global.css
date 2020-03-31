@@ -18,7 +18,7 @@
 
 /*
 多级菜单
- */
+
 .dropdown-submenu {
     position: relative;
 }
@@ -66,6 +66,7 @@
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
 }
+*/
 
 /*用body下的第二个div来填充导航栏的位置*/
 /*body > div:nth-child(2) {*/

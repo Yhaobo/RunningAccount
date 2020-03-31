@@ -43,8 +43,8 @@
     </div>
 </div>
 
-<!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
-<script src="static/layui/layui.all.js"></script>
+    <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
+    <script src="static/layui/layui.all.js"></script>
 <script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
 <script src="static/js/util.js"></script>
@@ -135,12 +135,9 @@
                 $.get(url, $("#modal_form").serialize(), function (data) {
                     layer.close(load);
                     if (data.flag) {
-                        // $("#modal").modal('hide');
+                        $("#modal").modal('hide');
                         layer.msg('修改成功', {icon: 6});
-                        // 刷新页面
-                        setTimeout(function () {
-                            location.reload();
-                        }, 1000);
+                        init();
                     } else {
                         layer.alert(data.message, {icon: 5});
                     }

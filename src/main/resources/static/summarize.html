@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title id="title">收支汇总</title>
+    <link rel="stylesheet" href="static/layui/css/layui.css" media="all"/>
+    <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="static/css/global.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<header id="header"></header>
+<main>
+    <h2 style="margin-top: 60px;text-align: center; font-weight: bold;">收支汇总</h2>
+    <!--条件查询-->
+    <div id="filter" hidden>
+        <form action="javascript:;" class="filterForm" autocomplete="off">
+            <span style="font-size: 1.2em">条件查询: </span>
+            <select name="groupPolicy" class="form-control formChildren" onchange="filter()">
+                <option value="month">按月</option>
+                <option value="year">按年</option>
+            </select>
+            <input type="text" class="layui-input duringDate formChildren" placeholder="请选择时间范围" name="duringDate">
+            <select name="isAll" class="formChildren form-control filterIsAll" onchange="loadOptions(this)">
+                <option value="true">所有</option>
+                <option value="Project">按项目</option>
+                <option value="Account">按账户</option>
+                <option value="Department">按部门</option>
+                <option value="Category">按分类</option>
+            </select>
+            <select class="formChildren form-control filterOptions hidden" onchange="filter()"></select>
+        </form>
+    </div>
+    <table id="table" lay-filter="layuiTable"></table>
+    <!--分页-->
+    <div id="page"></div>
+</main>
+<!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
+<script src="static/layui/layui.all.js"></script>
+<script src="static/js/jquery-3.4.1.min.js"></script>
+<script src="static/bootstrap/js/bootstrap.min.js"></script>
+<script src="static/js/util.js"></script>
+<script src="static/js/loadHeader.js"></script>
+<script>
+    //分页数据
+    let pageData = {
+        pageNum: 1
+        , pageSize: 25
+        , isRender: true
+    };
+    //过滤(条件查询)数据
+    let filterData = {
+        isAll: true
+        , groupPolicy: 'month'
+    };
+    //合计数据
+    let totalData = {
+        html: ''
+    };
+
+    function pageHandler() {
+        // 渲染分页
+        layui.laypage.render({
+            elem: 'page' // 注意，这里的 test1 是 ID，不用加 # 号
+            , count: pageData.total  // 数据总数
+            , limit: pageData.pageSize
+            , layout: ['prev', 'page', 'next', 'count', 'limit', 'skip']
+            , limits: [25, 50, 100, 1000, 10000, 100000]
+            , jump: function (obj, isFirst) {
+                // obj包含了当前分页的所有参数，比如：
+                pageData.pageNum = obj.curr; //得到当前页，以便向服务端请求对应页的数据
+                pageData.pageSize = obj.limit; // 得到每页显示的条数
+                // 首次不执行
+                if (!isFirst) {
+                    loadTable();
+                }
+            }
+        });
+    }
+
+    init();
+
+    function init() {
+        loadTable();
+    }
+
+    // 加载表格数据
+    function loadTable() {
+        const loadIndex = layer.load(2);
+        $.post('summarize', $('.filterForm').eq(0).serialize() + `&pageNum=${pageData.pageNum}&pageSize=${pageData.pageSize}`, function (result) {
+            layer.close(loadIndex);
+            let html;
+            if (result.flag) {
+                const pageInfo = result.data;
+                pageData.total = pageInfo.total;
+                if (filterData.isAll) {
+                    html = '<caption>' + decodeURIComponent(getParameter("title")) + '</caption>' +
+                        '<thead><tr>' +
+                        '            <th lay-data="{field:\'month\'}">日期</th>\n' +
+                        '            <th lay-data="{field:\'earning\'}">收入</th>\n' +
+                        '            <th lay-data="{field:\'expense\'}">支出</th>\n' +
+                        '            <th lay-data="{field:\'balance\'}">结存</th>\n' +
+                        '</tr></thead>';
+                } else {
+                    html = '<caption>' + decodeURIComponent(getParameter("title")) + '</caption>' +
+                        '<thead><tr>' +
+                        '            <th lay-data="{field:\'month\'}">日期</th>\n' +
+                        '            <th lay-data="{field:\'earning\'}">收入</th>\n' +
+                        '            <th lay-data="{field:\'expense\'}">支出</th>\n' +
+                        '</tr></thead>';
+                }
+                //收入合计
+                let earning_total = 0;
+                //支出合计
+                let expense_total = 0;
+                //循环次数
+                let count = 0;
+                html += '<tbody>';
+                for (let i = 0; i < pageInfo.list.length; i++) {
+                    let item = pageInfo.list[i];
+                    if (filterData.isAll) {
+                        html += '<tr>\n';
+                        if (filterData.groupPolicy === 'month') {
+                            html += '<td>' + dateFormat(new Date(item.date), "yyyy-MM") + '</td>\n';
+                        } else if (filterData.groupPolicy === 'year') {
+                            html += '<td>' + dateFormat(new Date(item.date), "yyyy") + '</td>\n';
+                        }
+                        html += '        <td>' + item.formatEarning + '</td>\n' +
+                            '            <td>' + item.formatExpense + '</td>\n' +
+                            '            <td>' + item.formatBalance + '</td>\n' +
+                            '        </tr>';
+                    } else {
+                        html += '<tr>\n';
+                        if (filterData.groupPolicy === 'month') {
+                            html += '<td>' + dateFormat(new Date(item.date), "yyyy-MM") + '</td>\n';
+                        } else if (filterData.groupPolicy === 'year') {
+                            html += '<td>' + dateFormat(new Date(item.date), "yyyy") + '</td>\n';
+                        }
+                        html += '            <td>' + item.formatEarning + '</td>\n' +
+                            '            <td>' + item.formatExpense + '</td>\n' +
+                            '        </tr>';
+                    }
+                    if (count < pageData.pageSize) {
+                        earning_total += item.earning * 100;
+                        expense_total += item.expense * 100;
+                    }
+                    count++;
+                }
+                html += '</tbody>';
+                $("#table").html(html);
+
+
+                totalData.html = '<table ><tr>' +
+                    '<td>本页合计</td>' +
+                    '<td>收入: ￥' + earning_total / 100 + '</td>' +
+                    '<td>支出: ￥' + expense_total / 100 + '</td></tr></table>';
+
+
+                //渲染表格
+                renderTable();
+
+                //只渲染分页条一次
+                if (pageData.isRender) {
+                    pageHandler();
+                    pageData.isRender = false;
+                }
+            }
+        });
+    }
+
+
+    function renderTable() {
+        // 渲染表格
+        layui.table.init('layuiTable', {
+            title: '收支明细'
+            , limit: pageData.pageSize
+            , toolbar: true
+            , totalRow: true
+        });
+
+        // 将过滤div放入表格头部
+        $('.layui-table-tool-temp').html($('#filter').html());
+
+        // 将合计html放入表格合计区
+        $('.layui-table-total').html(totalData.html);
+
+        // 渲染日期范围
+        layui.laydate.render({
+            elem: $('.layui-table-tool-temp .duringDate')[0]
+            , range: '~'
+            , type: filterData.groupPolicy
+            , theme: 'grid'
+            , done: function (value, date, endDate) {
+                $('.layui-table-tool-temp .duringDate').val(value);
+                filter();
+            }
+        });
+
+        // 将过滤的表单数据从源表单复制到新渲染的表单中
+        copyFormData(false);
+    }
+
+    // 条件查询
+    function filter() {
+        copyFormData(true);
+        pageData.pageNum = 1;
+        filterData.groupPolicy = $('.layui-table-view select[name="groupPolicy"]').val();
+        pageData.isRender = true;
+        loadTable();
+    }
+
+    // 复制表单数据
+    function copyFormData(isTargetToSource) {
+        const source = $('#filter>form').children('.formChildren');
+        const target = $('.layui-table-tool-temp form').children('.formChildren');
+        if (isTargetToSource) {
+            // 从target到source
+            target.each(function (i, e) {
+                source.eq(i).val($(e).val());
+            });
+        } else {
+            // 从source到target
+            source.each(function (i, e) {
+                target.eq(i).val($(e).val());
+            });
+        }
+    }
+
+    //根据主下拉框的value来加载次下拉框
+    function loadOptions(caller) {
+        //调用者为主下拉框
+        let optionValue = $(caller).val();
+        const filterOptions = $('.filterOptions');
+        if (optionValue !== "true") {
+            // 不是所有
+            const loadIndex = layer.load(2);
+            //为次下拉框增加name属性
+            filterOptions.prop('name', optionValue + 'Id');
+            $.get("setting/find" + optionValue + 's', function (data) {
+                layer.close(loadIndex);
+                let html = '';
+                for (let i = 0; i < data.data.length; i++) {
+                    let option = data.data[i];
+                    html += '<option value="' + option.id + '">' + option.name + '</option>';
+                }
+                filterOptions.html(html);
+                //显示次下拉框
+                if (filterOptions.hasClass('hidden')) {
+                    filterOptions.removeClass("hidden");
+                }
+                // 让主下拉框的name属性为空(为了使后端的isAll参数为false)
+                $('.filterIsAll').prop('name', '');
+                //修改标记
+                filterData.isAll = false;
+                filter();
+            });
+        } else {
+            // 是所有
+            // 隐藏次下拉框
+            if (!filterOptions.hasClass('hidden')) {
+                filterOptions.addClass('hidden');
+            }
+            //修改标记
+            filterData.isAll = true;
+            // 还原主下拉框的name属性
+            $('.filterIsAll').prop('name', 'isAll');
+            filter();
+        }
+    }
+</script>
+</body>
+</html>

@@ -7,19 +7,27 @@ import java.util.Date;
 
 /**
  * @author Yhaobo
- * @date 2020/3/13
+ * @date 2020/3/28
  */
 @Data
-public class DetailFilterVo implements Serializable {
+public class SummarizeFilterVo implements Serializable {
+    private String duringDate;
     private Date frontDate;
     private Date backDate;
-    private String description;
+    private String groupPolicy;
+
     private Integer projectId;
     private Integer accountId;
     private Integer departmentId;
     private Integer categoryId;
 
-    public void setDescription(String description) {
-        this.description = "%" + description + "%";
+    private boolean isAll;
+
+    public boolean isAll() {
+        return isAll;
+    }
+
+    public void setIsAll(boolean all) {
+        isAll = all;
     }
 }

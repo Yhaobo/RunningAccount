@@ -17,11 +17,10 @@ public class ExportExcelWrapper extends ExportExcelUtil {
      * @param headers  头部标题集合
      * @param dataset  数据集合
      * @param response HttpServletResponse
-     *                 //     * @param version  2003 或者 2007，不传时默认生成2003版本
      */
     public static <T> void exportExcelToRemote(String fileName, String title, String[] headers, Collection<T> dataset, HttpServletResponse response) throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         response.setContentType("application/vnd.ms-excel");
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xlsx");
-        exportExcel2007(title, headers, dataset, response.getOutputStream(), "yyyy-MM-dd");
+        exportExcel2007(title, headers, dataset, response.getOutputStream(), "yyyy-MM-dd HH:mm:ss");
     }
 }

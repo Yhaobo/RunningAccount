@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -27,18 +28,24 @@ public class DetailController {
     private DetailService detailService;
 
     @RequestMapping("/getAll")
-    public ResultInfo getAll(DetailFilterVo vo, String date, Integer pageNum, Integer pageSize) {
+    public ResultInfo getAll(DetailFilterVo vo, String duringDate, Integer pageNum, Integer pageSize) {
         try {
             // 分页
             PageHelper.startPage(pageNum, pageSize);
 
             //处理日期格式
-            if (!StringUtils.isEmpty(date)) {
-                String[] dates = date.split(" ~ ");
+            if (!StringUtils.isEmpty(duringDate)) {
+                String[] dates = duringDate.split(" ~ ");
                 if (dates.length == 2) {
+                    //处理前日期
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
                     vo.setFrontDate(simpleDateFormat.parse(dates[0].trim()));
-                    vo.setBackDate(simpleDateFormat.parse(dates[1].trim()));
+                    //处理后日期
+                    Calendar calendar = simpleDateFormat.getCalendar();
+                    calendar.setTime(simpleDateFormat.parse(dates[1].trim()));
+                    calendar.add(Calendar.MONTH, 1);
+                    calendar.add(Calendar.MILLISECOND, -1);
+                    vo.setBackDate(calendar.getTime());
                 }
             }
             List<Detail> detailList = detailService.findAll(vo);
