@@ -58,9 +58,10 @@
     };
 
     function pageHandler() {
+        let pageDiv = $('#page');
         // 渲染分页
         layui.laypage.render({
-            elem: 'page' // 注意，这里的 test1 是 ID，不用加 # 号
+            elem: pageDiv
             , count: pageData.total  // 数据总数
             , limit: pageData.pageSize
             , layout: ['prev', 'page', 'next', 'count', 'limit', 'skip']
@@ -75,6 +76,8 @@
                 }
             }
         });
+        pageData.div = pageDiv;
+        pageDiv.remove();
     }
 
     init();
@@ -154,15 +157,14 @@
                     '<td>收入: ￥' + earning_total / 100 + '</td>' +
                     '<td>支出: ￥' + expense_total / 100 + '</td></tr></table>';
 
-
-                //渲染表格
-                renderTable();
-
                 //只渲染分页条一次
                 if (pageData.isRender) {
                     pageHandler();
                     pageData.isRender = false;
                 }
+
+                //渲染表格
+                renderTable();
             }
         });
     }
@@ -175,6 +177,7 @@
             , limit: pageData.pageSize
             , toolbar: true
             , totalRow: true
+            , page: true
         });
 
         // 将过滤div放入表格头部
@@ -182,6 +185,9 @@
 
         // 将合计html放入表格合计区
         $('.layui-table-total').html(totalData.html);
+
+        // 将分页栏放入表格尾部
+        $('.layui-table-page').html(pageData.div);
 
         // 渲染日期范围
         layui.laydate.render({

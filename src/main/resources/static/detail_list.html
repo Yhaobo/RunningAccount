@@ -30,7 +30,9 @@
     <!--列表-->
     <table id="details" lay-filter="table" hidden></table>
     <!--分页-->
-    <div id="page"></div>
+    <div id="page">
+        <div></div>
+    </div>
     <!-- Modal -->
     <div class="modal fade " id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
         <div class="modal-dialog modal-slg" role="document">
@@ -123,10 +125,22 @@
     };
     init();
 
+    let promiseNum = 0;
+
+    // 保证所有(4个)下拉框加载完毕之后才渲染表格
+    function promise() {
+        if (promiseNum < 3) {
+            promiseNum++;
+        } else {
+            loadTable();
+        }
+    }
+
     function pageHandler() {
+        let pageDiv = $('#page');
         // 渲染分页
         layui.laypage.render({
-            elem: 'page' // 注意，这里的 test1 是 ID，不用加 # 号
+            elem: pageDiv
             , count: pageData.total  // 数据总数
             , limit: pageData.pageSize
             , layout: ['prev', 'page', 'next', 'count', 'limit', 'skip']
@@ -141,6 +155,8 @@
                 }
             }
         });
+        pageData.div = pageDiv;
+        pageDiv.remove();
     }
 
     // 条件查询
@@ -213,19 +229,21 @@
                 html += '</tbody>';
                 $("#details").html(html);
 
-                //渲染原始表格
-                renderTable();
-
                 //只渲染分页条一次
                 if (pageData.isRender) {
                     pageHandler();
                     pageData.isRender = false;
                 }
+
+                //渲染原始表格
+                if (!promiseNum < 3) {
+                    renderTable();
+                }
             }
         });
     }
 
-    //渲染日期时间输入框
+    //渲染模态框里的日期输入框
     function renderDate() {
         layui.laydate.render({
             elem: $('#date')[0]
@@ -253,6 +271,7 @@
             }
             $(".projectFilter").html(html);
             $("#project").html(html);
+            promise();
         });
         // 获取所有账户
         $.get("setting/findAccounts", function (data) {
@@ -271,6 +290,7 @@
             }
             $(".accountFilter").html(html);
             $("#account").html(html);
+            promise();
         });
         // 获取所有部门
         $.get("setting/findDepartments", function (data) {
@@ -289,6 +309,7 @@
             }
             $(".departmentFilter").html(html);
             $("#department").html(html);
+            promise();
         });
         // 获取所有分类
         $.get("setting/findCategorys", function (data) {
@@ -310,6 +331,7 @@
             }
             $(".categoryFilter").html(html);
             $("#category").html(html);
+            promise();
         });
         renderDate();
     }
@@ -321,13 +343,8 @@
             title: '收支明细'
             , limit: pageData.pageSize
             , toolbar: true
+            , page: true
         });
-
-        // 将过滤div和添加按钮放入表格头部
-        $('.layui-table-tool-temp').html($('#filter').html());
-        $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
-style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
-<i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
 
         // 渲染日期范围
         layui.laydate.render({
@@ -340,6 +357,16 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
                 filter();
             }
         });
+
+        // 将过滤div和添加按钮放入表格头部
+        $('.layui-table-tool-temp').html($('#filter').html());
+        $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
+style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
+<i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
+
+        // 将分页栏放入表格尾部
+        $('.layui-table-page').html(pageData.div);
+
 
         // 将表单数据从源表单复制到新渲染的表格中
         copyFormData(false);
@@ -378,12 +405,15 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
         submit("add");
     }
 
-    // 表单数据回显
-    let projectId;
-    let accountId;
-    let categoryId;
-    let departmentId;
 
+    let echoData = {
+        projectId: null,
+        accountId: null,
+        categoryId: null,
+        departmentId: null,
+    };
+
+    // 表单数据回显
     function loadDetail(id) {
         $.get("detail/findOne", {"id": id}, function (data) {
             if (data.flag) {
@@ -392,10 +422,10 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
                 $("#earning").val(data.data.earning);
                 $("#expense").val(data.data.expense);
 
-                projectId = data.data.project.id;
-                accountId = data.data.account.id;
-                categoryId = data.data.category.id;
-                departmentId = data.data.department.id;
+                echoData.projectId = data.data.project.id;
+                echoData.accountId = data.data.account.id;
+                echoData.categoryId = data.data.category.id;
+                echoData.departmentId = data.data.department.id;
 
                 $("#hidden_id").val(id);
                 loadSelects(false);
@@ -403,7 +433,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
         });
     }
 
-    // 加载所有选项
+    // 加载模态框所有选项
     function loadSelects(isAdd) {
         // 加载所有项目
         const projectOptions = selectData.projectOptions;
@@ -413,7 +443,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
         }
         for (let i = 0; i < projectOptions.length; i++) {
             let option = projectOptions[i];
-            if (!isAdd && projectId && option.id === projectId) {
+            if (!isAdd && echoData.projectId && option.id === echoData.projectId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
@@ -429,7 +459,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
         }
         for (let i = 0; i < accountOptions.length; i++) {
             let option = accountOptions[i];
-            if (!isAdd && accountId && option.id === accountId) {
+            if (!isAdd && echoData.accountId && option.id === echoData.accountId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
@@ -445,7 +475,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
         }
         for (let i = 0; i < categoryOptions.length; i++) {
             let option = categoryOptions[i];
-            if (!isAdd && categoryId && option.id === categoryId) {
+            if (!isAdd && echoData.categoryId && option.id === echoData.categoryId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
@@ -461,7 +491,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
         }
         for (let i = 0; i < departmentOptions.length; i++) {
             let option = departmentOptions[i];
-            if (!isAdd && departmentId && option.id === departmentId) {
+            if (!isAdd && echoData.departmentId && option.id === echoData.departmentId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';

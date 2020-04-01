@@ -73,8 +73,8 @@
 /*    height: 50px;*/
 /*}*/
 
-.layui-table-view .layui-form-select{
-   display: none;
+.layui-table-view .layui-form-select {
+    display: none;
 }
 
 .layui-table-tool-temp select, .layui-table-tool-temp input {
@@ -114,10 +114,14 @@ table caption {
     font-size: 2.0em;
     font-weight: bold;
     text-align: center;
-    color: #0f0f0f;
+    color: #333;
 }
 
 /*模态框宽度*/
 .modal-slg {
     width: 98%;
+}
+
+.layui-laypage-skip {
+    color: #333 !important;
 }
