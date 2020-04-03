@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class UserService {
     @Autowired
@@ -27,5 +29,13 @@ public class UserService {
         SimpleHash result = new SimpleHash("md5", user.getU_password(), user.getU_username(), 7);
         user.setU_password(result.toString());
         userDao.updateByUser(user);
+    }
+
+    public List<String> listUsername() {
+        return userDao.listUsername();
+    }
+
+    public Integer getLevelByUsername(String username) {
+        return userDao.getLevelByUsername(username);
     }
 }

@@ -10,7 +10,7 @@
 <body>
 <header id="header"></header>
 <main>
-    <h2 style="margin-top: 60px;text-align: center; font-weight: bold;">收支汇总</h2>
+    <h3 style="margin-top: 60px;text-align: center; font-weight: bold;">收支汇总</h3>
     <!--条件查询-->
     <div id="filter" hidden>
         <form action="javascript:;" class="filterForm" autocomplete="off">
@@ -33,8 +33,11 @@
     <table id="table" lay-filter="layuiTable"></table>
     <!--分页-->
     <div id="page"></div>
+    <!--图表-->
+    <div id="chart" style="width: 100%;height:850px;margin-top: 25px"></div>
 </main>
 <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
+<script src="static/js/echarts.min.js"></script>
 <script src="static/layui/layui.all.js"></script>
 <script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
@@ -57,7 +60,7 @@
         html: ''
     };
 
-    function pageHandler() {
+    function renderPage() {
         let pageDiv = $('#page');
         // 渲染分页
         layui.laypage.render({
@@ -86,15 +89,95 @@
         loadTable();
     }
 
+    // 加载图表
+    function loadChart(data) {
+        //处理数据
+        const earnings = [];
+        const expenses = [];
+        const balances = [];
+        const dates = [];
+        $(data.reverse()).each(function (i, e) {
+            earnings.push(e.earning);
+            expenses.push(e.expense);
+            balances.push(e.balance);
+            let date = null;
+            if (filterData.groupPolicy === 'month') {
+                date = dateFormat(new Date(e.date), "yyyy-MM");
+            } else if (filterData.groupPolicy === 'year') {
+                date = dateFormat(new Date(e.date), "yyyy");
+            }
+            dates.push(date);
+        });
+
+        // 渲染绘制
+        const chart = echarts.init(document.getElementById('chart'));
+        let option = {
+            title: {
+                text: '数据可视化'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['收入', '支出', '结存']
+            },
+            grid: {
+                left: '2%',
+                right: '3%',
+                bottom: '3%',
+                containLabel: true
+            },
+            // toolbox: {
+            //     feature: {
+            //         saveAsImage: {}
+            //     }
+            // },
+            xAxis: {
+                type: 'category',
+                boundaryGap: true,
+                data: dates
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name: '收入',
+                    type: 'line',
+                    color: '#228B22',
+                    data: earnings
+                },
+                {
+                    name: '支出',
+                    type: 'line',
+                    color: '#E3170D',
+                    data: expenses
+                }
+            ]
+        };
+        if (filterData.isAll) {
+            option.series.push({
+                name: '结存',
+                type: 'bar',
+                color: '#FFD700',
+                // barMaxWidth: "50%",
+                data: balances
+            });
+        }
+
+        // 第二个参数的意思为是否重新绘制(默认合并上一次绘制)
+        chart.setOption(option, true);
+    }
+
     // 加载表格数据
     function loadTable() {
         const loadIndex = layer.load(2);
         $.post('summarize', $('.filterForm').eq(0).serialize() + `&pageNum=${pageData.pageNum}&pageSize=${pageData.pageSize}`, function (result) {
             layer.close(loadIndex);
-            let html;
             if (result.flag) {
-                const pageInfo = result.data;
-                pageData.total = pageInfo.total;
+                let html;
+                const dataList = result.data.list;
+                pageData.total = result.data.total;
                 if (filterData.isAll) {
                     html = '<caption>' + decodeURIComponent(getParameter("title")) + '</caption>' +
                         '<thead><tr>' +
@@ -111,6 +194,7 @@
                         '            <th lay-data="{field:\'expense\'}">支出</th>\n' +
                         '</tr></thead>';
                 }
+
                 //收入合计
                 let earning_total = 0;
                 //支出合计
@@ -118,8 +202,8 @@
                 //循环次数
                 let count = 0;
                 html += '<tbody>';
-                for (let i = 0; i < pageInfo.list.length; i++) {
-                    let item = pageInfo.list[i];
+                for (let i = 0; i < dataList.length; i++) {
+                    let item = dataList[i];
                     if (filterData.isAll) {
                         html += '<tr>\n';
                         if (filterData.groupPolicy === 'month') {
@@ -159,12 +243,15 @@
 
                 //只渲染分页条一次
                 if (pageData.isRender) {
-                    pageHandler();
+                    renderPage();
                     pageData.isRender = false;
                 }
 
                 //渲染表格
                 renderTable();
+
+                //加载图表
+                loadChart(dataList);
             }
         });
     }

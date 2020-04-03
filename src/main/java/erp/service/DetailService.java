@@ -35,7 +35,10 @@ public class DetailService {
 
     @Transactional(rollbackFor = Exception.class)
     public void add(Detail form) {
-
+        //处理空值
+        if ( form.getDescription().length() < 1) {
+           form.setDescription("无");
+        }
         //处理null值
         if (form.getEarning() == null) {
             form.setEarning(new BigDecimal(0));

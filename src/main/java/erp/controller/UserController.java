@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 用户
  */
@@ -39,15 +41,11 @@ public class UserController {
     }
 
     @PostMapping("/alterPassword")
-    public ResultInfo alterPassword(String[] password, Integer flag) {
+    public ResultInfo alterPassword(String[] password, String username) {
         if (password[0].equals(password[1])) {
             try {
-                if (flag == 0) {
-                    service.updatePasswordByUser(new User("admin", password[0]));
-                } else {
-                    service.updatePasswordByUser(new User("visitor", password[0]));
-                }
-                return new ResultInfo(true, "", SecurityUtils.getSubject().getPrincipal());
+                service.updatePasswordByUser(new User(username, password[0]));
+                return new ResultInfo(true, service.getLevelByUsername(username));
             } catch (Exception e) {
                 log.error("[method:alterPassword]" + e.getMessage());
                 e.printStackTrace();
@@ -56,5 +54,17 @@ public class UserController {
         } else {
             return new ResultInfo(false, "密码不一致");
         }
+    }
+
+    @RequestMapping("/getRole")
+    public ResultInfo getRole() {
+        Object principal = SecurityUtils.getSubject().getPrincipal();
+        return new ResultInfo(true, principal);
+    }
+
+    @RequestMapping("/listUsername")
+    public ResultInfo listUsername() {
+        List<String> usernameList = service.listUsername();
+        return new ResultInfo(true,usernameList);
     }
 }

@@ -13,7 +13,7 @@
 <body>
 <header id="header"></header>
 <main>
-    <h2 style="margin-top: 60px;text-align: center; font-weight: bold;">收支明细</h2>
+    <h3 style="margin-top: 60px;text-align: center; font-weight: bold;">收支明细</h3>
     <!--条件查询-->
     <div id="filter" hidden>
         <form action="javascript:;" class="filterForm" autocomplete="off">
@@ -123,20 +123,24 @@
         , categoryOptions: null
         , departmentOptions: null
     };
+
+    // 登录用户是否有修改和添加权限
+    let canAlter=false;
+
     init();
 
-    let promiseNum = 0;
+    let promiseCount = 0;
 
     // 保证所有(4个)下拉框加载完毕之后才渲染表格
     function promise() {
-        if (promiseNum < 3) {
-            promiseNum++;
+        if (promiseCount < 3) {
+            promiseCount++;
         } else {
             loadTable();
         }
     }
 
-    function pageHandler() {
+    function renderPage() {
         let pageDiv = $('#page');
         // 渲染分页
         layui.laypage.render({
@@ -206,7 +210,7 @@
                                     <th lay-data="{field:'earning',sort:true}">收入</th>
                                     <th lay-data="{field:'expense',sort:true}">支出</th>
                                     <th lay-data="{field:'balance',sort:true}">结存</th>
-                                    <th lay-data="{field:'operation'}">操作</th>
+                                    <th lay-data="{field:'operation',hide:${!canAlter}}">操作</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -231,12 +235,12 @@
 
                 //只渲染分页条一次
                 if (pageData.isRender) {
-                    pageHandler();
+                    renderPage();
                     pageData.isRender = false;
                 }
 
                 //渲染原始表格
-                if (!promiseNum < 3) {
+                if (!promiseCount < 3) {
                     renderTable();
                 }
             }
@@ -252,6 +256,14 @@
     }
 
     function init() {
+        //根据登录用户的角色来开启或隐藏部分功能
+        $.get('user/getRole').done(function (result) {
+            if (result.flag) {
+                if (result.data === 'admin' || result.data === 'user') {
+                    canAlter = true;
+                }
+            }
+        });
         // 加载表格
         loadTable();
         // 获取所有项目
@@ -360,9 +372,11 @@
 
         // 将过滤div和添加按钮放入表格头部
         $('.layui-table-tool-temp').html($('#filter').html());
-        $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
+        if (canAlter) {
+            $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
 style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
 <i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
+        }
 
         // 将分页栏放入表格尾部
         $('.layui-table-page').html(pageData.div);

@@ -1,6 +1,5 @@
 package erp.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -22,7 +21,6 @@ public class Detail implements Serializable {
     private Category category;
     private BigDecimal earning;
     private BigDecimal expense;
-    @JsonIgnore
     private BigDecimal balance;
     private String formatEarning;
     private String formatExpense;

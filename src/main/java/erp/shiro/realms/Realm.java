@@ -31,9 +31,7 @@ public class Realm extends AuthorizingRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         Object principal = principalCollection.getPrimaryPrincipal();
         Set<String> roles = new HashSet<>();
-        if (principal.equals(0)) {
-            roles.add("user");
-        }
+        roles.add((String) principal);
         return new SimpleAuthorizationInfo(roles);
     }
 
@@ -48,13 +46,21 @@ public class Realm extends AuthorizingRealm {
         } else {
             //使用用户名为盐值
             ByteSource salt = ByteSource.Util.bytes(user.getU_username());
-            return new SimpleAuthenticationInfo(user.getU_level(), user.getU_password(), salt, user.getU_username());
+            Object principal;
+            if (user.getU_level().equals(0)) {
+                principal = "admin";
+            } else if (user.getU_level().equals(1)) {
+                principal = "user";
+            } else {
+                principal = "visitor";
+            }
+            return new SimpleAuthenticationInfo(principal, user.getU_password(), salt, user.getU_username());
         }
     }
 
     //hash加密
     public static void main(String[] args) {
-        SimpleHash result = new SimpleHash("md5", "123", "visitor", 7);
+        SimpleHash result = new SimpleHash("md5", "123", "user", 7);
         System.out.println(result);
     }
 }

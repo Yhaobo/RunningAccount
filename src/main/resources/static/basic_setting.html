@@ -60,7 +60,7 @@
         $.get("setting/find" + path + "s", function (data) {
             layer.close(load);
             if (data.flag) {
-                var html = '<caption>设置</caption> ' +
+                var html = '<caption>选项设置</caption> ' +
                     '    <tr>' +
                     '        <th id="tab_th"></th>' +
                     '        <th>操作</th>' +
@@ -74,7 +74,7 @@
                 }
 
                 html += '<tr><td>' +
-                    '            <input type="text" class="form-control" id="input" placeholder="新增"  style="width: 200px;margin: 5px auto"/></td>' +
+                    '            <input type="text" class="form-control" id="input" placeholder="新增选项"  style="width: 250px;margin: 5px auto"/></td>' +
                     '            <td><button  type="button" class="btn btn-default" onclick="add()">提交</button>' +
                     '    </td></tr>';
                 $("#table").html(html).addClass('table-hover');

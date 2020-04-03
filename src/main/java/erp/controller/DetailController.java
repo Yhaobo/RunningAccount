@@ -54,7 +54,7 @@ public class DetailController {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("[method:getAll]" + e.getMessage());
-            return new ResultInfo(false, "解析日期失败");
+            return new ResultInfo(false, e.getMessage());
         }
     }
 
@@ -65,7 +65,7 @@ public class DetailController {
             return new ResultInfo(true);
         } catch (Exception e) {
             log.error("[method:add]" + e.getMessage());
-            return new ResultInfo(false, "添加失败!");
+            return new ResultInfo(false, "添加失败！请确认所有的栏目都已填写");
         }
     }
 
