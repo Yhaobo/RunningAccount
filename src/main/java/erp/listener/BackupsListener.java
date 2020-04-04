@@ -2,10 +2,11 @@ package erp.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,32 +14,36 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Properties;
 
 /**
- * 当服务器关闭时, 自动备份所有财务数据
+ * 当用户推出系统时, 自动备份所有财务数据
  */
 @WebListener
-public class BackupsListener implements ServletContextListener {
+public class BackupsListener implements HttpSessionListener {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
+    // 数据库帐号
+    @Value("${spring.datasource.druid.username}")
+    private String username;
+    // 数据库密码
+    @Value("${spring.datasource.druid.password}")
+    private String password;
+    // 需要备份的数据库名
+    @Value("${datasource.database}")
+    private String database;
 
     @Override
-    public void contextDestroyed(ServletContextEvent sce) {
+    public void sessionDestroyed(HttpSessionEvent se) {
+        backups();
+    }
+
+    private void backups() {
         // 数据库导出
         InputStream in = null;
         FileOutputStream out = null;
-        Properties properties = new Properties();
         try {
-            properties.load(this.getClass().getResourceAsStream("/druid.properties"));
-            // 数据库帐号
-            String user = properties.getProperty("jdbc.username");
-            // 数据库密码
-            String password = properties.getProperty("jdbc.password");
-            // 需要备份的数据库名
-            String database = "erp";
             //cmd命令拼接
-            String cmd = "mysqldump -u" + user + " -p" + password + " " + database;
+            String cmd = "mysqldump -u" + username + " -p" + password + " " + database;
             //执行命令
             Process process = Runtime.getRuntime().exec(cmd);
             // 生成的文件名
@@ -52,7 +57,7 @@ public class BackupsListener implements ServletContextListener {
             File file = new File(path);
             if (!file.getParentFile().exists()) {
                 if (file.getParentFile().mkdirs()) {
-                    throw new RuntimeException("创建目录失败");
+                    throw new RuntimeException("创建备份目录失败");
                 }
             }
 
@@ -65,6 +70,7 @@ public class BackupsListener implements ServletContextListener {
             }
             System.out.println("数据已备份到文件 " + filepath);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error(e.getMessage());
         } finally {
             if (in != null) {
@@ -83,5 +89,4 @@ public class BackupsListener implements ServletContextListener {
             }
         }
     }
-
 }
