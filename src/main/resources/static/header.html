@@ -8,15 +8,14 @@
             <ul class="dropdown-menu">
                 <li class="hidden"><a href="excel/export" class="glyphicon glyphicon-export"> 导出所有数据为Excel</a></li>
                 <li role="separator" class="divider hidden"></li>
-
                 <li class="hidden"><a href="javascript:;" onclick="updateBalance()" class="glyphicon glyphicon-refresh">
                     重新计算并更新所有结存</a>
                 </li>
                 <li role="separator" class="divider hidden"></li>
-                <li hidden class="header_alterPassword"><a href="javascript:;" class="glyphicon glyphicon-user"
-                                                           onclick="alterPassword(true)"> 用户管理</a>
+                <li hidden class="header_userManage"><a href="javascript:;" class="glyphicon glyphicon-user"
+                                                        onclick="submitAlter(true)"> 用户管理</a>
                 </li>
-                <li hidden role="separator" class="divider header_alterPassword"></li>
+                <li hidden role="separator" class="divider header_userManage"></li>
                 <li><a href="user/exit" class="glyphicon glyphicon-off"> 退出系统</a></li>
             </ul>
         </div>
@@ -100,17 +99,17 @@
 </nav>
 
 <!-- 修改密码模态框 -->
-<div class="modal fade" id="alterPasswordModal" tabindex="-1" role="dialog" aria-labelledby="alterPasswordModalTitle">
+<div class="modal fade" id="userManageModal" tabindex="-1" role="dialog" aria-labelledby="userManageModalTitle">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="alterPasswordModalTitle">用户管理</h4>
+                <h4 class="modal-title" id="userManageModalTitle">用户管理</h4>
             </div>
             <div class="modal-body">
-                <form id="alterPasswordForm" action="javascript:;" autocomplete="off">
-                    <div class="form-group">
+                <form id="userManageForm" action="javascript:;" autocomplete="off">
+                    <div class="form-group u_levelSelect">
                         <select class="form-control" name="u_level" onchange="loadUsername(this)">
                             <option value="">--请选择要修改的账号--</option>
                             <option value="0">管理员</option>
@@ -131,7 +130,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="alterPassword(false);">提交</button>
+                <button type="button" class="btn btn-primary" onclick="submitAlter(false);">提交</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>
         </div>
@@ -146,7 +145,7 @@
             const brand = $('.navbar-brand');
             if (result.data === 0) {
                 $('ul>.hidden').removeClass('hidden');
-                $('.header_alterPassword').show();
+                $('.header_userManage').show();
                 brand.text('企业财务管理系统 (管理员)');
             } else if (result.data === 1) {
                 $('ul>.hidden').removeClass('hidden');
@@ -177,9 +176,18 @@
     }
 
 
-    //根据两次输入的密码校验是否相同来改变输入框颜色, 相同则返回true
+    //用户管理表单校验
     function inputStatusChange() {
-        const formDivs = $('#alterPasswordForm>.passwordInput');
+
+        if (!$('#userManageForm select[name="u_level"]').val()) {
+            $('#userManageForm>.u_levelSelect').addClass('has-error');
+        } else {
+            if ($('#userManageForm>.u_levelSelect').hasClass('has-error')) {
+                $('#userManageForm>.u_levelSelect').removeClass('has-error')
+            }
+        }
+        const formDivs = $('#userManageForm>.passwordInput');
+        //根据两次输入的密码校验是否相同来改变输入框颜色, 相同则返回true
         if ($('input[name="password"]').eq(0).val() != $('input[name="password"]').eq(1).val()) {
             formDivs.addClass('has-error');
             return false;
@@ -193,44 +201,45 @@
 
     // 回显用户名
     function loadUsername(caller) {
+        inputStatusChange();
         const level = caller.value;
         if (level != '') {
             const loadIndex = layer.load(2);
             $.get('user/getUsername', {u_level: level}).done(function (result) {
                 layer.close(loadIndex);
                 if (result.flag) {
-                    $('#alterPasswordForm input[name="u_username"]').val(result.data);
+                    $('#userManageForm input[name="u_username"]').val(result.data);
                 }
             });
         }
     }
 
-    //修改密码
-    function alterPassword(isShow) {
+    // 提交修改
+    function submitAlter(isShow) {
         if (isShow) {
             //弹出模态框
-            $('#alterPasswordForm')[0].reset();
-            inputStatusChange();
-            $('#alterPasswordModal').modal({
+            $('#userManageForm')[0].reset();
+            // inputStatusChange();
+            $('#userManageModal').modal({
                 show: true,
                 backdrop: false
             });
         } else {
             //提交表单
-            const form = $('#alterPasswordForm')
-            const inputs = $('#alterPasswordForm input');
+            const form = $('#userManageForm')
+            const inputs = $('#userManageForm input');
             if (inputs.eq(0).val() === '') {
                 layer.alert('密码不能为空', {icon: 5});
                 return;
             }
             if (inputStatusChange()) {
-                if ($('#alterPasswordForm select').val() != '') {
+                if ($('#userManageForm select').val() != '') {
                     layer.confirm('确定此修改?', {icon: 3}, function () {
                         const loadIndex = layer.load(2);
                         $.post('user/alter', form.serialize(), function (result) {
                             layer.close(loadIndex);
                             if (result.flag) {
-                                $('#alterPasswordModal').modal('hide');
+                                $('#userManageModal').modal('hide');
                                 form[0].reset();
                                 if (result.data == 0) {
                                     layer.alert("修改成功, 请重新登录", {icon: 6}, function () {
