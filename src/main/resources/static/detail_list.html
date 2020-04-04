@@ -257,9 +257,9 @@
 
     function init() {
         //根据登录用户的角色来开启或隐藏部分功能
-        $.get('user/getRole').done(function (result) {
+        $.get('user/getLevel').done(function (result) {
             if (result.flag) {
-                if (result.data === 'admin' || result.data === 'user') {
+                if (result.data === 0 || result.data === 1) {
                     canAlter = true;
                 }
             }

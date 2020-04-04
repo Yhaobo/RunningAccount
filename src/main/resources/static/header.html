@@ -3,20 +3,20 @@
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display 主名称-->
         <div class="navbar-header">
-            <a class="navbar-brand dropdown-toggle " data-toggle="dropdown" role="button"
-               aria-haspopup="true"
+            <a class="navbar-brand dropdown-toggle " data-toggle="dropdown" role="button" aria-haspopup="true"
                aria-expanded="false">峰众-企业财务管理系统<span class="caret"></span></a>
             <ul class="dropdown-menu">
                 <li class="hidden"><a href="excel/export" class="glyphicon glyphicon-export"> 导出所有数据为Excel</a></li>
                 <li role="separator" class="divider hidden"></li>
-                <li hidden class="header_alterPassword"><a href="javascript:;" class="glyphicon glyphicon-pencil"
-                                                           onclick="alterPassword(true)"> 修改密码</a>
-                </li>
-                <li hidden role="separator" class="divider header_alterPassword"></li>
+
                 <li class="hidden"><a href="javascript:;" onclick="updateBalance()" class="glyphicon glyphicon-refresh">
                     重新计算并更新所有结存</a>
                 </li>
                 <li role="separator" class="divider hidden"></li>
+                <li hidden class="header_alterPassword"><a href="javascript:;" class="glyphicon glyphicon-user"
+                                                           onclick="alterPassword(true)"> 用户管理</a>
+                </li>
+                <li hidden role="separator" class="divider header_alterPassword"></li>
                 <li><a href="user/exit" class="glyphicon glyphicon-off"> 退出系统</a></li>
             </ul>
         </div>
@@ -106,18 +106,25 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="alterPasswordModalTitle">修改密码</h4>
+                <h4 class="modal-title" id="alterPasswordModalTitle">用户管理</h4>
             </div>
             <div class="modal-body">
-                <form id="alterPasswordForm" action="javascript:;">
+                <form id="alterPasswordForm" action="javascript:;" autocomplete="off">
                     <div class="form-group">
-                        <select class="form-control" name="username" id="alterPasswordForm_select">
+                        <select class="form-control" name="u_level" onchange="loadUsername(this)">
+                            <option value="">--请选择要修改的账号--</option>
+                            <option value="0">管理员</option>
+                            <option value="1">用户</option>
+                            <option value="2">参观者</option>
                         </select>
                     </div>
                     <div class="form-group">
+                        <input type="text" class="form-control" placeholder="请输入新用户名" name="u_username">
+                    </div>
+                    <div class="form-group passwordInput">
                         <input type="password" class="form-control" placeholder="请输入新密码" name="password">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group passwordInput">
                         <input type="password" class="form-control" placeholder="请再次输入新密码" name="password"
                                onblur="inputStatusChange()">
                     </div>
@@ -134,31 +141,67 @@
 <script>
 
     //根据登录用户的角色来开启或隐藏部分功能
-    $.get('user/getRole').done(function (result) {
+    $.get('user/getLevel').done(function (result) {
         if (result.flag) {
-            if (result.data === 'admin') {
+            const brand = $('.navbar-brand');
+            if (result.data === 0) {
                 $('ul>.hidden').removeClass('hidden');
                 $('.header_alterPassword').show();
-            } else if (result.data === 'user') {
+                brand.text('企业财务管理系统 (管理员)');
+            } else if (result.data === 1) {
                 $('ul>.hidden').removeClass('hidden');
+                brand.text('企业财务管理系统 (用户)');
+            } else {
+                brand.text('企业财务管理系统 (参观者)')
             }
         }
     });
 
+    //隐藏文件选择框, 鼠标悬停显示
+    const fileInput = $("#header_file_input");
+    const fileForm = $("#header_file_form");
+    fileForm.hover(function () {
+        fileInput.removeClass("hidden");
+    }, function () {
+        fileInput.addClass("hidden");
+    });
 
-    //根据两次输入的密码校验是否相同来改变输入框状态, 相同则返回true
+    //处理导航栏栏目激活状态
+    const url = location.href;
+    if (url.indexOf('detail') != -1) {
+        $('#header_detail').addClass('active');
+    } else if (url.indexOf('summarize') != -1) {
+        $('#header_summarize').addClass('active');
+    } else if (url.indexOf('setting') != -1) {
+        $('#header_setting').addClass('active');
+    }
+
+
+    //根据两次输入的密码校验是否相同来改变输入框颜色, 相同则返回true
     function inputStatusChange() {
-        const formDivs = $('#alterPasswordForm>div');
+        const formDivs = $('#alterPasswordForm>.passwordInput');
         if ($('input[name="password"]').eq(0).val() != $('input[name="password"]').eq(1).val()) {
-            formDivs.eq(1).addClass('has-error');
-            formDivs.eq(2).addClass('has-error');
+            formDivs.addClass('has-error');
             return false;
         } else {
-            if (formDivs.eq(1).hasClass('has-error')) {
-                formDivs.eq(1).removeClass('has-error');
-                formDivs.eq(2).removeClass('has-error');
+            if (formDivs.hasClass('has-error')) {
+                formDivs.removeClass('has-error');
             }
             return true;
+        }
+    }
+
+    // 回显用户名
+    function loadUsername(caller) {
+        const level = caller.value;
+        if (level != '') {
+            const loadIndex = layer.load(2);
+            $.get('user/getUsername', {u_level: level}).done(function (result) {
+                layer.close(loadIndex);
+                if (result.flag) {
+                    $('#alterPasswordForm input[name="u_username"]').val(result.data);
+                }
+            });
         }
     }
 
@@ -166,19 +209,6 @@
     function alterPassword(isShow) {
         if (isShow) {
             //弹出模态框
-            const loadIndex = layer.load(2);
-            //加载选项
-            $.get('user/listUsername').done(function (result) {
-                layer.close(loadIndex);
-                if (result.flag) {
-                    const select = $('#alterPasswordForm_select');
-                    select.html('');
-                    select.append('<option value="">--请选择要修改的账号--</option>');
-                    $(result.data).each(function (i, e) {
-                        select.append(`<option value="${e}">${e}</option>`)
-                    });
-                }
-            });
             $('#alterPasswordForm')[0].reset();
             inputStatusChange();
             $('#alterPasswordModal').modal({
@@ -197,12 +227,12 @@
                 if ($('#alterPasswordForm select').val() != '') {
                     layer.confirm('确定此修改?', {icon: 3}, function () {
                         const loadIndex = layer.load(2);
-                        $.post('user/alterPassword', form.serialize(), function (result) {
+                        $.post('user/alter', form.serialize(), function (result) {
                             layer.close(loadIndex);
                             if (result.flag) {
                                 $('#alterPasswordModal').modal('hide');
                                 form[0].reset();
-                                if (result.data === '0') {
+                                if (result.data == 0) {
                                     layer.alert("修改成功, 请重新登录", {icon: 6}, function () {
                                         location.href = 'user/exit';
                                     });
@@ -223,7 +253,6 @@
             } else {
                 layer.alert('密码不一致,请重新输入', {icon: 5});
             }
-
         }
     }
 
@@ -316,25 +345,6 @@
                 }
             });
         });
-    }
-
-    //隐藏文件选择框, 鼠标悬停激活
-    const fileInput = $("#header_file_input");
-    const fileForm = $("#header_file_form");
-    fileForm.hover(function () {
-        fileInput.removeClass("hidden");
-    }, function () {
-        fileInput.addClass("hidden");
-    });
-
-    //处理导航栏选择激活
-    const url = location.href;
-    if (url.indexOf('detail') != -1) {
-        $('#header_detail').addClass('active');
-    } else if (url.indexOf('summarize') != -1) {
-        $('#header_summarize').addClass('active');
-    } else if (url.indexOf('setting') != -1) {
-        $('#header_setting').addClass('active');
     }
 
 

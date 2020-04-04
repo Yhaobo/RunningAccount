@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 /**
  * 用户
  */
@@ -40,31 +38,32 @@ public class UserController {
         }
     }
 
-    @PostMapping("/alterPassword")
-    public ResultInfo alterPassword(String[] password, String username) {
-        if (password[0].equals(password[1])) {
+    @PostMapping("/alter")
+    public ResultInfo alter(String[] password, User user) {
+        if (password[0].equals(password[1])&&password[0].length()>=6) {
             try {
-                service.updatePasswordByUser(new User(username, password[0]));
-                return new ResultInfo(true, service.getLevelByUsername(username));
+                user.setU_password(password[0]);
+                service.updateByUser(user);
+                return new ResultInfo(true, user.getU_level());
             } catch (Exception e) {
-                log.error("[method:alterPassword]" + e.getMessage());
+                log.error("[method:alter]" + e.getMessage());
                 e.printStackTrace();
                 return new ResultInfo(false, "修改失败");
             }
         } else {
-            return new ResultInfo(false, "密码不一致");
+            return new ResultInfo(false, "密码不一致或长度没有达到6位");
         }
     }
 
-    @RequestMapping("/getRole")
-    public ResultInfo getRole() {
+    @RequestMapping("/getLevel")
+    public ResultInfo getLevel() {
         Object principal = SecurityUtils.getSubject().getPrincipal();
         return new ResultInfo(true, principal);
     }
 
-    @RequestMapping("/listUsername")
-    public ResultInfo listUsername() {
-        List<String> usernameList = service.listUsername();
-        return new ResultInfo(true,usernameList);
+    @RequestMapping("/getUsername")
+    public ResultInfo getUsername(Integer u_level) {
+        String username = service.getUsernameByLevel(u_level);
+        return new ResultInfo(true,"",username);
     }
 }
