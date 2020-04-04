@@ -24,7 +24,7 @@ public class UserService {
         return userDao.findByUsername(username);
     }
 
-    public void updatePasswordByUser(User user) {
+    public void updateByUser(User user) {
         // 密码加密
         SimpleHash result = new SimpleHash("md5", user.getU_password(), user.getU_username(), 7);
         user.setU_password(result.toString());
@@ -37,5 +37,9 @@ public class UserService {
 
     public Integer getLevelByUsername(String username) {
         return userDao.getLevelByUsername(username);
+    }
+
+    public String getUsernameByLevel(Integer level) {
+        return userDao.getUsernameByLevel(level);
     }
 }

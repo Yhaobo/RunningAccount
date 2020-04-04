@@ -45,8 +45,8 @@ public class ShiroConfig {
         shiroFilterChainDefinition.addPathDefinition("/setting/update*", "roles[user]");
         shiroFilterChainDefinition.addPathDefinition("/excel/importing*", "roles[admin]");
         shiroFilterChainDefinition.addPathDefinition("/excel/importing*", "roles[user]");
-        shiroFilterChainDefinition.addPathDefinition("/user/listUsername", "roles[admin]");
-        shiroFilterChainDefinition.addPathDefinition("/user/alterPassword", "roles[admin]");
+        shiroFilterChainDefinition.addPathDefinition("/user/getUsername", "roles[admin]");
+        shiroFilterChainDefinition.addPathDefinition("/user/alter", "roles[admin]");
         shiroFilterChainDefinition.addPathDefinition("/user/exit", "logout");
         shiroFilterChainDefinition.addPathDefinition("/**", "authc");
         return shiroFilterChainDefinition;
