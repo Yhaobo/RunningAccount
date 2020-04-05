@@ -282,6 +282,7 @@
                 success: function (result) {
                     if (result.flag) {
                         layer.msg('导入成功!', {icon: 6});
+                        init();
                     } else {
                         layer.msg(result.message, {icon: 5});
                     }

@@ -40,6 +40,7 @@ public class ExcelController {
             service.importing(file.getInputStream());
             return new ResultInfo(true);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("[method:importing]" + e.getMessage());
             return new ResultInfo(false,"导入失败!");
         } finally {
