@@ -53,10 +53,6 @@ public class ExcelService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void importing(InputStream in) throws NoSuchFieldException, InstantiationException, IllegalAccessException, ParseException, IOException {
-        List<Detail> details = ImportExcelUtil.Importing(in);
-        for (Detail i : details) {
-            dao.addByExcel(i);
-        }
+        dao.addByBatch(ImportExcelUtil.Importing(in));
     }
-
 }

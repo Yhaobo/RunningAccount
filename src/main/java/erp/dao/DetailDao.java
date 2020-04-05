@@ -48,6 +48,14 @@ public interface DetailDao {
     void add(Detail form);
 
     /**
+     * 从Excel文件导入多条记录
+     *
+     * @param details
+     */
+    @InsertProvider(type = DetailDaoProvider.class, method = "addByBatchSql")
+    void addByBatch(List<Detail> details);
+
+    /**
      * 添加一条记录
      *
      * @param detail 从excel解析得到的实体类(外键引用的属性只有name, 没有id)

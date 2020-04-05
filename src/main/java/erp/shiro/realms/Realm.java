@@ -33,6 +33,7 @@ public class Realm extends AuthorizingRealm {
         Set<String> roles = new HashSet<>();
         if (principal.equals(0)) {
             roles.add("admin");
+            roles.add("user");
         } else if (principal.equals(1)) {
             roles.add("user");
         } else {
