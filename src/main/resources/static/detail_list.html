@@ -358,6 +358,14 @@
             , page: true
         });
 
+        // 将过滤div和添加按钮放入表格头部
+        $('.layui-table-tool-temp').html($('#filter').html());
+        if (canAlter) {
+            $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
+style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
+<i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
+        }
+
         // 渲染日期范围
         layui.laydate.render({
             elem: $('.layui-table-tool-temp .duringDate')[0]
@@ -370,17 +378,8 @@
             }
         });
 
-        // 将过滤div和添加按钮放入表格头部
-        $('.layui-table-tool-temp').html($('#filter').html());
-        if (canAlter) {
-            $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
-style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
-<i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
-        }
-
         // 将分页栏放入表格尾部
         $('.layui-table-page').html(pageData.div);
-
 
         // 将表单数据从源表单复制到新渲染的表格中
         copyFormData(false);

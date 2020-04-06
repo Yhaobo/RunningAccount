@@ -6,7 +6,6 @@ import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
@@ -59,8 +58,8 @@ public class Realm extends AuthorizingRealm {
     }
 
     //hash加密
-    public static void main(String[] args) {
-        SimpleHash result = new SimpleHash("md5", "123", "user", 7);
-        System.out.println(result);
-    }
+//    public static void main(String[] args) {
+//        SimpleHash result = new SimpleHash("md5", "123", "user", 7);
+//        System.out.println(result);
+//    }
 }
