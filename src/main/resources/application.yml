@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: ERP
   #数据源基本配置
   datasource:
     name: druidDataSource
@@ -7,8 +9,8 @@ spring:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://localhost:3306/erp?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8
       username: root
-#      password: xxx
-      #配置监控统计拦截的filters,’wall’用于防火墙
+      #      password: xxx
+      #配置监控统计拦截的filters,wall用于防火墙
       filters: stat,wall
       max-active: 5
       initial-size: 1
@@ -31,7 +33,38 @@ spring:
       #要启用PSCache，必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true。 在Druid中，不会存在Oracle下PSCache占用内存过多的问题，可以把这个数值配置大一些，比如说100
       max-open-prepared-statements: 50
       max-pool-prepared-statement-per-connection-size: 5
-  application:
-    name: erp
+  #静态资源配置
+  resources:
+    chain:
+      strategy:
+        content:
+          enabled: true
+          paths: /**
+      cache: true
+      compressed: true
+      enabled: true
+    cache:
+      cachecontrol:
+        # 过期时间(秒)
+        max-age: 3600
+        cache-public: true
 server:
   port: 8080
+
+shiro:
+  # 开启 Shrio 配置，默认为 true
+  enabled: true
+  web:
+    # 开启 Shrio Web 配置，默认为 true
+    enabled: true
+  # 配置登录地址，默认为"login.jsp"
+  loginUrl: /index.html
+  # 配置登录成功地址，默认为"/"
+  successUrl: /detail_list.html
+  # 配置未获授权默认跳转地址
+  unauthorizedUrl: /unauthorized.json
+  sessionManager:
+    # 是否允许通过 URL 参数实现会话跟踪，默认为 true。如果网站支持 Cookie，可以关闭次选项。
+    sessionIdUrlRewritingEnabled: true
+    # 是否允许通过 Cookie 实现会话跟踪，默认为 true。
+    sessionIdCookieEnabled: true

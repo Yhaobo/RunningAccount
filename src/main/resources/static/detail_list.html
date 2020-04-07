@@ -387,14 +387,8 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
 
     // 修改
     function edit(id) {
-        $("#modalTitle").text("修改");
         // 数据回显
         loadDetail(id);
-        $("#delete").removeClass("hidden");
-        $('#modal').modal({
-            show: true,
-            backdrop: false
-        });
         // 添加点击事件
         submit("update");
         submit("delete");
@@ -428,7 +422,9 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
 
     // 表单数据回显
     function loadDetail(id) {
+        const loadIndex = layer.load(2);
         $.get("detail/findOne", {"id": id}, function (data) {
+            layer.close(loadIndex);
             if (data.flag) {
                 $("#date").val(dateFormat(new Date(data.data.date), "yyyy-MM-dd HH:mm:ss"));
                 $("#description").val(data.data.description);
@@ -442,6 +438,12 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
 
                 $("#hidden_id").val(id);
                 loadSelects(false);
+                $("#modalTitle").text("修改");
+                $("#delete").removeClass("hidden");
+                $('#modal').modal({
+                    show: true,
+                    backdrop: false
+                });
             }
         });
     }

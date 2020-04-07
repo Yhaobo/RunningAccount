@@ -337,9 +337,7 @@
                 }
                 filterOptions.html(html);
                 //显示次下拉框
-                if (filterOptions.hasClass('hidden')) {
-                    filterOptions.removeClass("hidden");
-                }
+                filterOptions.removeClass("hidden");
                 // 让主下拉框的name属性为空(为了使后端的isAll参数为false)
                 $('.filterIsAll').prop('name', '');
                 //修改标记
