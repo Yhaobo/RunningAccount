@@ -146,12 +146,12 @@
             if (result.data === 0) {
                 $('ul>.hidden').removeClass('hidden');
                 $('.header_userManage').show();
-                brand.text('峰众-企业财务管理系统 (管理员)');
+                brand.html('峰众-企业财务管理系统 (管理员)<span class="caret"></span>');
             } else if (result.data === 1) {
                 $('ul>.hidden').removeClass('hidden');
-                brand.text('峰众-企业财务管理系统 (用户)');
+                brand.html('峰众-企业财务管理系统 (用户)<span class="caret"></span>');
             } else {
-                brand.text('峰众-企业财务管理系统 (参观者)')
+                brand.html('峰众-企业财务管理系统 (参观者)<span class="caret"></span>')
             }
         }
     });
@@ -182,9 +182,7 @@
         if (!$('#userManageForm select[name="u_level"]').val()) {
             $('#userManageForm>.u_levelSelect').addClass('has-error');
         } else {
-            if ($('#userManageForm>.u_levelSelect').hasClass('has-error')) {
                 $('#userManageForm>.u_levelSelect').removeClass('has-error')
-            }
         }
         const formDivs = $('#userManageForm>.passwordInput');
         //根据两次输入的密码校验是否相同来改变输入框颜色, 相同则返回true
@@ -192,9 +190,7 @@
             formDivs.addClass('has-error');
             return false;
         } else {
-            if (formDivs.hasClass('has-error')) {
                 formDivs.removeClass('has-error');
-            }
             return true;
         }
     }
