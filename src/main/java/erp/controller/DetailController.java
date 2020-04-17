@@ -58,8 +58,14 @@ public class DetailController {
         }
     }
 
+    @RequestMapping("/findOne")
+    public ResultInfo findOne(int id) {
+        Detail detail = detailService.findOne(id);
+        return new ResultInfo(true, detail);
+    }
+
     @RequestMapping("/add")
-    public ResultInfo add(Detail form) {
+    public synchronized ResultInfo add(Detail form) {
         try {
             detailService.add(form);
             return new ResultInfo(true);
@@ -69,14 +75,8 @@ public class DetailController {
         }
     }
 
-    @RequestMapping("/findOne")
-    public ResultInfo findOne(int id) {
-        Detail detail = detailService.findOne(id);
-        return new ResultInfo(true, detail);
-    }
-
     @RequestMapping("/update")
-    public ResultInfo update(Detail form) {
+    public synchronized ResultInfo update(Detail form) {
         try {
             detailService.update(form);
         } catch (MyException e) {
@@ -90,7 +90,7 @@ public class DetailController {
     }
 
     @RequestMapping("/delete")
-    public ResultInfo delete(Detail form) {
+    public synchronized ResultInfo delete(Detail form) {
         try {
             detailService.delete(form);
             return new ResultInfo(true);
@@ -101,7 +101,7 @@ public class DetailController {
     }
 
     @RequestMapping("/updateBalance")
-    public ResultInfo updateBalance() {
+    public synchronized ResultInfo updateBalance() {
         try {
             detailService.updateAllBalance();
             return new ResultInfo(true);

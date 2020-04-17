@@ -45,7 +45,7 @@ public class SummarizeDaoProvider {
                 if (vo.isAll()) {
                     //所有
                     SELECT(" m.date date, m.earning earning, m.expense expense, d.d_balance balance");
-                    FROM("(SELECT DATE_FORMAT(d_date,'%Y') monthly, SUM(d_earning) earning, SUM(d_expense) expense,MAX(d_date) date FROM detail GROUP BY monthly) m");
+                    FROM("(SELECT DATE_FORMAT(d_date,'%Y') yearly, SUM(d_earning) earning, SUM(d_expense) expense,MAX(d_date) date FROM detail GROUP BY yearly) m");
                     JOIN("detail d ON d.d_date=m.date");
                     if (vo.getBackDate() != null && vo.getFrontDate() != null) {
                         WHERE("date between #{frontDate} and #{backDate}");
@@ -53,7 +53,7 @@ public class SummarizeDaoProvider {
                     ORDER_BY("date DESC");
                 } else {
                     //按某项
-                    SELECT("0 balance, DATE_FORMAT(d_date,'%Y') monthly, SUM(d_earning) earning, SUM(d_expense) expense,MAX(d_date) date");
+                    SELECT("0 balance, DATE_FORMAT(d_date,'%Y') yearly, SUM(d_earning) earning, SUM(d_expense) expense,MAX(d_date) date");
                     FROM("detail");
                     if (vo.getBackDate() != null && vo.getFrontDate() != null) {
                         WHERE("d_date between #{frontDate} and #{backDate}");
@@ -67,8 +67,8 @@ public class SummarizeDaoProvider {
                     } else if (vo.getCategoryId() != null) {
                         WHERE("c_id=#{categoryId}");
                     }
-                    GROUP_BY("monthly");
-                    ORDER_BY("monthly DESC");
+                    GROUP_BY("yearly");
+                    ORDER_BY("yearly DESC");
                 }
             }
         }}.toString();

@@ -36,8 +36,8 @@ public class DetailService {
     @Transactional(rollbackFor = Exception.class)
     public void add(Detail form) {
         //处理空值
-        if ( form.getDescription().length() < 1) {
-           form.setDescription("无");
+        if (form.getDescription().length() < 1) {
+            form.setDescription("无");
         }
         //处理null值
         if (form.getEarning() == null) {
@@ -50,7 +50,7 @@ public class DetailService {
         handleBalance(form);
         //添加到数据库
         detailDao.add(form);
-        //如果是插入以前,就需要调整本次插入记录之后的所有记录的结存
+        //如果是插入时间是以前,就需要调整本次插入记录之后的所有记录的结存
         BigDecimal balanceDifference = form.getEarning().subtract(form.getExpense());
         handleLaterBalance(form.getDate(), balanceDifference);
     }
@@ -70,7 +70,7 @@ public class DetailService {
         }
         //获取被修改之前的旧记录
         Detail old = detailDao.findOne(form.getId());
-        //处理修改时间之后的不一致
+        //处理修改时间之后的结存不一致
         if (form.getDate().compareTo(old.getDate()) < 0) {
             //时间提前
             handleAlterDate(form, old, true);
@@ -78,7 +78,7 @@ public class DetailService {
             //时间推后
             handleAlterDate(form, old, false);
         }
-        //处理修改收入支出之后的不一致
+        //处理修改收入支出之后的结存不一致
         if (form.getEarning().compareTo(old.getEarning()) != 0 || form.getExpense().compareTo(old.getExpense()) != 0) {
             //修改了收入支出,这条记录以后的所有记录的余额都要修改
             BigDecimal earningDifference = form.getEarning().subtract(old.getEarning());
@@ -90,7 +90,6 @@ public class DetailService {
         //更新当前记录
         handleBalance(form);
         detailDao.update(form);
-
     }
 
     /**
