@@ -31,14 +31,17 @@ public class UserService {
         userDao.updateByUser(user);
     }
 
+    @Transactional(readOnly = true)
     public List<String> listUsername() {
         return userDao.listUsername();
     }
 
+    @Transactional(readOnly = true)
     public Integer getLevelByUsername(String username) {
         return userDao.getLevelByUsername(username);
     }
 
+    @Transactional(readOnly = true)
     public String getUsernameByLevel(Integer level) {
         return userDao.getUsernameByLevel(level);
     }

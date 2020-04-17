@@ -6,6 +6,7 @@ import erp.util.MyUtils;
 import erp.vo.req.SummarizeFilterVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.text.ParseException;
@@ -18,6 +19,7 @@ import java.util.List;
  * @date 2020/3/28
  */
 @Service
+@Transactional(readOnly = true)
 public class SummarizeService {
     @Autowired
     private SummarizeDao dao;
