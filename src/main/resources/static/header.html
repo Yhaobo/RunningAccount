@@ -4,7 +4,7 @@
         <!-- Brand and toggle get grouped for better mobile display 主名称-->
         <div class="navbar-header">
             <a class="navbar-brand dropdown-toggle " data-toggle="dropdown" role="button" aria-haspopup="true"
-               aria-expanded="false">企业财务流水管理系统<span class="caret"></span></a>
+               aria-expanded="false" style="width: 300px">企业财务流水管理系统<span class="caret"></span></a>
             <ul class="dropdown-menu">
                 <li class="hidden"><a href="excel/export" class="glyphicon glyphicon-export"> 导出所有数据为Excel</a></li>
                 <li role="separator" class="divider hidden"></li>
@@ -146,12 +146,12 @@
             if (result.data === 0) {
                 $('ul>.hidden').removeClass('hidden');
                 $('.header_userManage').show();
-                brand.html('企业财务管理系统 (管理员)<span class="caret"></span>');
+                brand.html('企业财务流水管理系统 (管理员)<span class="caret"></span>');
             } else if (result.data === 1) {
                 $('ul>.hidden').removeClass('hidden');
-                brand.html('企业财务管理系统 (用户)<span class="caret"></span>');
+                brand.html('企业财务流水管理系统 (用户)<span class="caret"></span>');
             } else {
-                brand.html('企业财务管理系统 (参观者)<span class="caret"></span>')
+                brand.html('企业财务流水管理系统 (参观者)<span class="caret"></span>')
             }
         }
     });
