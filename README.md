@@ -1,5 +1,5 @@
 # RunningAccount
-简单的企业财务管理系统; 基于SpringBoot+MyBatis框架
+简单的企业财务流水管理系统; 基于SpringBoot+MyBatis框架
 
 涉及技术: JDK1.8，SpringBoot, MyBatis, Layui, BootStrap, JQuery, ECharts, Apache-POI等
 
