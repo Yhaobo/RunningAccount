@@ -4,6 +4,7 @@ import erp.dao.provider.SummarizeDaoProvider;
 import erp.domain.Detail;
 import erp.vo.req.SummarizeFilterVo;
 import org.apache.ibatis.annotations.SelectProvider;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * @author Yhaobo
  * @date 2020/3/28
  */
+@Repository
 public interface SummarizeDao {
     /**
      * 根据条件来获取记录

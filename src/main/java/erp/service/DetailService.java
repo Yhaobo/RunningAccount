@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class DetailService {
 
     private DetailDao detailDao;
@@ -22,6 +21,7 @@ public class DetailService {
         this.detailDao = detailDao;
     }
 
+    @Transactional(readOnly = true)
     public List<Detail> findAll(DetailFilterVo vo) {
         List<Detail> details = detailDao.listByFilter(vo);
         //格式化所有数字
@@ -29,11 +29,12 @@ public class DetailService {
         return details;
     }
 
-    public Detail findOne(int id) {
+    @Transactional(readOnly = true)
+    public Detail findOneById(int id) {
         return detailDao.findOne(id);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, timeout = 10)
     public void add(Detail form) {
         //处理空值
         if (form.getDescription().length() < 1) {
@@ -51,11 +52,10 @@ public class DetailService {
         //添加到数据库
         detailDao.add(form);
         //如果是插入时间是以前,就需要调整本次插入记录之后的所有记录的结存
-        BigDecimal balanceDifference = form.getEarning().subtract(form.getExpense());
-        handleLaterBalance(form.getDate(), balanceDifference);
+        handleLaterBalance(form.getDate(), form.getEarning().subtract(form.getExpense()));
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, timeout = 10)
     public void update(Detail form) throws Exception {
         //判断id是否为表单默认值0
         if (form.getId() == 0) {
@@ -97,7 +97,7 @@ public class DetailService {
      *
      * @param form
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, timeout = 10)
     public void delete(Detail form) {
         detailDao.delete(form.getId());
         handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()));
@@ -106,7 +106,7 @@ public class DetailService {
     /**
      * 根据每一笔收入支出来更新所有记录的结存
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, timeout = 10)
     public void updateAllBalance() {
         List<Detail> detailList = detailDao.findAll();
         BigDecimal balance = new BigDecimal(0);

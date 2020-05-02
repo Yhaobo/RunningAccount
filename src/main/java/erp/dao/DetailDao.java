@@ -4,11 +4,13 @@ import erp.dao.provider.DetailDaoProvider;
 import erp.domain.Detail;
 import erp.vo.req.DetailFilterVo;
 import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+@Repository
 public interface DetailDao {
     /**
      * 查询所有
