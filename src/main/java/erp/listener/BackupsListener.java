@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -31,6 +30,8 @@ public class BackupsListener implements HttpSessionListener {
     // 需要备份的数据库名
     @Value("${datasource.database}")
     private String database;
+    @Value("${dataFile.location}")
+    private String location;
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
@@ -49,12 +50,11 @@ public class BackupsListener implements HttpSessionListener {
             // 生成的文件名
             String fileName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
             // 需要备份到的路径
-            String filepath = "file:D:\\cai_wu_shu_jv\\" + fileName + ".sql";
+            String filepath = location +"sql\\"+ fileName + ".sql";
             //如果地址有空格，为解决找不到路径所以用了这个方式
-            URL url = new URL(filepath);
-            String path = url.getPath();
-            //自动创建目录
-            File file = new File(path);
+//            String path = new URL(filepath).getPath();
+            File file = new File(filepath);
+            //自动创建父目录
             if (!file.getParentFile().exists()) {
                 if (file.getParentFile().mkdirs()) {
                     throw new RuntimeException("创建备份目录失败");

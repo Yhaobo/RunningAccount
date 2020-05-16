@@ -194,13 +194,13 @@
         }
     }
 
-    // 回显用户名
+    // 用户管理功能之回显用户名
     function loadUsername(caller) {
         inputStatusChange();
-        const level = caller.value;
-        if (level != '') {
+        const u_level = caller.value;
+        if (u_level != '') {
             const loadIndex = layer.load(2);
-            $.get('user/getUsername', {u_level: level}).done(function (result) {
+            $.get('user/getUsername', {u_level}).done(function (result) {
                 layer.close(loadIndex);
                 if (result.flag) {
                     $('#userManageForm input[name="u_username"]').val(result.data);

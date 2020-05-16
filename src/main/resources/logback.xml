@@ -5,7 +5,7 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-<!--            <charset>UTF-8</charset>-->
+<!--            <charset>UTF-8</charset> 不要设置此选项, 会导致乱码-->
         </encoder>
     </appender>
     <!-- 输出error log 至统一日志文件中 -->
@@ -29,7 +29,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-    <root level="debug">
+    <root level="error">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ERROR_APPENDER"/>
     </root>

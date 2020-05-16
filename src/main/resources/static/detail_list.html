@@ -33,18 +33,82 @@
     <div id="page">
         <div></div>
     </div>
-    <!-- Modal -->
-    <div class="modal fade " id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
+
+    <!-- 添加模态框 -->
+    <div class="modal fade " id="addModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
         <div class="modal-dialog modal-slg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title" id="modalTitle"></h4>
+                    <h4 class="modal-title">添加</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="form" action="javascript:;">
+                    <form id="addForm" action="javascript:;">
+                        <table class="table  table-bordered">
+                            <tr>
+                                <th>日期</th>
+                                <th>摘要</th>
+                                <th>项目</th>
+                                <th>账户</th>
+                                <th>部门</th>
+                                <th>分类</th>
+                                <th>收入</th>
+                                <th>支出</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" id="addDate" name="date">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" placeholder="摘要"
+                                           name="description">
+                                </td>
+                                <td>
+                                    <select class="form-control projectSelect" name="project.id"></select>
+                                </td>
+                                <td>
+                                    <select class="form-control accountSelect" name="account.id"></select>
+                                </td>
+                                <td>
+                                    <select class="form-control departmentSelect" name="department.id"></select>
+                                </td>
+                                <td>
+                                    <select class="form-control categorySelect" name="category.id"></select>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" placeholder="收入"
+                                           name="earning">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" placeholder="支出"
+                                           name="expense">
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addSubmit()">提交</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改模态框 -->
+    <div class="modal fade " id="alterModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal-dialog modal-slg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">修改</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="alterForm" action="javascript:;">
                         <input type="hidden" name="id" value="0" id="hidden_id"/>
                         <table class="table  table-bordered">
                             <tr>
@@ -59,23 +123,23 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="text" class="form-control" id="date" name="date">
+                                    <input type="text" class="form-control" id="alterDate" name="date">
                                 </td>
                                 <td>
                                     <input type="text" class="form-control" id="description" placeholder="摘要"
                                            name="description">
                                 </td>
                                 <td>
-                                    <select class="form-control" name="project.id" id="project"></select>
+                                    <select class="form-control projectSelect" name="project.id"></select>
                                 </td>
                                 <td>
-                                    <select class="form-control" name="account.id" id="account"></select>
+                                    <select class="form-control accountSelect" name="account.id"></select>
                                 </td>
                                 <td>
-                                    <select class="form-control" name="department.id" id="department"></select>
+                                    <select class="form-control departmentSelect" name="department.id"></select>
                                 </td>
                                 <td>
-                                    <select class="form-control" name="category.id" id="category"></select>
+                                    <select class="form-control categorySelect" name="category.id"></select>
                                 </td>
                                 <td>
                                     <input type="number" class="form-control" id="earning" placeholder="收入"
@@ -85,15 +149,47 @@
                                     <input type="number" class="form-control" id="expense" placeholder="支出"
                                            name="expense">
                                 </td>
-
                             </tr>
                         </table>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="submit">提交</button>
-                    <button type="submit" class="btn btn-danger hidden " id="delete">删除</button>
+                    <button type="button" class="btn btn-primary" id="alterSubmit">提交</button>
+                    <button type="button" class="btn btn-danger" id="delete">删除</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片显示模态框 -->
+    <div class="modal fade" id="imgModal" tabindex="-1" role="dialog" aria-labelledby="imgModalTitle" detail_id="0">
+        <div class="modal-dialog modal-slg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="imgModalTitle">报销凭证</h4>
+                </div>
+                <div class="modal-body" id="imgModalBody"></div>
+                <div class="modal-footer">
+                    <div class="layui-upload">
+                        <button type="button" class="layui-btn layui-btn-normal" id="uploadVoucher">选择多文件</button>
+                        <div class="layui-upload-list">
+                            <table class="layui-table">
+                                <thead>
+                                <tr>
+                                    <th>文件名</th>
+                                    <th>大小</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="voucherList"></tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="layui-btn" id="uploadVoucherSubmit">开始上传</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,6 +224,102 @@
     let canAlter = false;
 
     init();
+
+    function init() {
+        //根据登录用户的角色来开启或隐藏部分功能
+        $.get('user/getLevel').done(function (result) {
+            if (result.flag) {
+                if (result.data === 0 || result.data === 1) {
+                    canAlter = true;
+                }
+            }
+        });
+        // 加载表格
+        loadTable();
+        // 获取所有项目
+        $.get("setting/findProjects", function (data) {
+            selectData.projectOptions = data.data;
+            let html = '<option value="">--请选择项目--</option>';
+            if (data.data.length === 1) {
+                html = '';
+            }
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
+                // if (project && option.id === project.id) {
+                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                // } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
+                // }
+            }
+            $(".projectFilter").html(html);
+            $(".projectSelect").html(html);
+            promise();
+        });
+        // 获取所有账户
+        $.get("setting/findAccounts", function (data) {
+            selectData.accountOptions = data.data;
+            let html = '<option value="">--请选择账户--</option>';
+            if (data.data.length === 1) {
+                html = '';
+            }
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
+                // if (account && option.id === account.id) {
+                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                // } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
+                // }
+            }
+            $(".accountFilter").html(html);
+            $(".accountSelect").html(html);
+            promise();
+        });
+        // 获取所有部门
+        $.get("setting/findDepartments", function (data) {
+            selectData.departmentOptions = data.data;
+            let html = '<option value="">--请选择部门--</option>';
+            if (data.data.length === 1) {
+                html = '';
+            }
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
+                // if (department && option.id === department.id) {
+                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                // } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
+                // }
+            }
+            $(".departmentFilter").html(html);
+            $(".departmentSelect").html(html);
+            promise();
+        });
+        // 获取所有分类
+        $.get("setting/findCategorys", function (data) {
+            selectData.categoryOptions = data.data;
+            if (!data.flag) {
+                location.href = "index.html";
+            }
+            let html = '<option value="">--请选择分类--</option>';
+            if (data.data.length === 1) {
+                html = '';
+            }
+            for (let i = 0; i < data.data.length; i++) {
+                let option = data.data[i];
+                // if (category && option.id === category.id) {
+                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                // } else {
+                html += '<option value="' + option.id + '">' + option.name + '</option>';
+                // }
+            }
+            $(".categoryFilter").html(html);
+            $(".categorySelect").html(html);
+            promise();
+        });
+
+        renderDate();
+
+        renderUpload();
+    }
 
     let promiseCount = 0;
 
@@ -227,7 +419,10 @@
                         '            <td>' + detail.formatEarning + '</td>\n' +
                         '            <td>' + detail.formatExpense + '</td>\n' +
                         '            <td>' + detail.formatBalance + '</td>\n' +
-                        '            <td><a href="javascript:;" style="display: block" onclick="edit(' + detail.id + ')">修改</a></td>\n' +
+                        '            <td>' +
+                        '               <a href="javascript:;" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')">查看凭证</a> |' +
+                        '               <a href="javascript:;" onclick="edit(' + detail.id + ')">修改</a>' +
+                        '            </td>\n' +
                         '    </tr> '
                 }
                 html += '</tbody>';
@@ -250,102 +445,133 @@
     //渲染模态框里的日期输入框
     function renderDate() {
         layui.laydate.render({
-            elem: $('#date')[0]
+            elem: $('#addDate')[0]
+            , type: 'datetime'
+        });
+        layui.laydate.render({
+            elem: $('#alterDate')[0]
             , type: 'datetime'
         });
     }
 
-    function init() {
-        //根据登录用户的角色来开启或隐藏部分功能
-        $.get('user/getLevel').done(function (result) {
-            if (result.flag) {
-                if (result.data === 0 || result.data === 1) {
-                    canAlter = true;
+    //显示凭证(图片弹出框)
+    function showVoucher(detailId, detailInfo, isAdd) {
+        const imgModal = $('#imgModal');
+        //将detailId放入自定义属性中, 方便上传凭证时获取
+        imgModal.attr('detail_id', detailId);
+        //清空之前的凭证
+        $('#imgModalBody').html('');
+        if (isAdd) {
+            // 新增记录后上传凭证操作
+            $('#imgModalTitle').text(detailInfo);
+        } else {
+            // 查看凭证操作
+            if (detailInfo) {
+                $('#imgModalTitle').text('日期为: ' + detailInfo + ' 的凭证');
+                // 清空上传文件列表
+                $('#voucherList').html('');
+            }
+            $.get('detail/vouchers', {id: detailId}).done(function (result) {
+                if (result.flag) {
+                    let html = '';
+                    $(result.data).each(function (i, e) {
+                        html += `<img src="detail/voucher/${e.url}" onclick="voucherTips(this,${e.id},${detailId})"/>`;
+                    });
+                    $('#imgModalBody').html(html);
                 }
-            }
-        });
-        // 加载表格
-        loadTable();
-        // 获取所有项目
-        $.get("setting/findProjects", function (data) {
-            selectData.projectOptions = data.data;
-            let html = '<option value="">--请选择项目--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                if (project && option.id === project.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+            });
+        }
+        imgModal.modal('show');
+    }
+
+    // 图片点击后显示tips
+    function voucherTips(caller, voucherId, detailId) {
+        layer.tips(`<button type="button" class="layui-btn layui-btn-danger" onclick="deleteVoucher(${voucherId},${detailId})">删除</button>`, caller, {tips: [3, '#b3ffb0']})
+    }
+
+    function deleteVoucher(voucherId, detailId) {
+        layer.confirm('确认删除此凭证?', {icon: 3}, function (index) {
+            const loadIndex = layer.load(2);
+            $.post("detail/deleteVoucher", {voucherId}).done(function (result) {
+                layer.close(loadIndex);
+                if (result.flag) {
+                    layer.msg("删除凭证成功", {icon: 6});
+                    showVoucher(detailId);
                 } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    layer.alert(result.message, {icon: 5});
+                }
+            });
+            layer.close(index);
+        });
+    }
+
+    // 渲染layui上传组件
+    function renderUpload() {
+        // 图片显示模态框内
+        const voucherListView = $("#voucherList");
+        const editUploadListIns = layui.upload.render({
+            elem: '#uploadVoucher'
+            , url: 'detail/addVouchers' //上传接口
+            , auto: false
+            , bindAction: '#uploadVoucherSubmit'
+            , size: 500
+            , multiple: true
+            , data: {
+                id: function () {
+                    return $('#imgModal').attr('detail_id');
                 }
             }
-            $(".projectFilter").html(html);
-            $("#project").html(html);
-            promise();
-        });
-        // 获取所有账户
-        $.get("setting/findAccounts", function (data) {
-            selectData.accountOptions = data.data;
-            let html = '<option value="">--请选择账户--</option>';
-            if (data.data.length === 1) {
-                html = '';
+            , choose: function (obj) {
+                var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+                //读取本地文件
+                obj.preview(function (index, file, result) {
+                    var tr = $(['<tr id="upload-' + index + '">'
+                        , '<td>' + file.name + '</td>'
+                        , '<td>' + (file.size / 1024).toFixed(1) + 'kb</td>'
+                        , '<td>等待上传</td>'
+                        , '<td>'
+                        , '<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
+                        , '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+                        , '</td>'
+                        , '</tr>'].join(''));
+
+                    //单个重传
+                    tr.find('.demo-reload').on('click', function () {
+                        obj.upload(index, file);
+                    });
+
+                    //删除
+                    tr.find('.demo-delete').on('click', function () {
+                        delete files[index]; //删除对应的文件
+                        tr.remove();
+                        editUploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+                    });
+
+                    voucherListView.append(tr);
+                });
             }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                if (account && option.id === account.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
+            , done: function (res, index, upload) {
+                if (res.flag) { //上传成功
+                    var tr = voucherListView.find('tr#upload-' + index)
+                        , tds = tr.children();
+                    tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+                    tds.eq(3).html(''); //清空操作
+                    return delete this.files[index]; //删除文件队列已经上传成功的文件
                 }
+                this.error(index, upload);
             }
-            $(".accountFilter").html(html);
-            $("#account").html(html);
-            promise();
-        });
-        // 获取所有部门
-        $.get("setting/findDepartments", function (data) {
-            selectData.departmentOptions = data.data;
-            let html = '<option value="">--请选择部门--</option>';
-            if (data.data.length === 1) {
-                html = '';
+            , allDone: function (resultInfo) {
+                // layer.msg('全部上传成功', {icon: 6});
+                // voucherListView.html('');
+                showVoucher($('#imgModal').attr('detail_id'));
             }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                if (department && option.id === department.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
-                }
+            , error: function (index, upload) {
+                var tr = voucherListView.find('tr#upload-' + index)
+                    , tds = tr.children();
+                tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+                tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
             }
-            $(".departmentFilter").html(html);
-            $("#department").html(html);
-            promise();
-        });
-        // 获取所有分类
-        $.get("setting/findCategorys", function (data) {
-            selectData.categoryOptions = data.data;
-            if (!data.flag) {
-                location.href = "index.html";
-            }
-            let html = '<option value="">--请选择分类--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                if (category && option.id === category.id) {
-                    html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                } else {
-                    html += '<option value="' + option.id + '">' + option.name + '</option>';
-                }
-            }
-            $(".categoryFilter").html(html);
-            $("#category").html(html);
-            promise();
-        });
-        renderDate();
+        })
     }
 
     // 使用layui的动态表格
@@ -362,8 +588,8 @@
         $('.layui-table-tool-temp').html($('#filter').html());
         if (canAlter) {
             $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
-style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
-<i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
+            style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
+            <i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
         }
 
         // 渲染日期范围
@@ -388,7 +614,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
     // 修改
     function edit(id) {
         // 数据回显
-        loadDetail(id);
+        echoDetail(id);
         // 添加点击事件
         submit("update");
         submit("delete");
@@ -396,22 +622,37 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
 
     // 添加记录
     function add() {
-        $('#form')[0].reset();
-        $("#modalTitle").text("添加");
+        $('#addForm')[0].reset();
+        $("#addModalTitle").text("添加");
         // 自动获取当前日期
-        $("#date").val(dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+        $("#addDate").val(dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
         loadSelects(true);
-        if (!$("#delete").hasClass("hidden")) {
-            $("#delete").addClass("hidden");
-        }
-        $('#modal').modal({
+        $('#addModal').modal({
             show: true,
             backdrop: false
         });
         // 添加点击事件(添加)
-        submit("add");
+        // submit("add");
     }
 
+
+    function addSubmit() {
+        layer.confirm("确认提交?", {icon: 3}, function (index) {
+            const load = layer.load(2);
+            $.post("detail/add", $("#addForm").serialize(), function (data) {
+                layer.close(load);
+                if (data.flag) {
+                    $('#addModal').modal('hide');
+                    layer.msg('操作成功, 请上传凭证(图片)', {icon: 6});
+                    loadTable();
+                    showVoucher(data.data, '请上传凭证', true);
+                } else {
+                    layer.alert(data.message, {icon: 5});
+                }
+            });
+            layer.close(index);
+        });
+    }
 
     let echoData = {
         projectId: null,
@@ -421,12 +662,12 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
     };
 
     // 表单数据回显
-    function loadDetail(id) {
+    function echoDetail(id) {
         const loadIndex = layer.load(2);
         $.get("detail/findOne", {"id": id}, function (data) {
             layer.close(loadIndex);
             if (data.flag) {
-                $("#date").val(dateFormat(new Date(data.data.date), "yyyy-MM-dd HH:mm:ss"));
+                $("#alterDate").val(dateFormat(new Date(data.data.date), "yyyy-MM-dd HH:mm:ss"));
                 $("#description").val(data.data.description);
                 $("#earning").val(data.data.earning);
                 $("#expense").val(data.data.expense);
@@ -438,9 +679,9 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
 
                 $("#hidden_id").val(id);
                 loadSelects(false);
-                $("#modalTitle").text("修改");
-                $("#delete").removeClass("hidden");
-                $('#modal').modal({
+                // $("#modalTitle").text("修改");
+                // $("#delete").removeClass("hidden");
+                $('#alterModal').modal({
                     show: true,
                     backdrop: false
                 });
@@ -464,7 +705,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $("#project").html(html);
+        $(".projectSelect").html(html);
 
         // 加载所有账户
         const accountOptions = selectData.accountOptions;
@@ -480,7 +721,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $("#account").html(html);
+        $(".accountSelect").html(html);
 
         // 加载所有分类
         const categoryOptions = selectData.categoryOptions;
@@ -496,7 +737,7 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $("#category").html(html);
+        $(".categorySelect").html(html);
 
         // 加载所有部门
         const departmentOptions = selectData.departmentOptions;
@@ -512,35 +753,35 @@ style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height:
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $("#department").html(html);
+        $(".departmentSelect").html(html);
     }
 
     // 表单提交
     function submit(method) {
-        let button = "submit";
-        let msg = "提交?";
+        let button = "AlterSubmit";
+        let msg = "修改?";
         if (method === "delete") {
             button = "delete";
             msg = "删除!!!!!!!???????";
         }
         $("#" + button).off().click(function () {
-            layer.confirm("确认" + msg, {icon: 3}, function () {
+            layer.confirm("确认" + msg, {icon: 3}, function (index) {
                 const load = layer.load(2);
-                $.post("detail/" + method, $("#form").serialize(), function (data) {
+                $.post("detail/" + method, $("#alterForm").serialize(), function (data) {
                     layer.close(load);
                     if (data.flag) {
-                        $('#modal').modal('hide');
+                        $('#alterModal').modal('hide');
                         layer.msg('操作成功', {icon: 6});
-                        $("#form")[0].reset();
-                        init();
+                        $("#alterForm")[0].reset();
+                        loadTable();
                     } else {
                         layer.alert(data.message, {icon: 5});
                     }
                 });
+                layer.close(index);
             });
         });
     }
-
 </script>
 </body>
 </html>

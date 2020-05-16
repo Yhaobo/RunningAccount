@@ -5,6 +5,7 @@ import erp.domain.Detail;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * @author Yhaobo
@@ -23,5 +24,9 @@ public class MyUtils {
             i.setFormatExpense(format.format(i.getExpense()));
             i.setFormatBalance(format.format(i.getBalance()));
         }
+    }
+
+    public static String uuid() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 }

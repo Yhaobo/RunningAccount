@@ -41,13 +41,14 @@ public interface DetailDao {
     BigDecimal findLatestBalance();
 
     /**
-     * 添加一条记录
+     * 添加一条记录, 并返回自增主键的 id 给 detail
      *
-     * @param form
+     * @param detail
      */
     @Insert("insert into detail values(null,#{date},#{description},#{project.id},#{account.id},#{department.id},#{category.id}," +
             "#{earning},#{expense},#{balance})")
-    void add(Detail form);
+    @Options(useGeneratedKeys = true,keyColumn = "d_id",keyProperty = "id")
+    void add(Detail detail);
 
     /**
      * 从Excel文件导入多条记录

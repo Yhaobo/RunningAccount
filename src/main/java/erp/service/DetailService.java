@@ -1,14 +1,24 @@
 package erp.service;
 
 import erp.dao.DetailDao;
+import erp.dao.VoucherDao;
 import erp.domain.Detail;
+import erp.domain.Voucher;
 import erp.util.MyException;
 import erp.util.MyUtils;
 import erp.vo.req.DetailFilterVo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -16,9 +26,16 @@ import java.util.List;
 public class DetailService {
 
     private DetailDao detailDao;
+    private VoucherDao voucherDao;
 
-    public DetailService(DetailDao detailDao) {
+    @Value("${dataFile.location}")
+    private String location;
+
+    private String parentPath = "voucher\\";
+
+    public DetailService(DetailDao detailDao, VoucherDao voucherDao) {
         this.detailDao = detailDao;
+        this.voucherDao = voucherDao;
     }
 
     @Transactional(readOnly = true)
@@ -35,7 +52,7 @@ public class DetailService {
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 10)
-    public void add(Detail form) {
+    public void insert(Detail form) {
         //处理空值
         if (form.getDescription().length() < 1) {
             form.setDescription("无");
@@ -98,7 +115,14 @@ public class DetailService {
      * @param form
      */
     @Transactional(rollbackFor = Exception.class, timeout = 10)
-    public void delete(Detail form) {
+    public void delete(Detail form) throws MyException {
+        // 删除本地凭证文件
+        String[] urls = voucherDao.listUrlByDetailId(form.getId());
+        deleteLocalVoucherFiles(urls);
+        // 删除凭证记录
+        voucherDao.deleteByDetailId(form.getId());
+
+        // 删除明细记录
         detailDao.delete(form.getId());
         handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()));
     }
@@ -115,6 +139,76 @@ public class DetailService {
             detailList.get(i).setBalance(balance);
             detailDao.update(detailList.get(i));
         }
+    }
+
+    /**
+     * 上传图片凭证的保存和记录
+     *
+     * @param file 图片凭证文件
+     * @param id   对应的一条记录的id
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    public void insertVoucher(MultipartFile file, Integer id) throws Exception {
+        String uuid = MyUtils.uuid();
+        String url = uuid + "_" + LocalDate.now().toString() + "_" + file.getOriginalFilename();
+        String filePath = getLocalVoucherFilePath(url);
+
+        // 数据库记录关联
+        voucherDao.insert(new Voucher(url, id));
+
+        // 保存文件到磁盘
+        File localFile = new File(filePath);
+        // 自动创建上级目录
+        if (!localFile.getParentFile().exists()) {
+            if (!localFile.getParentFile().mkdirs()) {
+                throw new MyException("目录创建失败");
+            }
+        }
+        file.transferTo(localFile);
+    }
+
+    /**
+     * @param d_id detail的id
+     * @return 返回对应d_id的所有voucher图片的地址
+     */
+    public List<Voucher> listVoucher(Integer d_id) {
+        return voucherDao.listVoucher(d_id);
+    }
+
+    /**
+     * @param fileName 对应voucher图片的文件名
+     * @param response 直接返回文件流
+     */
+    public void listVoucherByUrl(String fileName, HttpServletResponse response) throws Exception {
+        String filePath = getLocalVoucherFilePath(fileName);
+        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(filePath));
+             OutputStream outputStream = response.getOutputStream()) {
+            byte[] data = new byte[4096];
+
+            int len;
+            while ((len = inputStream.read(data)) != -1) {
+                outputStream.write(data, 0, len);
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    /**
+     * 删除凭证本地文件和数据库记录
+     *
+     * @param voucherId
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    public void deleteVoucher(Integer voucherId) throws MyException {
+        // 获取文件名
+        String fileName = voucherDao.getUrlById(voucherId);
+
+        // 删除数据库记录
+        voucherDao.deleteById(voucherId);
+
+        // 删除本地文件
+        deleteLocalVoucherFiles(fileName);
     }
 
     /**
@@ -159,4 +253,30 @@ public class DetailService {
         detailDao.updateLater(balanceDifference, date);
     }
 
+    /**
+     * @param fileName
+     * @return 返回凭证文件的本地路径
+     */
+    private String getLocalVoucherFilePath(String fileName) {
+        System.out.println(fileName);
+        return location + parentPath + fileName.charAt(0) + "\\" + fileName;
+    }
+
+    /**
+     * 删除多个本地凭证文件
+     *
+     * @param fileNames 文件名
+     * @throws MyException
+     */
+    private void deleteLocalVoucherFiles(String... fileNames) throws MyException {
+        File file = null;
+        for (String fileName : fileNames) {
+            file = new File(getLocalVoucherFilePath(fileName));
+            if (file.exists()) {
+                if (!file.delete()) {
+                    throw new MyException("凭证文件删除失败");
+                }
+            }
+        }
+    }
 }

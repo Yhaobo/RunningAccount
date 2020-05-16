@@ -33,9 +33,9 @@ public class ShiroConfig {
         shiroFilterChainDefinition.addPathDefinition("/static/**", "anon");
         shiroFilterChainDefinition.addPathDefinition("/user/login", "anon");
         shiroFilterChainDefinition.addPathDefinition("/druid/**", "anon");
-        shiroFilterChainDefinition.addPathDefinition("/detail/add", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/detail/add*", "roles[user]");
         shiroFilterChainDefinition.addPathDefinition("/detail/update*", "roles[user]");
-        shiroFilterChainDefinition.addPathDefinition("/detail/delete", "roles[user]");
+        shiroFilterChainDefinition.addPathDefinition("/detail/delete*", "roles[user]");
         shiroFilterChainDefinition.addPathDefinition("/setting/add*", "roles[user]");
         shiroFilterChainDefinition.addPathDefinition("/setting/update*", "roles[user]");
         shiroFilterChainDefinition.addPathDefinition("/excel/*", "roles[user]");
