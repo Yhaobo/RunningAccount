@@ -226,6 +226,14 @@
     init();
 
     function init() {
+        // 为凭证模态框添加隐藏事件处理
+        $('#imgModal').on('hide.bs.modal', function () {
+            const detailId = $('#imgModal').attr('detail_id');
+            if ($('#imgModalBody').html()) {
+                // 如果有凭证图片, 则按钮显示为 查看凭证
+                $(`a[detail_id="${detailId}"]`).text('查看凭证');
+            }
+        });
         //根据登录用户的角色来开启或隐藏部分功能
         $.get('user/getLevel').done(function (result) {
             if (result.flag) {
@@ -234,8 +242,6 @@
                 }
             }
         });
-        // 加载表格
-        loadTable();
         // 获取所有项目
         $.get("setting/findProjects", function (data) {
             selectData.projectOptions = data.data;
@@ -245,11 +251,7 @@
             }
             for (let i = 0; i < data.data.length; i++) {
                 let option = data.data[i];
-                // if (project && option.id === project.id) {
-                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                // } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
-                // }
             }
             $(".projectFilter").html(html);
             $(".projectSelect").html(html);
@@ -264,11 +266,7 @@
             }
             for (let i = 0; i < data.data.length; i++) {
                 let option = data.data[i];
-                // if (account && option.id === account.id) {
-                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                // } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
-                // }
             }
             $(".accountFilter").html(html);
             $(".accountSelect").html(html);
@@ -283,11 +281,7 @@
             }
             for (let i = 0; i < data.data.length; i++) {
                 let option = data.data[i];
-                // if (department && option.id === department.id) {
-                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                // } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
-                // }
             }
             $(".departmentFilter").html(html);
             $(".departmentSelect").html(html);
@@ -305,11 +299,7 @@
             }
             for (let i = 0; i < data.data.length; i++) {
                 let option = data.data[i];
-                // if (category && option.id === category.id) {
-                //     html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-                // } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
-                // }
             }
             $(".categoryFilter").html(html);
             $(".categorySelect").html(html);
@@ -418,12 +408,18 @@
                         '            <td>' + detail.category.name + '</td>\n' +
                         '            <td>' + detail.formatEarning + '</td>\n' +
                         '            <td>' + detail.formatExpense + '</td>\n' +
-                        '            <td>' + detail.formatBalance + '</td>\n' +
-                        '            <td>' +
-                        '               <a href="javascript:;" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')">查看凭证</a> |' +
-                        '               <a href="javascript:;" onclick="edit(' + detail.id + ')">修改</a>' +
+                        '            <td>' + detail.formatBalance + '</td>' +
+                        '<td><a href="javascript:;" detail_id="' + detail.id + '" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')">';
+
+                    if (detail.hasVoucher) {
+                        html += '查看凭证</a>';
+                    } else {
+                        html += '添加凭证</a>';
+                    }
+
+                    html += '         | <a href="javascript:;" onclick="edit(' + detail.id + ')">修改</a>' +
                         '            </td>\n' +
-                        '    </tr> '
+                        '    </tr> ';
                 }
                 html += '</tbody>';
                 $("#details").html(html);

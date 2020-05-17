@@ -47,7 +47,7 @@ public interface DetailDao {
      */
     @Insert("insert into detail values(null,#{date},#{description},#{project.id},#{account.id},#{department.id},#{category.id}," +
             "#{earning},#{expense},#{balance})")
-    @Options(useGeneratedKeys = true,keyColumn = "d_id",keyProperty = "id")
+    @Options(useGeneratedKeys = true, keyColumn = "d_id", keyProperty = "id")
     void add(Detail detail);
 
     /**
@@ -164,4 +164,11 @@ public interface DetailDao {
     @SelectProvider(type = DetailDaoProvider.class, method = "listByFilterSql")
     @ResultMap("detailMap")
     List<Detail> listByFilter(DetailFilterVo vo);
+
+    /**
+     * @return 返回没有凭证的明细记录
+     */
+    @Select("SELECT * FROM detail d LEFT JOIN voucher v ON v.d_id=d.d_id WHERE v.id IS NULL")
+    @ResultMap("detailMap")
+    List<Detail> listDetailNoVoucher();
 }

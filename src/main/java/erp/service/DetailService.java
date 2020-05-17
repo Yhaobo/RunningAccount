@@ -7,6 +7,8 @@ import erp.domain.Voucher;
 import erp.util.MyException;
 import erp.util.MyUtils;
 import erp.vo.req.DetailFilterVo;
+import erp.vo.resp.DetailRespVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +21,7 @@ import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class DetailService {
@@ -39,11 +40,31 @@ public class DetailService {
     }
 
     @Transactional(readOnly = true)
-    public List<Detail> findAll(DetailFilterVo vo) {
+    public List<DetailRespVo> findAll(DetailFilterVo vo) {
+        // 所有收支记录DO
         List<Detail> details = detailDao.listByFilter(vo);
+        // 没有凭证的收支记录
+        Set<Detail> noVoucherDetailSet = new HashSet<>(detailDao.listDetailNoVoucher());
+        // 返回前端的List
+        List<DetailRespVo> detailRespVos = new ArrayList<>();
+        for (Detail detail : details) {
+            // 用于返回前端的VO
+            DetailRespVo detailRespVo = new DetailRespVo();
+            // 将DO的数据传递给VO
+            BeanUtils.copyProperties(detail, detailRespVo);
+
+            if (noVoucherDetailSet.contains(detail)) {
+                // 没有凭证
+                detailRespVo.setHasVoucher(false);
+            } else {
+                // 有凭证
+                detailRespVo.setHasVoucher(true);
+            }
+            detailRespVos.add(detailRespVo);
+        }
         //格式化所有数字
-        MyUtils.formatNumber(details);
-        return details;
+        MyUtils.formatNumber(detailRespVos);
+        return detailRespVos;
     }
 
     @Transactional(readOnly = true)
@@ -258,7 +279,6 @@ public class DetailService {
      * @return 返回凭证文件的本地路径
      */
     private String getLocalVoucherFilePath(String fileName) {
-        System.out.println(fileName);
         return location + parentPath + fileName.charAt(0) + "\\" + fileName;
     }
 

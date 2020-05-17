@@ -1,6 +1,6 @@
 package erp.util;
 
-import erp.domain.Detail;
+import erp.vo.resp.DetailRespVo;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -15,14 +15,14 @@ public class MyUtils {
     /**
      * 格式化所有数字为货币格式
      *
-     * @param details
+     * @param detailRespVos
      */
-    public static void formatNumber(List<Detail> details) {
-        NumberFormat format = NumberFormat.getCurrencyInstance(Locale.CHINA);
-        for (Detail i : details) {
-            i.setFormatEarning(format.format(i.getEarning()));
-            i.setFormatExpense(format.format(i.getExpense()));
-            i.setFormatBalance(format.format(i.getBalance()));
+    public static void formatNumber(List<DetailRespVo> detailRespVos) {
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(Locale.CHINA);
+        for (DetailRespVo i : detailRespVos) {
+            i.setFormatEarning(numberFormat.format(i.getEarning()));
+            i.setFormatExpense(numberFormat.format(i.getExpense()));
+            i.setFormatBalance(numberFormat.format(i.getBalance()));
         }
     }
 

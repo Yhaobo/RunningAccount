@@ -7,6 +7,7 @@ import erp.service.DetailService;
 import erp.util.MyException;
 import erp.util.ResultInfo;
 import erp.vo.req.DetailFilterVo;
+import erp.vo.resp.DetailRespVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -49,8 +50,8 @@ public class DetailController {
                     vo.setBackDate(calendar.getTime());
                 }
             }
-            List<Detail> detailList = detailService.findAll(vo);
-            PageSerializable<Detail> pageInfo = new PageSerializable<>(detailList);
+            List<DetailRespVo> detailList = detailService.findAll(vo);
+            PageSerializable<DetailRespVo> pageInfo = new PageSerializable<>(detailList);
             return new ResultInfo(true, pageInfo);
         } catch (Exception e) {
             e.printStackTrace();
