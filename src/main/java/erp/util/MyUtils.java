@@ -1,6 +1,6 @@
 package erp.util;
 
-import erp.vo.resp.DetailRespVo;
+import erp.vo.resp.FormatMoney;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -17,9 +17,9 @@ public class MyUtils {
      *
      * @param detailRespVos
      */
-    public static void formatNumber(List<DetailRespVo> detailRespVos) {
+    public static void formatNumber(List<FormatMoney> detailRespVos) {
         NumberFormat numberFormat = NumberFormat.getCurrencyInstance(Locale.CHINA);
-        for (DetailRespVo i : detailRespVos) {
+        for (FormatMoney i : detailRespVos) {
             i.setFormatEarning(numberFormat.format(i.getEarning()));
             i.setFormatExpense(numberFormat.format(i.getExpense()));
             i.setFormatBalance(numberFormat.format(i.getBalance()));

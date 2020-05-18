@@ -21,7 +21,9 @@ import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class DetailService {
@@ -42,29 +44,29 @@ public class DetailService {
     @Transactional(readOnly = true)
     public List<DetailRespVo> findAll(DetailFilterVo vo) {
         // 所有收支记录DO
-        List<Detail> details = detailDao.listByFilter(vo);
-        // 没有凭证的收支记录
-        Set<Detail> noVoucherDetailSet = new HashSet<>(detailDao.listDetailNoVoucher());
-        // 返回前端的List
-        List<DetailRespVo> detailRespVos = new ArrayList<>();
-        for (Detail detail : details) {
+        List details = detailDao.listByFilter(vo);
+        // 没有凭证的收支记录的id集合
+        Set<Integer> noVoucherDetailIdSet = detailDao.listNoVoucherDetailId();
+        for (int i = 0; i < details.size(); i++) {
+            Detail detail = (Detail) details.get(i);
             // 用于返回前端的VO
             DetailRespVo detailRespVo = new DetailRespVo();
             // 将DO的数据传递给VO
             BeanUtils.copyProperties(detail, detailRespVo);
 
-            if (noVoucherDetailSet.contains(detail)) {
+            if (noVoucherDetailIdSet.contains(detail.getId())) {
                 // 没有凭证
                 detailRespVo.setHasVoucher(false);
             } else {
                 // 有凭证
                 detailRespVo.setHasVoucher(true);
             }
-            detailRespVos.add(detailRespVo);
+            details.set(i, detailRespVo);
         }
+
         //格式化所有数字
-        MyUtils.formatNumber(detailRespVos);
-        return detailRespVos;
+        MyUtils.formatNumber(details);
+        return details;
     }
 
     @Transactional(readOnly = true)

@@ -50,8 +50,8 @@ public class DetailController {
                     vo.setBackDate(calendar.getTime());
                 }
             }
-            List<DetailRespVo> detailList = detailService.findAll(vo);
-            PageSerializable<DetailRespVo> pageInfo = new PageSerializable<>(detailList);
+            List<DetailRespVo> detailRespVos = detailService.findAll(vo);
+            PageSerializable<DetailRespVo> pageInfo = new PageSerializable<>(detailRespVos);
             return new ResultInfo(true, pageInfo);
         } catch (Exception e) {
             e.printStackTrace();

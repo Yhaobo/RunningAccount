@@ -83,9 +83,9 @@
         pageDiv.remove();
     }
 
-    init();
+    pageInit();
 
-    function init() {
+    function pageInit() {
         loadTable();
     }
 
@@ -181,7 +181,7 @@
                 if (filterData.isAll) {
                     html = '<caption>' + decodeURIComponent(getParameter("title")) + '</caption>' +
                         '<thead><tr>' +
-                        '            <th lay-data="{field:\'month\'}">日期</th>\n' +
+                        '            <th lay-data="{field:\'month\',sort:true}">日期</th>\n' +
                         '            <th lay-data="{field:\'earning\'}">收入</th>\n' +
                         '            <th lay-data="{field:\'expense\'}">支出</th>\n' +
                         '            <th lay-data="{field:\'balance\'}">结存</th>\n' +

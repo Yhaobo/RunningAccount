@@ -223,9 +223,9 @@
     // 登录用户是否有修改和添加权限
     let canAlter = false;
 
-    init();
+    pageInit();
 
-    function init() {
+    function pageInit() {
         // 为凭证模态框添加隐藏事件处理
         $('#imgModal').on('hide.bs.modal', function () {
             const detailId = $('#imgModal').attr('detail_id');
@@ -234,7 +234,8 @@
                 $(`a[detail_id="${detailId}"]`).text('查看凭证');
             }
         });
-        //根据登录用户的角色来开启或隐藏部分功能
+
+        // 根据登录用户的角色来开启或隐藏部分功能
         $.get('user/getLevel').done(function (result) {
             if (result.flag) {
                 if (result.data === 0 || result.data === 1) {
@@ -242,6 +243,10 @@
                 }
             }
         });
+
+        // 加载表格数据
+        loadTable();
+
         // 获取所有项目
         $.get("setting/findProjects", function (data) {
             selectData.projectOptions = data.data;
@@ -255,7 +260,6 @@
             }
             $(".projectFilter").html(html);
             $(".projectSelect").html(html);
-            promise();
         });
         // 获取所有账户
         $.get("setting/findAccounts", function (data) {
@@ -270,7 +274,6 @@
             }
             $(".accountFilter").html(html);
             $(".accountSelect").html(html);
-            promise();
         });
         // 获取所有部门
         $.get("setting/findDepartments", function (data) {
@@ -285,7 +288,6 @@
             }
             $(".departmentFilter").html(html);
             $(".departmentSelect").html(html);
-            promise();
         });
         // 获取所有分类
         $.get("setting/findCategorys", function (data) {
@@ -303,23 +305,11 @@
             }
             $(".categoryFilter").html(html);
             $(".categorySelect").html(html);
-            promise();
         });
 
         renderDate();
 
         renderUpload();
-    }
-
-    let promiseCount = 0;
-
-    // 保证所有(4个)下拉框加载完毕之后才渲染表格
-    function promise() {
-        if (promiseCount < 3) {
-            promiseCount++;
-        } else {
-            loadTable();
-        }
     }
 
     function renderPage() {
@@ -389,9 +379,9 @@
                                     <th lay-data="{field:'account'}">账户</th>
                                     <th lay-data="{field:'department'}">部门</th>
                                     <th lay-data="{field:'category'}">分类</th>
-                                    <th lay-data="{field:'earning',sort:true}">收入</th>
-                                    <th lay-data="{field:'expense',sort:true}">支出</th>
-                                    <th lay-data="{field:'balance',sort:true}">结存</th>
+                                    <th lay-data="{field:'earning'}">收入</th>
+                                    <th lay-data="{field:'expense'}">支出</th>
+                                    <th lay-data="{field:'balance'}">结存</th>
                                     <th lay-data="{field:'operation',hide:${!canAlter}}">操作</th>
                                 </tr>
                             </thead>
@@ -431,9 +421,7 @@
                 }
 
                 //渲染原始表格
-                if (!promiseCount < 3) {
-                    renderTable();
-                }
+                renderTable();
             }
         });
     }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface DetailDao {
@@ -166,9 +167,8 @@ public interface DetailDao {
     List<Detail> listByFilter(DetailFilterVo vo);
 
     /**
-     * @return 返回没有凭证的明细记录
+     * @return 返回没有凭证的明细记录的id的Set集合
      */
-    @Select("SELECT * FROM detail d LEFT JOIN voucher v ON v.d_id=d.d_id WHERE v.id IS NULL")
-    @ResultMap("detailMap")
-    List<Detail> listDetailNoVoucher();
+    @Select("SELECT d.d_id FROM detail d LEFT JOIN voucher v ON v.d_id=d.d_id WHERE v.id IS NULL")
+    Set<Integer> listNoVoucherDetailId();
 }

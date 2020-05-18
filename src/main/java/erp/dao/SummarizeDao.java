@@ -21,5 +21,5 @@ public interface SummarizeDao {
      * @return
      */
     @SelectProvider(type = SummarizeDaoProvider.class, method = "listByFilterSql")
-    List<Detail> listByFilter(SummarizeFilterVo vo);
+    List<Detail> listDetailByFilter(SummarizeFilterVo vo);
 }
