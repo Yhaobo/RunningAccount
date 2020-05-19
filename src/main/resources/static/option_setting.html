@@ -52,10 +52,10 @@
 <script>
 
     const path = getParameter("path");//二级路径
-    init();
+    pageInit();
 
     //加载
-    function init() {
+    function pageInit() {
         let load = layer.load(2);
         $.get("setting/find" + path + "s", function (data) {
             layer.close(load);
@@ -137,7 +137,7 @@
                     if (data.flag) {
                         $("#modal").modal('hide');
                         layer.msg('修改成功', {icon: 6});
-                        init();
+                        pageInit();
                     } else {
                         layer.alert(data.message, {icon: 5});
                     }

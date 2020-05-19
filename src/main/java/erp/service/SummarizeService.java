@@ -1,9 +1,11 @@
 package erp.service;
 
 import erp.dao.SummarizeDao;
-import erp.domain.Detail;
 import erp.util.MyUtils;
 import erp.vo.req.SummarizeFilterVo;
+import erp.vo.resp.DetailRespVo;
+import erp.vo.resp.SummarizeRespVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +24,9 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class SummarizeService {
     @Autowired
-    private SummarizeDao dao;
+    private SummarizeDao summarizeDao;
 
-    public List<Detail> listByFilter(SummarizeFilterVo vo) throws ParseException {
-        System.out.println(vo);
+    public List<DetailRespVo> listByFilter(SummarizeFilterVo vo) throws ParseException {
         //处理日期格式
         if (!StringUtils.isEmpty(vo.getDuringDate())) {
             String[] dates = vo.getDuringDate().split(" ~ ");
@@ -52,7 +53,15 @@ public class SummarizeService {
                 }
             }
         }
-        List<Detail> detailList = dao.listByFilter(vo);
+
+        // 将DO的数据传递给VO
+        List detailList = summarizeDao.listDetailByFilter(vo);
+        for (int i = 0; i < detailList.size(); i++) {
+            SummarizeRespVo detailRespVo = new SummarizeRespVo();
+            BeanUtils.copyProperties(detailList.get(i), detailRespVo);
+            detailList.set(i, detailRespVo);
+        }
+
         //格式化为货币格式
         MyUtils.formatNumber(detailList);
         return detailList;

@@ -5,13 +5,13 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-<!--            <charset>UTF-8</charset>-->
+<!--            <charset>UTF-8</charset> 不要设置此选项, 会导致乱码-->
         </encoder>
     </appender>
     <!-- 输出error log 至统一日志文件中 -->
     <appender name="ERROR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>log/error/${HOSTNAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>D:/cai_wu_shu_jv/log/error/${HOSTNAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- 根据日志文件按天回滚，保存时间为30天，30天之前的都将被清理掉 -->
             <maxHistory>365</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -29,7 +29,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-    <root level="debug">
+    <root level="error">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ERROR_APPENDER"/>
     </root>

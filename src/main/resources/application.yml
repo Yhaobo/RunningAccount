@@ -48,6 +48,13 @@ spring:
         # 过期时间(秒)
         max-age: 3600
         cache-public: true
+
+  servlet:
+    multipart:
+      # 上传文件大小限制
+      max-file-size: 500KB
+      # 一次请求大小限制
+      max-request-size: 50MB
 server:
   port: 8080
 

@@ -4,14 +4,18 @@ import erp.domain.Account;
 import erp.domain.Category;
 import erp.domain.Department;
 import erp.domain.Project;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 /**
  * 所有外表(detail表外键所指向的表)的通用CRU
  */
-
+@Repository
 public interface ForeignTableDao {
     @Select("select id, name from account where id=#{id}")
     Account findAccountById(int id);

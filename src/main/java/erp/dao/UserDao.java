@@ -3,9 +3,11 @@ package erp.dao;
 import erp.domain.User;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface UserDao {
 
     @Select("select * from user where u_username=#{u_username} and u_password=#{u_password}")

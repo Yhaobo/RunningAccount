@@ -13,14 +13,6 @@ import java.util.List;
 
 @Service
 public class SettingService {
-    //    @Autowired
-//    private AccountDao accountDao;
-//    @Autowired
-//    private ProjectDao projectDao;
-//    @Autowired
-//    private CategoryDao categoryDao;
-//    @Autowired
-//    private DepartmentDao departmentDao;
     @Autowired
     private ForeignTableDao dao;
 

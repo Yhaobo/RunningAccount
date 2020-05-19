@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * 收支明细表的实体类
@@ -22,33 +23,6 @@ public class Detail implements Serializable {
     private BigDecimal earning;
     private BigDecimal expense;
     private BigDecimal balance;
-    private String formatEarning;
-    private String formatExpense;
-    private String formatBalance;
-
-    public String getFormatEarning() {
-        return formatEarning;
-    }
-
-    public void setFormatEarning(String formatEarning) {
-        this.formatEarning = formatEarning;
-    }
-
-    public String getFormatExpense() {
-        return formatExpense;
-    }
-
-    public void setFormatExpense(String formatExpense) {
-        this.formatExpense = formatExpense;
-    }
-
-    public String getFormatBalance() {
-        return formatBalance;
-    }
-
-    public void setFormatBalance(String formatBalance) {
-        this.formatBalance = formatBalance;
-    }
 
     public Category getCategory() {
         return category;
@@ -134,6 +108,32 @@ public class Detail implements Serializable {
         if (balance != null) {
             this.balance = balance.setScale(2, BigDecimal.ROUND_DOWN);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Detail detail = (Detail) o;
+        return Objects.equals(id, detail.id) &&
+                Objects.equals(date, detail.date) &&
+                Objects.equals(description, detail.description) &&
+                Objects.equals(project, detail.project) &&
+                Objects.equals(account, detail.account) &&
+                Objects.equals(department, detail.department) &&
+                Objects.equals(category, detail.category) &&
+                Objects.equals(earning, detail.earning) &&
+                Objects.equals(expense, detail.expense) &&
+                Objects.equals(balance, detail.balance);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, date, description, project, account, department, category, earning, expense, balance);
     }
 
     @Override

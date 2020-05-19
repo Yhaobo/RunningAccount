@@ -7,12 +7,14 @@ import erp.service.DetailService;
 import erp.util.MyException;
 import erp.util.ResultInfo;
 import erp.vo.req.DetailFilterVo;
+import erp.vo.resp.DetailRespVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -48,29 +50,30 @@ public class DetailController {
                     vo.setBackDate(calendar.getTime());
                 }
             }
-            List<Detail> detailList = detailService.findAll(vo);
-            PageSerializable<Detail> pageInfo = new PageSerializable<>(detailList);
+            List<DetailRespVo> detailRespVos = detailService.findAll(vo);
+            PageSerializable<DetailRespVo> pageInfo = new PageSerializable<>(detailRespVos);
             return new ResultInfo(true, pageInfo);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("[method:getAll]" + e.getMessage());
+            log.error("[method:getAll]" + e);
             return new ResultInfo(false, e.getMessage());
         }
     }
 
     @RequestMapping("/findOne")
     public ResultInfo findOne(int id) {
-        Detail detail = detailService.findOne(id);
+        Detail detail = detailService.findOneById(id);
         return new ResultInfo(true, detail);
     }
 
     @RequestMapping("/add")
     public synchronized ResultInfo add(Detail form) {
         try {
-            detailService.add(form);
-            return new ResultInfo(true);
+            detailService.insert(form);
+            return new ResultInfo(true, form.getId());
         } catch (Exception e) {
-            log.error("[method:add]" + e.getMessage());
+            log.error("[method:add]" + e);
+            e.printStackTrace();
             return new ResultInfo(false, "添加失败！请确认所有的栏目都已填写");
         }
     }
@@ -80,10 +83,10 @@ public class DetailController {
         try {
             detailService.update(form);
         } catch (MyException e) {
-            log.error("[method:update]" + e.getMessage());
+            log.error("[method:update]" + e);
             return new ResultInfo(false, e.getMessage());
         } catch (Exception e) {
-            log.error("[method:update]" + e.getMessage());
+            log.error("[method:update]" + e);
             return new ResultInfo(false, "修改失败!");
         }
         return new ResultInfo(true);
@@ -95,7 +98,7 @@ public class DetailController {
             detailService.delete(form);
             return new ResultInfo(true);
         } catch (Throwable t) {
-            log.error("[method:delete]" + t.getMessage());
+            log.error("[method:delete]" + t);
             return new ResultInfo(false, "删除失败!");
         }
     }
@@ -106,8 +109,47 @@ public class DetailController {
             detailService.updateAllBalance();
             return new ResultInfo(true);
         } catch (Throwable t) {
-            log.error("[method:updateBalance]" + t.getMessage());
+            log.error("[method:updateBalance]" + t);
             return new ResultInfo(false, "更新结存失败!");
+        }
+    }
+
+    @PostMapping("/addVouchers")
+    public synchronized ResultInfo addVouchers(MultipartFile file, Integer id) {
+        try {
+            detailService.insertVoucher(file, id);
+            return new ResultInfo(true);
+        } catch (Exception e) {
+            log.error("[method:addVouchers] " +e);
+            e.printStackTrace();
+            return new ResultInfo(false);
+        }
+    }
+
+    @PostMapping("/deleteVoucher")
+    public synchronized ResultInfo deleteVoucher(Integer voucherId) {
+        try {
+            detailService.deleteVoucher(voucherId);
+            return new ResultInfo(true);
+        } catch (Exception e) {
+            log.error("[method:deleteVoucher] " +e);
+            e.printStackTrace();
+            return new ResultInfo(false, "删除凭证失败");
+        }
+    }
+
+    @PostMapping("/vouchers")
+    public ResultInfo vouchers(Integer id) {
+        return new ResultInfo(true, detailService.listVoucher(id));
+    }
+
+    @GetMapping("/voucher/{fileName}")
+    public void voucher(@PathVariable String fileName, HttpServletResponse response) {
+        try {
+            detailService.listVoucherByUrl(fileName, response);
+        } catch (Exception e) {
+            log.error("[method:voucher] " + e);
+            e.printStackTrace();
         }
     }
 }

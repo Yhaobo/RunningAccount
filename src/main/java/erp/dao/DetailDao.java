@@ -4,11 +4,14 @@ import erp.dao.provider.DetailDaoProvider;
 import erp.domain.Detail;
 import erp.vo.req.DetailFilterVo;
 import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
+@Repository
 public interface DetailDao {
     /**
      * 查询所有
@@ -39,13 +42,14 @@ public interface DetailDao {
     BigDecimal findLatestBalance();
 
     /**
-     * 添加一条记录
+     * 添加一条记录, 并返回自增主键的 id 给 detail
      *
-     * @param form
+     * @param detail
      */
     @Insert("insert into detail values(null,#{date},#{description},#{project.id},#{account.id},#{department.id},#{category.id}," +
             "#{earning},#{expense},#{balance})")
-    void add(Detail form);
+    @Options(useGeneratedKeys = true, keyColumn = "d_id", keyProperty = "id")
+    void add(Detail detail);
 
     /**
      * 从Excel文件导入多条记录
@@ -161,4 +165,10 @@ public interface DetailDao {
     @SelectProvider(type = DetailDaoProvider.class, method = "listByFilterSql")
     @ResultMap("detailMap")
     List<Detail> listByFilter(DetailFilterVo vo);
+
+    /**
+     * @return 返回没有凭证的明细记录的id的Set集合
+     */
+    @Select("SELECT d.d_id FROM detail d LEFT JOIN voucher v ON v.d_id=d.d_id WHERE v.id IS NULL")
+    Set<Integer> listNoVoucherDetailId();
 }

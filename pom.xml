@@ -7,7 +7,7 @@
     <groupId>Yhaobo</groupId>
     <artifactId>erp</artifactId>
     <version>2.0</version>
-    <description>企业财务管理系统</description>
+    <description>企业财务流水管理系统</description>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -41,6 +41,12 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <!--druid连接池-->
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.1.20</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -51,49 +57,42 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- 解决idea无法找到junit错误 -->
         <dependency>
+            <!-- 解决idea无法找到junit错误 -->
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--编译时代码构建工具-->
         <dependency>
+            <!-- 字节码生成bean通用方法工具 -->
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
         </dependency>
-        <!-- 分页 -->
         <dependency>
+            <!-- 分页 -->
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>1.2.13</version>
         </dependency>
-        <!--热部署插件, 需设置idea-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <!--Shiro权限认证框架-->
-        <dependency>
+            <!--Shiro权限认证框架-->
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-spring-boot-web-starter</artifactId>
             <version>1.4.1</version>
         </dependency>
-        <!--导入导出excel-->
         <dependency>
+            <!--导入导出excel-->
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>4.1.0</version>
         </dependency>
-
-        <!--druid连接池-->
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-starter</artifactId>
-            <version>1.1.20</version>
+            <!--热部署插件, 需设置idea-->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
         </dependency>
-
     </dependencies>
 
     <dependencyManagement>
