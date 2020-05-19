@@ -232,6 +232,8 @@
             if ($('#imgModalBody').html()) {
                 // 如果有凭证图片, 则按钮显示为 查看凭证
                 $(`a[detail_id="${detailId}"]`).text('查看凭证');
+            } else {
+                $(`a[detail_id="${detailId}"]`).text('上传凭证');
             }
         });
 
@@ -404,7 +406,7 @@
                     if (detail.hasVoucher) {
                         html += '查看凭证</a>';
                     } else {
-                        html += '添加凭证</a>';
+                        html += '上传凭证</a>';
                     }
 
                     html += '         | <a href="javascript:;" onclick="edit(' + detail.id + ')">修改</a>' +
@@ -438,16 +440,18 @@
         });
     }
 
-    //显示凭证(图片弹出框)
+    // 显示凭证(图片弹出框)
     function showVoucher(detailId, detailInfo, isAdd) {
         const imgModal = $('#imgModal');
-        //将detailId放入自定义属性中, 方便上传凭证时获取
+        // 将detailId放入自定义属性中, 方便上传凭证时获取
         imgModal.attr('detail_id', detailId);
-        //清空之前的凭证
+        // 清空之前的凭证
         $('#imgModalBody').html('');
         if (isAdd) {
             // 新增记录后上传凭证操作
             $('#imgModalTitle').text(detailInfo);
+            // 清空上传文件列表
+            $('#voucherList').html('');
         } else {
             // 查看凭证操作
             if (detailInfo) {
@@ -455,7 +459,7 @@
                 // 清空上传文件列表
                 $('#voucherList').html('');
             }
-            $.get('detail/vouchers', {id: detailId}).done(function (result) {
+            $.post('detail/vouchers', {id: detailId}).done(function (result) {
                 if (result.flag) {
                     let html = '';
                     $(result.data).each(function (i, e) {
@@ -468,12 +472,15 @@
         imgModal.modal('show');
     }
 
+
     // 图片点击后显示tips
     function voucherTips(caller, voucherId, detailId) {
-        layer.tips(`<button type="button" class="layui-btn layui-btn-danger" onclick="deleteVoucher(${voucherId},${detailId})">删除</button>`, caller, {tips: [3, '#b3ffb0']})
+        layer.tips(`<button type="button" class="layui-btn layui-btn-danger" onclick="deleteVoucher(${voucherId},${detailId})">删除</button>`, caller, {tips: [3, '#b3ffb0']});
     }
 
     function deleteVoucher(voucherId, detailId) {
+        // 点击删除按钮后关闭tips
+        layer.closeAll();
         layer.confirm('确认删除此凭证?', {icon: 3}, function (index) {
             const loadIndex = layer.load(2);
             $.post("detail/deleteVoucher", {voucherId}).done(function (result) {
@@ -615,8 +622,6 @@
             show: true,
             backdrop: false
         });
-        // 添加点击事件(添加)
-        // submit("add");
     }
 
 
@@ -626,10 +631,12 @@
             $.post("detail/add", $("#addForm").serialize(), function (data) {
                 layer.close(load);
                 if (data.flag) {
-                    $('#addModal').modal('hide');
-                    layer.msg('操作成功, 请上传凭证(图片)', {icon: 6});
                     loadTable();
-                    showVoucher(data.data, '请上传凭证', true);
+                    layer.msg('操作成功, 请上传凭证(图片)', {icon: 6});
+                    $('#addModal').modal('hide');
+                    setTimeout(function () {
+                        showVoucher(data.data, '请上传凭证', true)
+                    }, 1500)
                 } else {
                     layer.alert(data.message, {icon: 5});
                 }

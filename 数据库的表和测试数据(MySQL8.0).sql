@@ -184,6 +184,20 @@ INSERT INTO `user` VALUES (1,'admin','b55209d0ffd2652ae7e4255fb6d661f1',0),(2,'v
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+-- ----------------------------
+-- Table structure for voucher
+-- ----------------------------
+DROP TABLE IF EXISTS `voucher`;
+CREATE TABLE `voucher` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `d_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `d_id` (`d_id`),
+  CONSTRAINT `voucher_ibfk_1` FOREIGN KEY (`d_id`) REFERENCES `detail` (`d_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

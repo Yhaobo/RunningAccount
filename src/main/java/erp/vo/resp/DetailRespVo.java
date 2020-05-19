@@ -9,7 +9,7 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * 用于返回前端页面的 VO
+ * 用于返回前端收支明细页面的 VO
  *
  * @author Yhaobo
  * @date 2020/5/16

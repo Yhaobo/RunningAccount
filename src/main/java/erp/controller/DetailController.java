@@ -55,7 +55,7 @@ public class DetailController {
             return new ResultInfo(true, pageInfo);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("[method:getAll]" + e.getMessage());
+            log.error("[method:getAll]" + e);
             return new ResultInfo(false, e.getMessage());
         }
     }
@@ -72,7 +72,7 @@ public class DetailController {
             detailService.insert(form);
             return new ResultInfo(true, form.getId());
         } catch (Exception e) {
-            log.error("[method:add]" + e.getMessage());
+            log.error("[method:add]" + e);
             e.printStackTrace();
             return new ResultInfo(false, "添加失败！请确认所有的栏目都已填写");
         }
@@ -83,10 +83,10 @@ public class DetailController {
         try {
             detailService.update(form);
         } catch (MyException e) {
-            log.error("[method:update]" + e.getMessage());
+            log.error("[method:update]" + e);
             return new ResultInfo(false, e.getMessage());
         } catch (Exception e) {
-            log.error("[method:update]" + e.getMessage());
+            log.error("[method:update]" + e);
             return new ResultInfo(false, "修改失败!");
         }
         return new ResultInfo(true);
@@ -98,7 +98,7 @@ public class DetailController {
             detailService.delete(form);
             return new ResultInfo(true);
         } catch (Throwable t) {
-            log.error("[method:delete]" + t.getMessage());
+            log.error("[method:delete]" + t);
             return new ResultInfo(false, "删除失败!");
         }
     }
@@ -109,7 +109,7 @@ public class DetailController {
             detailService.updateAllBalance();
             return new ResultInfo(true);
         } catch (Throwable t) {
-            log.error("[method:updateBalance]" + t.getMessage());
+            log.error("[method:updateBalance]" + t);
             return new ResultInfo(false, "更新结存失败!");
         }
     }
@@ -120,6 +120,7 @@ public class DetailController {
             detailService.insertVoucher(file, id);
             return new ResultInfo(true);
         } catch (Exception e) {
+            log.error("[method:addVouchers] " +e);
             e.printStackTrace();
             return new ResultInfo(false);
         }
@@ -131,13 +132,13 @@ public class DetailController {
             detailService.deleteVoucher(voucherId);
             return new ResultInfo(true);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("[method:deleteVoucher] " +e);
             e.printStackTrace();
             return new ResultInfo(false, "删除凭证失败");
         }
     }
 
-    @RequestMapping("/vouchers")
+    @PostMapping("/vouchers")
     public ResultInfo vouchers(Integer id) {
         return new ResultInfo(true, detailService.listVoucher(id));
     }
@@ -147,7 +148,7 @@ public class DetailController {
         try {
             detailService.listVoucherByUrl(fileName, response);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("[method:voucher] " + e);
             e.printStackTrace();
         }
     }

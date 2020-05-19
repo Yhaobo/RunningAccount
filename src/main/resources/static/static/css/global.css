@@ -3,9 +3,7 @@
     font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
 }
 
-/*
-导航栏
- */
+/*导航栏*/
 #header {
     position: fixed;
     width: 100%;
@@ -13,6 +11,59 @@
     margin: 0;
     height: 50px;
     z-index: 999;
+}
+
+.layui-table-view .layui-form-select {
+    display: none;
+}
+
+.layui-table-tool-temp select, .layui-table-tool-temp input {
+    display: inline;
+    width: 13%;
+    height: 33px;
+}
+
+.layui-table-tool-temp button {
+    height: 36px;
+    font-size: 1.1em;
+    margin-left: 5px;
+}
+
+table {
+    width: 100%;
+    margin: 0 auto;
+}
+
+table, td, th {
+    border: 1px solid #ddd;
+    text-align: center !important;
+}
+
+table td {
+    height: 35px;
+    font-size: 1.1em !important;
+}
+
+table th {
+    background: #f5f5f5;
+    font-size: 1.4em !important;
+}
+
+table caption {
+    margin-top: 50px;
+    font-size: 1.7em;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+}
+
+/*模态框宽度*/
+.modal-slg {
+    width: 95%;
+}
+
+.layui-laypage-skip {
+    color: #333 !important;
 }
 
 
@@ -72,56 +123,3 @@
 /*body > div:nth-child(2) {*/
 /*    height: 50px;*/
 /*}*/
-
-.layui-table-view .layui-form-select {
-    display: none;
-}
-
-.layui-table-tool-temp select, .layui-table-tool-temp input {
-    display: inline;
-    width: 13%;
-    height: 33px;
-}
-
-.layui-table-tool-temp button {
-    height: 36px;
-    font-size: 1.1em;
-    margin-left: 5px;
-}
-
-table {
-    width: 100%;
-    margin: 0 auto;
-}
-
-table, td, th {
-    border: 1px solid #ddd;
-    text-align: center !important;
-}
-
-table td {
-    height: 35px;
-    font-size: 1.1em !important;
-}
-
-table th {
-    background: #f5f5f5;
-    font-size: 1.4em !important;
-}
-
-table caption {
-    margin-top: 50px;
-    font-size: 1.7em;
-    font-weight: bold;
-    text-align: center;
-    color: #333;
-}
-
-/*模态框宽度*/
-.modal-slg {
-    width: 98%;
-}
-
-.layui-laypage-skip {
-    color: #333 !important;
-}
