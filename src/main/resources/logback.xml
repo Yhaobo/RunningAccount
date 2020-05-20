@@ -11,7 +11,7 @@
     <!-- 输出error log 至统一日志文件中 -->
     <appender name="ERROR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>D:/cai_wu_shu_jv/log/error/${HOSTNAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>log/error/${HOSTNAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- 根据日志文件按天回滚，保存时间为30天，30天之前的都将被清理掉 -->
             <maxHistory>365</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">

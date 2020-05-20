@@ -54,7 +54,7 @@ spring:
       # 上传文件大小限制
       max-file-size: 500KB
       # 一次请求大小限制
-      max-request-size: 50MB
+      max-request-size: 10MB
 server:
   port: 8080
 

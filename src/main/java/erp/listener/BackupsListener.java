@@ -30,7 +30,7 @@ public class BackupsListener implements HttpSessionListener {
     // 需要备份的数据库名
     @Value("${datasource.database}")
     private String database;
-    @Value("${dataFile.location}")
+    @Value("${home.location}")
     private String location;
 
     @Override
@@ -56,7 +56,7 @@ public class BackupsListener implements HttpSessionListener {
             File file = new File(filepath);
             //自动创建父目录
             if (!file.getParentFile().exists()) {
-                if (file.getParentFile().mkdirs()) {
+                if (!file.getParentFile().mkdirs()) {
                     throw new RuntimeException("创建备份目录失败");
                 }
             }

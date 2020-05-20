@@ -31,7 +31,7 @@ public class DetailService {
     private DetailDao detailDao;
     private VoucherDao voucherDao;
 
-    @Value("${dataFile.location}")
+    @Value("${home.location}")
     private String location;
 
     private String parentPath = "voucher\\";
@@ -74,7 +74,7 @@ public class DetailService {
         return detailDao.findOne(id);
     }
 
-    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void insert(Detail form) {
         //处理空值
         if (form.getDescription().length() < 1) {
@@ -95,7 +95,7 @@ public class DetailService {
         handleLaterBalance(form.getDate(), form.getEarning().subtract(form.getExpense()));
     }
 
-    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void update(Detail form) throws Exception {
         //判断id是否为表单默认值0
         if (form.getId() == 0) {
@@ -137,7 +137,7 @@ public class DetailService {
      *
      * @param form
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void delete(Detail form) throws MyException {
         // 删除本地凭证文件
         String[] urls = voucherDao.listUrlByDetailId(form.getId());
@@ -153,7 +153,7 @@ public class DetailService {
     /**
      * 根据每一笔收入支出来更新所有记录的结存
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void updateAllBalance() {
         List<Detail> detailList = detailDao.findAll();
         BigDecimal balance = new BigDecimal(0);
@@ -170,7 +170,7 @@ public class DetailService {
      * @param file 图片凭证文件
      * @param id   对应的一条记录的id
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void insertVoucher(MultipartFile file, Integer id) throws Exception {
         String uuid = MyUtils.uuid();
         String url = uuid + "_" + LocalDate.now().toString() + "_" + file.getOriginalFilename();
@@ -222,7 +222,7 @@ public class DetailService {
      *
      * @param voucherId
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 10)
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void deleteVoucher(Integer voucherId) throws MyException {
         // 获取文件名
         String fileName = voucherDao.getUrlById(voucherId);
