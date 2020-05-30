@@ -15,7 +15,7 @@
     <div id="filter" hidden>
         <form action="javascript:;" class="filterForm" autocomplete="off">
             <span style="font-size: 1.2em">条件查询: </span>
-            <select name="groupPolicy" class="form-control formChildren" onchange="filter()">
+            <select name="groupPolicy" class="form-control formChildren" onchange="filter(true)">
                 <option value="month">按月</option>
                 <option value="year">按年</option>
             </select>
@@ -127,11 +127,6 @@
                 bottom: '3%',
                 containLabel: true
             },
-            // toolbox: {
-            //     feature: {
-            //         saveAsImage: {}
-            //     }
-            // },
             xAxis: {
                 type: 'category',
                 boundaryGap: true,
@@ -276,7 +271,7 @@
         // 将分页栏放入表格尾部
         $('.layui-table-page').html(pageData.div);
 
-        // 渲染日期范围
+        // 渲染日期范围选择器
         layui.laydate.render({
             elem: $('.layui-table-tool-temp .duringDate')[0]
             , range: '~'
@@ -293,7 +288,11 @@
     }
 
     // 条件查询
-    function filter() {
+    function filter(isClear) {
+        if (isClear) {
+            // 重置时间范围选择器
+            $('.layui-table-tool-temp .duringDate').val('');
+        }
         copyFormData(true);
         pageData.pageNum = 1;
         filterData.groupPolicy = $('.layui-table-view select[name="groupPolicy"]').val();

@@ -3,11 +3,13 @@ package erp.util;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -16,6 +18,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExportExcelUtil {
+    /**
+     * <p>
+     * 导出带有头部标题行的Excel <br>
+     * 时间格式默认：yyyy-MM-dd hh:mm:ss <br>
+     * </p>
+     *
+     * @param title    表格标题
+     * @param headers  头部标题集合
+     * @param dataset  数据集合
+     * @param response HttpServletResponse
+     */
+    public static <T> void exportExcelToRemote(String fileName, String title, String[] headers, Collection<T> dataset, HttpServletResponse response) throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        response.setContentType("application/vnd.ms-excel");
+        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xlsx");
+        exportExcel2007(title, headers, dataset, response.getOutputStream(), "yyyy-MM-dd HH:mm:ss");
+    }
 
     /**
      * <p>

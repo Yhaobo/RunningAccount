@@ -228,6 +228,8 @@
     function pageInit() {
         // 为凭证模态框添加隐藏事件处理
         $('#imgModal').on('hide.bs.modal', function () {
+            // 关闭图片删除tips,防止误删除
+            layer.closeAll();
             const detailId = $('#imgModal').attr('detail_id');
             if ($('#imgModalBody').html()) {
                 // 如果有凭证图片, 则按钮显示为 查看凭证
@@ -261,7 +263,7 @@
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
             $(".projectFilter").html(html);
-            $(".projectSelect").html(html);
+            $("#addForm .projectSelect").html(html);
         });
         // 获取所有账户
         $.get("setting/findAccounts", function (data) {
@@ -275,7 +277,7 @@
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
             $(".accountFilter").html(html);
-            $(".accountSelect").html(html);
+            $("#addForm .accountSelect").html(html);
         });
         // 获取所有部门
         $.get("setting/findDepartments", function (data) {
@@ -289,7 +291,7 @@
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
             $(".departmentFilter").html(html);
-            $(".departmentSelect").html(html);
+            $("#addForm .departmentSelect").html(html);
         });
         // 获取所有分类
         $.get("setting/findCategorys", function (data) {
@@ -306,7 +308,7 @@
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
             $(".categoryFilter").html(html);
-            $(".categorySelect").html(html);
+            $("#addForm .categorySelect").html(html);
         });
 
         renderDate();
@@ -463,7 +465,7 @@
                 if (result.flag) {
                     let html = '';
                     $(result.data).each(function (i, e) {
-                        html += `<img src="detail/voucher/${e.url}" onclick="voucherTips(this,${e.id},${detailId})"/>`;
+                        html += ` <img src="detail/voucher/${e.url}" onclick="voucherTips(this,${e.id},${detailId})"/> `;
                     });
                     $('#imgModalBody').html(html);
                 }
@@ -617,7 +619,6 @@
         $("#addModalTitle").text("添加");
         // 自动获取当前日期
         $("#addDate").val(dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
-        loadSelects(true);
         $('#addModal').modal({
             show: true,
             backdrop: false
@@ -631,9 +632,9 @@
             $.post("detail/add", $("#addForm").serialize(), function (data) {
                 layer.close(load);
                 if (data.flag) {
+                    $('#addModal').modal('hide');
                     loadTable();
                     layer.msg('操作成功, 请上传凭证(图片)', {icon: 6});
-                    $('#addModal').modal('hide');
                     setTimeout(function () {
                         showVoucher(data.data, '请上传凭证', true)
                     }, 1500)
@@ -669,9 +670,7 @@
                 echoData.departmentId = data.data.department.id;
 
                 $("#hidden_id").val(id);
-                loadSelects(false);
-                // $("#modalTitle").text("修改");
-                // $("#delete").removeClass("hidden");
+                loadSelects();
                 $('#alterModal').modal({
                     show: true,
                     backdrop: false
@@ -681,7 +680,7 @@
     }
 
     // 加载模态框所有选项
-    function loadSelects(isAdd) {
+    function loadSelects() {
         // 加载所有项目
         const projectOptions = selectData.projectOptions;
         let html = '<option value="">--请选择项目--</option>';
@@ -690,13 +689,13 @@
         }
         for (let i = 0; i < projectOptions.length; i++) {
             let option = projectOptions[i];
-            if (!isAdd && echoData.projectId && option.id === echoData.projectId) {
+            if (echoData.projectId && option.id === echoData.projectId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $(".projectSelect").html(html);
+        $("#alterForm .projectSelect").html(html);
 
         // 加载所有账户
         const accountOptions = selectData.accountOptions;
@@ -706,13 +705,13 @@
         }
         for (let i = 0; i < accountOptions.length; i++) {
             let option = accountOptions[i];
-            if (!isAdd && echoData.accountId && option.id === echoData.accountId) {
+            if (echoData.accountId && option.id === echoData.accountId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $(".accountSelect").html(html);
+        $("#alterForm .accountSelect").html(html);
 
         // 加载所有分类
         const categoryOptions = selectData.categoryOptions;
@@ -722,13 +721,13 @@
         }
         for (let i = 0; i < categoryOptions.length; i++) {
             let option = categoryOptions[i];
-            if (!isAdd && echoData.categoryId && option.id === echoData.categoryId) {
+            if (echoData.categoryId && option.id === echoData.categoryId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $(".categorySelect").html(html);
+        $("#alterForm .categorySelect").html(html);
 
         // 加载所有部门
         const departmentOptions = selectData.departmentOptions;
@@ -738,13 +737,13 @@
         }
         for (let i = 0; i < departmentOptions.length; i++) {
             let option = departmentOptions[i];
-            if (!isAdd && echoData.departmentId && option.id === echoData.departmentId) {
+            if (echoData.departmentId && option.id === echoData.departmentId) {
                 html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
             } else {
                 html += '<option value="' + option.id + '">' + option.name + '</option>';
             }
         }
-        $(".departmentSelect").html(html);
+        $("#alterForm .departmentSelect").html(html);
     }
 
     // 表单提交

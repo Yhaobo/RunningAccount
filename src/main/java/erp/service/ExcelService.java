@@ -2,7 +2,7 @@ package erp.service;
 
 import erp.dao.DetailDao;
 import erp.domain.Detail;
-import erp.util.ExportExcelWrapper;
+import erp.util.ExportExcelUtil;
 import erp.util.ImportExcelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class ExcelService {
      */
     public void export(HttpServletResponse response) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         List<Detail> data = dao.findAll();
-        ExportExcelWrapper.exportExcelToRemote(fileName, title, headers, data, response);
+        ExportExcelUtil.exportExcelToRemote(fileName, title, headers, data, response);
     }
 
     /**
