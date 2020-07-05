@@ -386,7 +386,7 @@
                                     <th lay-data="{field:'earning'}">收入</th>
                                     <th lay-data="{field:'expense'}">支出</th>
                                     <th lay-data="{field:'balance'}">结存</th>
-                                    <th lay-data="{field:'operation',hide:${!canAlter}}">操作</th>
+                                    <th lay-data="{field:'operation'}">操作</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -402,18 +402,25 @@
                         '            <td>' + detail.category.name + '</td>\n' +
                         '            <td>' + detail.formatEarning + '</td>\n' +
                         '            <td>' + detail.formatExpense + '</td>\n' +
-                        '            <td>' + detail.formatBalance + '</td>' +
-                        '<td><a href="javascript:;" detail_id="' + detail.id + '" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')">';
-
-                    if (detail.hasVoucher) {
+                        '            <td>' + detail.formatBalance + '</td>';
+                    let operateVoucher = '<td><a href="javascript:;" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')">';
+                    if (canAlter && detail.hasVoucher) {
+                        html += operateVoucher;
+                        html += '查看凭证</a>';
+                    } else if (canAlter) {
+                        html += operateVoucher;
+                        html += '上传凭证</a>';
+                    } else if (!canAlter && detail.hasVoucher) {
+                        html += operateVoucher;
                         html += '查看凭证</a>';
                     } else {
-                        html += '上传凭证</a>';
+                        html += '<td><span>暂无凭证</span>';
                     }
 
-                    html += '         | <a href="javascript:;" onclick="edit(' + detail.id + ')">修改</a>' +
-                        '            </td>\n' +
-                        '    </tr> ';
+                    if (canAlter) {
+                        html += ' | <a href="javascript:;" onclick="edit(' + detail.id + ')">修改</a>';
+                    }
+                    html += '</td></tr>';
                 }
                 html += '</tbody>';
                 $("#details").html(html);

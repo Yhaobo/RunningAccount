@@ -120,6 +120,6 @@ table caption {
 */
 
 /*用body下的第二个div来填充导航栏的位置*/
-/*body > div:nth-child(2) {*/
-/*    height: 50px;*/
-/*}*/
+/*body > div:nth-child(2) {
+   height: 50px;
+}*/

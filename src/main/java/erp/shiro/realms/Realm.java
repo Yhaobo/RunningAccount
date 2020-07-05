@@ -52,7 +52,7 @@ public class Realm extends AuthorizingRealm {
         } else {
             //使用用户名为盐值
             ByteSource salt = ByteSource.Util.bytes(user.getU_username());
-            Object principal = user.getU_level();
+            Integer principal = user.getU_level();
             return new SimpleAuthenticationInfo(principal, user.getU_password(), salt, user.getU_username());
         }
     }
