@@ -18,28 +18,20 @@ public interface DetailDao {
      *
      * @return
      */
-    @Select("SELECT * FROM detail d " + "ORDER BY d_date DESC")
+    @Select("SELECT * FROM detail FORCE INDEX(d_date) ORDER BY d_date DESC")
     @Results(id = "detailMap", value = {
             @Result(id = true, column = "d_id", property = "id"),
             @Result(column = "d_date", property = "date"),
             @Result(column = "d_description", property = "description"),
-            @Result(column = "c_id", property = "category", one = @One(select = "erp.dao.ForeignTableDao.findCategoryById")),
-            @Result(column = "a_id", property = "account", one = @One(select = "erp.dao.ForeignTableDao.findAccountById")),
-            @Result(column = "p_id", property = "project", one = @One(select = "erp.dao.ForeignTableDao.findProjectById")),
-            @Result(column = "dep_id", property = "department", one = @One(select = "erp.dao.ForeignTableDao.findDepartmentById")),
+            @Result(column = "c_id", property = "category", one = @One(select = "erp.dao.ForeignTableDao.getCategoryById")),
+            @Result(column = "a_id", property = "account", one = @One(select = "erp.dao.ForeignTableDao.getAccountById")),
+            @Result(column = "p_id", property = "project", one = @One(select = "erp.dao.ForeignTableDao.getProjectById")),
+            @Result(column = "dep_id", property = "department", one = @One(select = "erp.dao.ForeignTableDao.getDepartmentById")),
             @Result(column = "d_earning", property = "earning"),
             @Result(column = "d_expense", property = "expense"),
             @Result(column = "d_balance", property = "balance")
     })
-    List<Detail> findAll();
-
-    /**
-     * 查询最新的结存
-     *
-     * @return
-     */
-    @Select("SELECT d_balance FROM detail ORDER BY d_date DESC LIMIT 1")
-    BigDecimal findLatestBalance();
+    List<Detail> listAll();
 
     /**
      * 添加一条记录, 并返回自增主键的 id 给 detail
@@ -57,20 +49,7 @@ public interface DetailDao {
      * @param details
      */
     @InsertProvider(type = DetailDaoProvider.class, method = "addByBatchSql")
-    void addByBatch(List<Detail> details);
-
-    /**
-     * 添加一条记录
-     *
-     * @param detail 从excel解析得到的实体类(外键引用的属性只有name, 没有id)
-     */
-    @Insert("insert into detail values(null,#{date},#{description}," +
-            "(select id from project where name=#{project.name})," +
-            "(select id from account where name=#{account.name})," +
-            "(select id from department where name=#{department.name})," +
-            "(select id from category where name=#{category.name})," +
-            "#{earning},#{expense},#{balance})")
-    void addByExcel(Detail detail);
+    void insertFromExcelByBatch(List<Detail> details);
 
     /**
      * 根据id查找记录
@@ -78,24 +57,9 @@ public interface DetailDao {
      * @param id
      * @return
      */
-    @Select("SELECT * FROM detail d " +
-            "LEFT JOIN category c ON c.id=d.c_id " +
-            "LEFT JOIN account a ON a.id=d.a_id " +
-            "LEFT JOIN project p ON p.id=d.p_id " +
-            "LEFT JOIN department dep ON dep.id=d.dep_id " +
-            "WHERE d_id=#{id} ")
+    @Select("SELECT * FROM detail d WHERE d_id=#{id} ")
     @ResultMap("detailMap")
-    Detail findOne(int id);
-
-    /**
-     * 查询date时间之后的所有记录
-     *
-     * @param date
-     * @return
-     */
-    @Select("select * from detail where d_date>#{date} order by d_date ")
-    @ResultMap("detailMap")
-    List<Detail> findLaterList(Date date);
+    Detail getById(int id);
 
     /**
      * 修改一条记录
@@ -138,17 +102,6 @@ public interface DetailDao {
     Detail findBeforeOne(Date date);
 
     /**
-     * 查询两个时间之间(不包括)的所有记录
-     *
-     * @param before
-     * @param late
-     * @return
-     */
-    @Select("select * from detail where d_date>#{before} and d_date<#{late} order by d_date")
-    @ResultMap("detailMap")
-    List<Detail> findBetweenList(@Param("before") Date before, @Param("late") Date late);
-
-    /**
      * 根据id删除一条记录
      *
      * @param id
@@ -167,7 +120,9 @@ public interface DetailDao {
     List<Detail> listByFilter(DetailFilterVo vo);
 
     /**
-     * @return 返回没有凭证的明细记录的id的Set集合
+     * 返回没有凭证的明细记录的id的Set集合
+     *
+     * @return
      */
     @Select("SELECT d.d_id FROM detail d LEFT JOIN voucher v ON v.d_id=d.d_id WHERE v.id IS NULL")
     Set<Integer> listNoVoucherDetailId();

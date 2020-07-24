@@ -71,7 +71,7 @@ public class DetailService {
 
     @Transactional(readOnly = true)
     public Detail findOneById(int id) {
-        return detailDao.findOne(id);
+        return detailDao.getById(id);
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 30)
@@ -109,7 +109,7 @@ public class DetailService {
             form.setExpense(new BigDecimal(0));
         }
         //获取被修改之前的旧记录
-        Detail old = detailDao.findOne(form.getId());
+        Detail old = detailDao.getById(form.getId());
         //处理修改时间之后的结存不一致
         if (form.getDate().compareTo(old.getDate()) < 0) {
             //时间提前
@@ -155,7 +155,7 @@ public class DetailService {
      */
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void updateAllBalance() {
-        List<Detail> detailList = detailDao.findAll();
+        List<Detail> detailList = detailDao.listAll();
         BigDecimal balance = new BigDecimal(0);
         for (int i = detailList.size() - 1; i >= 0; i--) {
             balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));

@@ -10,7 +10,7 @@ import java.util.List;
  * @date 2020/5/15
  */
 public class VoucherDaoProvider {
-    public String addByBatchSql(List<Voucher> vouchers) {
+    public String insertByBatchSql(List<Voucher> vouchers) {
         return new SQL() {{
             INSERT_INTO("voucher");
             INTO_COLUMNS("url, d_id");

@@ -16,8 +16,8 @@ import java.util.List;
  */
 @Repository
 public interface VoucherDao {
-    @InsertProvider(type = VoucherDaoProvider.class, method = "addByBatchSql")
-    void addByBatch(List<Voucher> vouchers);
+    @InsertProvider(type = VoucherDaoProvider.class, method = "insertByBatchSql")
+    void insertByBatch(List<Voucher> vouchers);
 
     @Insert("insert into voucher(url,d_id) values(#{url},#{d_id})")
     void insert(Voucher voucher);

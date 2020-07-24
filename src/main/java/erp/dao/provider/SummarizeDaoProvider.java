@@ -16,9 +16,9 @@ public class SummarizeDaoProvider {
                     //所有
                     SELECT(" m.date date, m.earning earning, m.expense expense, d.d_balance balance");
                     FROM("(SELECT DATE_FORMAT(d_date,'%Y-%m') monthly, SUM(d_earning) earning, SUM(d_expense) expense,MAX(d_date) date FROM detail GROUP BY monthly) m");
-                    JOIN("detail d ON d.d_date=m.date");
+                    JOIN(" detail d ON d.d_date=m.date");
                     if (vo.getBackDate() != null && vo.getFrontDate() != null) {
-                        WHERE("d_date between #{frontDate} and #{backDate}");
+                        WHERE(" d_date between #{frontDate} and #{backDate}");
                     }
                     ORDER_BY("date DESC");
                 } else {

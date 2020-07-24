@@ -16,12 +16,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User findOneByUser(User form) {
-        return userDao.findOneByUser(form);
+        return userDao.getByUser(form);
     }
 
     @Transactional(readOnly = true)
     public User findByUsername(String username) {
-        return userDao.findByUsername(username);
+        return userDao.getByUsername(username);
     }
 
     public void updateByUser(User user) {

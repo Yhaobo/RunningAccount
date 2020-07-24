@@ -18,22 +18,22 @@ public class SettingService {
 
     @Transactional(readOnly = true)
     public List<Category> findCategorys() {
-        return dao.findAllCategory();
+        return dao.listCategory();
     }
 
     @Transactional(readOnly = true)
     public List<Department> findDepartments() {
-        return dao.findAllDepartment();
+        return dao.listDepartment();
     }
 
     @Transactional(readOnly = true)
     public List<Account> findAccounts() {
-        return dao.findAllAccount();
+        return dao.listAccount();
     }
 
     @Transactional(readOnly = true)
     public List<Project> findProjects() {
-        return dao.findAllProject();
+        return dao.listProject();
     }
 
     public void addCategory(Category category) {

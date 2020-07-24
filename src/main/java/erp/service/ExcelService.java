@@ -37,7 +37,7 @@ public class ExcelService {
      * @throws IOException
      */
     public void export(HttpServletResponse response) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-        List<Detail> data = dao.findAll();
+        List<Detail> data = dao.listAll();
         ExportExcelUtil.exportExcelToRemote(fileName, title, headers, data, response);
     }
 
@@ -53,6 +53,6 @@ public class ExcelService {
      */
     @Transactional(rollbackFor = Exception.class,timeout = 10)
     public void importing(InputStream in) throws NoSuchFieldException, InstantiationException, IllegalAccessException, ParseException, IOException {
-        dao.addByBatch(ImportExcelUtil.Importing(in));
+        dao.insertFromExcelByBatch(ImportExcelUtil.Importing(in));
     }
 }

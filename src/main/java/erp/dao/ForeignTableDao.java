@@ -18,28 +18,28 @@ import java.util.List;
 @Repository
 public interface ForeignTableDao {
     @Select("select id, name from account where id=#{id}")
-    Account findAccountById(int id);
+    Account getAccountById(int id);
 
     @Select("select id, name from category where id=#{id}")
-    Category findCategoryById(int id);
+    Category getCategoryById(int id);
 
     @Select("select id, name from department where id=#{id}")
-    Department findDepartmentById(int id);
+    Department getDepartmentById(int id);
 
     @Select("select id, name from project where id=#{id}")
-    Project findProjectById(int id);
+    Project getProjectById(int id);
 
-    @Select("select id, name from account order by id")
-    List<Account> findAllAccount();
+    @Select("select id, name from account ")
+    List<Account> listAccount();
 
-    @Select("select id, name from category order by id")
-    List<Category> findAllCategory();
+    @Select("select id, name from category ")
+    List<Category> listCategory();
 
-    @Select("select id, name from department order by id")
-    List<Department> findAllDepartment();
+    @Select("select id, name from department ")
+    List<Department> listDepartment();
 
-    @Select("select id, name from project order by id")
-    List<Project> findAllProject();
+    @Select("select id, name from project ")
+    List<Project> listProject();
 
     @Insert("insert into ${tableName}(name) values(#{entity.name})")
     void insert(@Param("tableName") String tableName, @Param("entity") Object entity);

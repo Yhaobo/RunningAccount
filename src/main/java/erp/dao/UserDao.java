@@ -11,10 +11,10 @@ import java.util.List;
 public interface UserDao {
 
     @Select("select * from user where u_username=#{u_username} and u_password=#{u_password}")
-    User findOneByUser(User form);
+    User getByUser(User form);
 
     @Select("select * from user where u_username=#{username}")
-    User findByUsername(String username);
+    User getByUsername(String username);
 
     @Update("update user set u_password=#{u_password},u_username=#{u_username} where u_level=#{u_level}")
     void updateByUser(User user);

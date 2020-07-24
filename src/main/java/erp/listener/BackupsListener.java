@@ -51,10 +51,9 @@ public class BackupsListener implements HttpSessionListener {
             String fileName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
             // 需要备份到的路径
             String filepath = location +"sql\\"+ fileName + ".sql";
-            //如果地址有空格，为解决找不到路径所以用了这个方式
-//            String path = new URL(filepath).getPath();
+
             File file = new File(filepath);
-            //自动创建父目录
+            // 自动创建父目录
             if (!file.getParentFile().exists()) {
                 if (!file.getParentFile().mkdirs()) {
                     throw new RuntimeException("创建备份目录失败");
