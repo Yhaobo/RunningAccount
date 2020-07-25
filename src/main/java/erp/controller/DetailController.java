@@ -30,10 +30,10 @@ public class DetailController {
     private DetailService detailService;
 
     @RequestMapping("/getAll")
-    public ResultInfo getAll(DetailFilterVo vo, String duringDate, Integer pageNum, Integer pageSize) {
+    public ResultInfo getAll(DetailFilterVo vo, String duringDate) {
         try {
             // 分页
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(vo.getPageNum(), vo.getPageSize());
 
             //处理日期格式
             if (!StringUtils.isEmpty(duringDate)) {
@@ -139,16 +139,16 @@ public class DetailController {
     }
 
     @PostMapping("/vouchers")
-    public ResultInfo vouchers(Integer id) {
-        return new ResultInfo(true, detailService.listVoucher(id));
+    public ResultInfo listVoucherByDetailId(Integer id) {
+        return new ResultInfo(true, detailService.listVoucherByDetailId(id));
     }
 
     @GetMapping("/voucher/{fileName}")
-    public void voucher(@PathVariable String fileName, HttpServletResponse response) {
+    public void listVoucherByUrl(@PathVariable String fileName, HttpServletResponse response) {
         try {
             detailService.listVoucherByUrl(fileName, response);
         } catch (Exception e) {
-            log.error("[method:voucher] " + e);
+            log.error("[method:listVoucherByUrl] " + e);
             e.printStackTrace();
         }
     }

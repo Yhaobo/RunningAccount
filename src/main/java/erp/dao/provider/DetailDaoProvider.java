@@ -18,7 +18,7 @@ public class DetailDaoProvider {
             if (vo.getBackDate() != null && vo.getFrontDate() != null) {
                 WHERE("d_date between #{frontDate} and #{backDate}");
             }
-            if (vo.getDescription() != null && vo.getDescription().length() > 0) {
+            if (vo.getDescription() != null && vo.getDescription().length() > 2) {
                 WHERE("d_description like #{description}");
             }
             if (vo.getProjectId() != null) {
@@ -40,7 +40,7 @@ public class DetailDaoProvider {
     public String addByBatchSql(List<Detail> list) {
         return new SQL() {{
             INSERT_INTO("detail");
-            INTO_COLUMNS("d_date,d_description,p_id,a_id,dep_id,c_id,d_earning,d_expense,d_balance");
+            INTO_COLUMNS("d_date,d_description,p_id,a_id,dep_id,c_id,d_earning,d_expense");
             for (int i = 0; i < list.size(); i++) {
                 INTO_VALUES(
                         "#{list[" + i + "].date},#{list[" + i + "].description}," +
@@ -48,7 +48,7 @@ public class DetailDaoProvider {
                                 "(select id from account where name=#{list[" + i + "].account.name})," +
                                 "(select id from department where name=#{list[" + i + "].department.name})," +
                                 "(select id from category where name=#{list[" + i + "].category.name})," +
-                                "#{list[" + i + "].earning},#{list[" + i + "].expense},0}");
+                                "#{list[" + i + "].earning},#{list[" + i + "].expense}");
                 ADD_ROW();
             }
         }}.toString();

@@ -120,10 +120,10 @@ public interface DetailDao {
     List<Detail> listByFilter(DetailFilterVo vo);
 
     /**
-     * 返回没有凭证的明细记录的id的Set集合
+     * 返回拥有凭证的明细记录的id的Set集合
      *
      * @return
      */
-    @Select("SELECT d.d_id FROM detail d LEFT JOIN voucher v ON v.d_id=d.d_id WHERE v.id IS NULL")
-    Set<Integer> listNoVoucherDetailId();
+    @Select("SELECT d_id FROM voucher ")
+    Set<Integer> listDetailIdFromVouchers();
 }

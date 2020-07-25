@@ -210,6 +210,7 @@
         , pageSize: 25
         , total: null // 总条数
         , isRender: true // 是否渲染分页条
+        , div: null // 分页条
     };
 
     // 下拉框数据
@@ -332,6 +333,9 @@
                 // 首次不执行
                 if (!isFirst) {
                     loadTable();
+                    if (pageData.total) {
+                        obj.count = pageData.total;
+                    }
                 }
             }
         });
@@ -370,7 +374,6 @@
         const data = $('.layui-table-tool-temp .filterForm').serialize() + `&pageNum=${pageData.pageNum}&pageSize=${pageData.pageSize}`;
         $.get('detail/getAll', data, function (result) {
             layer.close(loadIndex);
-
             if (result.flag) {
                 const pageInfo = result.data;
                 pageData.total = pageInfo.total;
@@ -403,7 +406,7 @@
                         '            <td>' + detail.formatEarning + '</td>\n' +
                         '            <td>' + detail.formatExpense + '</td>\n' +
                         '            <td>' + detail.formatBalance + '</td>';
-                    let operateVoucher = '<td><a href="javascript:;" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')">';
+                    let operateVoucher = '<td><a href="javascript:;" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')" detail_id="' + detail.id + '">';
                     if (canAlter && detail.hasVoucher) {
                         html += operateVoucher;
                         html += '查看凭证</a>';
@@ -425,14 +428,18 @@
                 html += '</tbody>';
                 $("#details").html(html);
 
-                //只渲染分页条一次
+                // 只渲染分页条一次
                 if (pageData.isRender) {
                     renderPage();
                     pageData.isRender = false;
                 }
 
-                //渲染原始表格
+                // 渲染原始表格
                 renderTable();
+
+                // 页面返回顶部
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
             }
         });
     }

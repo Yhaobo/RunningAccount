@@ -45,8 +45,8 @@ public class DetailService {
     public List<DetailRespVo> findAll(DetailFilterVo vo) {
         // 所有收支记录DO
         List details = detailDao.listByFilter(vo);
-        // 没有凭证的收支记录的id集合
-        Set<Integer> noVoucherDetailIdSet = detailDao.listNoVoucherDetailId();
+        // 拥有凭证的收支记录的id集合
+        Set<Integer> DetailIdFromVouchers = detailDao.listDetailIdFromVouchers();
         for (int i = 0; i < details.size(); i++) {
             Detail detail = (Detail) details.get(i);
             // 用于返回前端的VO
@@ -54,12 +54,12 @@ public class DetailService {
             // 将DO的数据传递给VO
             BeanUtils.copyProperties(detail, detailRespVo);
 
-            if (noVoucherDetailIdSet.contains(detail.getId())) {
-                // 没有凭证
-                detailRespVo.setHasVoucher(false);
-            } else {
+            if (DetailIdFromVouchers.contains(detail.getId())) {
                 // 有凭证
                 detailRespVo.setHasVoucher(true);
+            } else {
+                // 没有凭证
+                detailRespVo.setHasVoucher(false);
             }
             details.set(i, detailRespVo);
         }
@@ -191,11 +191,11 @@ public class DetailService {
     }
 
     /**
-     * @param d_id detail的id
+     * @param dId detail的id
      * @return 返回对应d_id的所有voucher图片的地址
      */
-    public List<Voucher> listVoucher(Integer d_id) {
-        return voucherDao.listVoucher(d_id);
+    public List<Voucher> listVoucherByDetailId(Integer dId) {
+        return voucherDao.listVoucher(dId);
     }
 
     /**
@@ -207,7 +207,6 @@ public class DetailService {
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(filePath));
              OutputStream outputStream = response.getOutputStream()) {
             byte[] data = new byte[4096];
-
             int len;
             while ((len = inputStream.read(data)) != -1) {
                 outputStream.write(data, 0, len);

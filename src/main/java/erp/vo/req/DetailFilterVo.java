@@ -18,6 +18,8 @@ public class DetailFilterVo implements Serializable {
     private Integer accountId;
     private Integer departmentId;
     private Integer categoryId;
+    private int pageNum;
+    private int pageSize;
 
     public void setDescription(String description) {
         this.description = "%" + description + "%";
