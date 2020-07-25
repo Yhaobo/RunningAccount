@@ -40,7 +40,6 @@ public class ImportExcelUtil {
             entity.setCategory(new Category(row.getCell(5).getStringCellValue()));
             entity.setEarning(new BigDecimal(row.getCell(6).getStringCellValue()));
             entity.setExpense(new BigDecimal(row.getCell(7).getStringCellValue()));
-            entity.setBalance(new BigDecimal(row.getCell(8).getStringCellValue()));
             //添加到list
             list.add(entity);
         }

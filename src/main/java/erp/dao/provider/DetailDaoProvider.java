@@ -48,7 +48,7 @@ public class DetailDaoProvider {
                                 "(select id from account where name=#{list[" + i + "].account.name})," +
                                 "(select id from department where name=#{list[" + i + "].department.name})," +
                                 "(select id from category where name=#{list[" + i + "].category.name})," +
-                                "#{list[" + i + "].earning},#{list[" + i + "].expense},#{list[" + i + "].balance}");
+                                "#{list[" + i + "].earning},#{list[" + i + "].expense},0}");
                 ADD_ROW();
             }
         }}.toString();

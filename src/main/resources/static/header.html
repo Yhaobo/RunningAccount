@@ -267,6 +267,7 @@
             return;
         }
         layer.confirm("确认导入Excel吗?", {icon: 3}, function () {
+            const loadIdx = layer.load(2);
             const data = new FormData($('#header_file_form')[0]);
             $.ajax({
                 type: 'post',
@@ -275,14 +276,20 @@
                 processData: false,
                 data: data,
                 success: function (result) {
+                    layer.close(loadIdx);
                     if (result.flag) {
                         layer.msg('导入成功!', {icon: 6});
                         pageInit();
                     } else {
+                        if (!result.message) {
+                            layer.msg('请刷新页面后重试',{icon: 5})
+                            return;
+                        }
                         layer.msg(result.message, {icon: 5});
                     }
                 },
                 error: function () {
+                    layer.close(loadIdx);
                     layer.msg('导入失败!', {icon: 5});
                 }
             })

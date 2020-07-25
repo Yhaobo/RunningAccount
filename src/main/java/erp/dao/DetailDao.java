@@ -18,7 +18,7 @@ public interface DetailDao {
      *
      * @return
      */
-    @Select("SELECT * FROM detail FORCE INDEX(d_date) ORDER BY d_date DESC")
+    @Select("SELECT * FROM detail ORDER BY d_date DESC")
     @Results(id = "detailMap", value = {
             @Result(id = true, column = "d_id", property = "id"),
             @Result(column = "d_date", property = "date"),
@@ -41,7 +41,7 @@ public interface DetailDao {
     @Insert("insert into detail values(null,#{date},#{description},#{project.id},#{account.id},#{department.id},#{category.id}," +
             "#{earning},#{expense},#{balance})")
     @Options(useGeneratedKeys = true, keyColumn = "d_id", keyProperty = "id")
-    void add(Detail detail);
+    void insert(Detail detail);
 
     /**
      * 从Excel文件导入多条记录

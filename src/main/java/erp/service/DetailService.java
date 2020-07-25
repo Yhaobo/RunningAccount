@@ -90,7 +90,7 @@ public class DetailService {
         //设置结存
         handleBalance(form);
         //添加到数据库
-        detailDao.add(form);
+        detailDao.insert(form);
         //如果是插入时间是以前,就需要调整本次插入记录之后的所有记录的结存
         handleLaterBalance(form.getDate(), form.getEarning().subtract(form.getExpense()));
     }
@@ -172,7 +172,7 @@ public class DetailService {
      */
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void insertVoucher(MultipartFile file, Integer id) throws Exception {
-        String uuid = MyUtils.uuid();
+        String uuid = MyUtils.getUUID();
         String url = uuid + "_" + LocalDate.now().toString() + "_" + file.getOriginalFilename();
         String filePath = getLocalVoucherFilePath(url);
 
