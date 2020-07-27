@@ -153,7 +153,7 @@ public class DetailService {
     /**
      * 根据每一笔收入支出来更新所有记录的结存
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 30)
+    @Transactional(rollbackFor = Exception.class)
     public void updateAllBalance() {
         List<Detail> detailList = detailDao.listAll();
         BigDecimal balance = new BigDecimal(0);

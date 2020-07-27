@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageSerializable;
 import erp.domain.Detail;
 import erp.service.DetailService;
+import erp.service.ExcelService;
 import erp.util.MyException;
 import erp.util.ResultInfo;
 import erp.vo.req.DetailFilterVo;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -28,6 +30,9 @@ import java.util.List;
 public class DetailController {
     @Autowired
     private DetailService detailService;
+
+    @Autowired
+    private ExcelService excelService;
 
     @RequestMapping("/getAll")
     public ResultInfo getAll(DetailFilterVo vo, String duringDate) {
@@ -150,6 +155,32 @@ public class DetailController {
         } catch (Exception e) {
             log.error("[method:listVoucherByUrl] " + e);
             e.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/excel/export")
+    public void export(HttpServletResponse response) throws IOException {
+        try {
+            excelService.export(response);
+        } catch (Exception e) {
+            log.error("[method:export]" + e.getMessage());
+        }
+    }
+
+    @RequestMapping("/excel/importing")
+    public synchronized ResultInfo importing(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return new ResultInfo(false);
+        }
+        try {
+            excelService.importing(file.getInputStream());
+            return new ResultInfo(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("[method:importing]" + e.getMessage());
+            return new ResultInfo(false,"导入失败!");
+        } finally {
+            file.getInputStream().close();
         }
     }
 }

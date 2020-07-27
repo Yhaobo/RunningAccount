@@ -6,7 +6,7 @@
             <a class="navbar-brand dropdown-toggle " data-toggle="dropdown" role="button" aria-haspopup="true"
                aria-expanded="false" style="width: 300px">企业财务流水管理系统<span class="caret"></span></a>
             <ul class="dropdown-menu">
-                <li class="hidden"><a href="excel/export" class="glyphicon glyphicon-export"> 导出所有数据为Excel</a></li>
+                <li class="hidden"><a href="detail/excel/export" class="glyphicon glyphicon-export"> 导出所有数据为Excel</a></li>
                 <li role="separator" class="divider hidden"></li>
                 <li class="hidden"><a href="javascript:;" onclick="updateBalance()" class="glyphicon glyphicon-refresh">
                     重新计算并更新所有结存</a>
@@ -271,7 +271,7 @@
             const data = new FormData($('#header_file_form')[0]);
             $.ajax({
                 type: 'post',
-                url: 'excel/importing',
+                url: 'detail/excel/importing',
                 contentType: false,
                 processData: false,
                 data: data,
