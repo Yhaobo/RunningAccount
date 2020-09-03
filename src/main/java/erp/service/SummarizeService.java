@@ -21,11 +21,11 @@ import java.util.List;
  * @date 2020/3/28
  */
 @Service
-@Transactional(readOnly = true)
 public class SummarizeService {
     @Autowired
     private SummarizeDao summarizeDao;
 
+    @Transactional(readOnly = true)
     public List<DetailRespVo> listByFilter(SummarizeFilterVo vo) throws ParseException {
         //处理日期格式
         if (!StringUtils.isEmpty(vo.getDuringDate())) {

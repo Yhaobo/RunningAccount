@@ -18,6 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExportExcelUtil {
+    private static Pattern p = Pattern.compile("^//d+(//.//d+)?$");
+
     /**
      * <p>
      * 导出带有头部标题行的Excel <br>
@@ -105,7 +107,7 @@ public class ExportExcelUtil {
         Field[] fields;
         Field field;
         XSSFRichTextString richString;
-        Pattern p = Pattern.compile("^//d+(//.//d+)?$");
+
         Matcher matcher;
         String fieldName;
         String getMethodName;

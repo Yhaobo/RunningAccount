@@ -8,11 +8,10 @@
     <link rel="stylesheet" href="static/layui/css/layui.css" media="all"/>
     <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
     <link href="static/css/global.css" rel="stylesheet" type="text/css"/>
-
 </head>
 <body>
 <header id="header"></header>
-<main>
+<main id="vue">
     <h3 style="margin-top: 60px;text-align: center; font-weight: bold;">收支明细</h3>
     <!--条件查询-->
     <div id="filter" hidden>
@@ -20,15 +19,67 @@
             <span style="font-size: 1.2em">条件查询: </span>
             <input type="text" class="layui-input duringDate formChildren" placeholder="请选择时间范围" name="duringDate">
             <input type="text" class="form-control formChildren" placeholder="请输入摘要关键字"
-                   name="description" onchange="filter()">
-            <select name="projectId" class="formChildren form-control projectFilter" onchange="filter()"></select>
-            <select name="accountId" class="formChildren form-control accountFilter" onchange="filter()"></select>
-            <select name="departmentId" class="formChildren form-control departmentFilter" onchange="filter()"></select>
-            <select name="categoryId" class="formChildren form-control categoryFilter" onchange="filter()"></select>
+                   name="description" onchange="vue.filter()">
+            <select name="projectId" class="formChildren form-control projectFilter" onchange="vue.filter()">
+                <!--                <option v-if="selectData.projectOptions.length>1" value="">&#45;&#45;请选择项目&#45;&#45;</option>-->
+                <!--                <option v-for="option in selectData.projectOptions" :value="option.id">{{option.name}}</option>-->
+            </select>
+            <select name="accountId" class="formChildren form-control accountFilter" onchange="vue.filter()">
+                <!--                <option v-if="selectData.accountOptions.length>1" value="">&#45;&#45;请选择账户&#45;&#45;</option>-->
+                <!--                <option v-for="option in selectData.accountOptions" :value="option.id">{{option.name}}</option>-->
+            </select>
+            <select name="departmentId" class="formChildren form-control departmentFilter" onchange="vue.filter()">
+                <!--                <option v-if="selectData.departmentOptions.length>1" value="">&#45;&#45;请选择部门&#45;&#45;</option>-->
+                <!--                <option v-for="option in selectData.departmentOptions" :value="option.id">{{option.name}}</option>-->
+            </select>
+            <select name="categoryId" class="formChildren form-control categoryFilter" onchange="vue.filter()">
+                <!--                <option v-if="selectData.categoryOptions.length>1" value="">&#45;&#45;请选择分类&#45;&#45;</option>-->
+                <!--                <option v-for="option in selectData.categoryOptions" :value="option.id">{{option.name}}</option>-->
+            </select>
         </form>
     </div>
     <!--列表-->
-    <table id="details" lay-filter="table" hidden></table>
+    <table id="details" lay-filter="table" hidden>
+        <caption>收支明细</caption>
+        <thead>
+        <tr>
+            <th lay-data="{field:'date',sort:true}">日期</th>
+            <th lay-data="{field:'description'}">摘要</th>
+            <th lay-data="{field:'project'}">项目</th>
+            <th lay-data="{field:'account'}">账户</th>
+            <th lay-data="{field:'department'}">部门</th>
+            <th lay-data="{field:'category'}">分类</th>
+            <th lay-data="{field:'earning'}">收入</th>
+            <th lay-data="{field:'expense'}">支出</th>
+            <th lay-data="{field:'balance'}">结存</th>
+            <th lay-data="{field:'operation'}">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!--        <tr v-for="detail in pageInfo.list">-->
+        <!--            <td>{{dateFormat(new Date(detail.date), "yyyy-MM-dd")}}</td>-->
+        <!--            <td>{{detail.description}}</td>-->
+        <!--            <td>{{detail.project.name}}</td>-->
+        <!--            <td>{{detail.account.name}}</td>-->
+        <!--            <td>{{detail.department.name}}</td>-->
+        <!--            <td>{{detail.category.name}}</td>-->
+        <!--            <td>{{detail.formatEarning}}</td>-->
+        <!--            <td>{{detail.formatExpense}}</td>-->
+        <!--            <td>{{detail.formatBalance}}</td>-->
+        <!--            <td>-->
+        <!--                <a href="javascript:;"-->
+        <!--                   @click="showVoucher(detail.id , dateFormat(new Date(detail.date), 'yyyy-MM-dd HH:mm'))"-->
+        <!--                   :detail_id="detail.id">-->
+        <!--                    <span v-if="canAlter && detail.hasVoucher">查看凭证</span>-->
+        <!--                    <span v-else-if="canAlter">上传凭证</span>-->
+        <!--                    <span v-else-if="!canAlter && detail.hasVoucher">查看凭证</span>-->
+        <!--                    <span v-else>暂无凭证</span>-->
+        <!--                </a>-->
+        <!--                <span v-if="canAlter"> | <a href="javascript:;"  @click="edit( detail.id)">修改</a></span>-->
+        <!--            </td>-->
+        <!--        </tr>-->
+        </tbody>
+    </table>
     <!--分页-->
     <div id="page">
         <div></div>
@@ -66,23 +117,43 @@
                                            name="description">
                                 </td>
                                 <td>
-                                    <select class="form-control projectSelect" name="project.id"></select>
+                                    <select class="form-control projectSelect" name="project.id">
+                                        <option v-if="selectData.projectOptions.length>1" value="">--请选择项目--</option>
+                                        <option v-for="option in selectData.projectOptions" :value="option.id">
+                                            {{option.name}}
+                                        </option>
+                                    </select>
                                 </td>
                                 <td>
-                                    <select class="form-control accountSelect" name="account.id"></select>
+                                    <select class="form-control accountSelect" name="account.id">
+                                        <option v-if="selectData.accountOptions.length>1" value="">--请选择账户--</option>
+                                        <option v-for="option in selectData.accountOptions" :value="option.id">
+                                            {{option.name}}
+                                        </option>
+                                    </select>
                                 </td>
                                 <td>
-                                    <select class="form-control departmentSelect" name="department.id"></select>
+                                    <select class="form-control departmentSelect" name="department.id">
+                                        <option v-if="selectData.departmentOptions.length>1" value="">--请选择部门--</option>
+                                        <option v-for="option in selectData.departmentOptions" :value="option.id">
+                                            {{option.name}}
+                                        </option>
+                                    </select>
                                 </td>
                                 <td>
-                                    <select class="form-control categorySelect" name="category.id"></select>
+                                    <select class="form-control categorySelect" name="category.id">
+                                        <option v-if="selectData.categoryOptions.length>1" value="">--请选择分类--</option>
+                                        <option v-for="option in selectData.categoryOptions" :value="option.id">
+                                            {{option.name}}
+                                        </option>
+                                    </select>
                                 </td>
                                 <td>
-                                    <input type="number" class="form-control" placeholder="收入"
+                                    <input type="text" class="form-control number-input" placeholder="收入"
                                            name="earning">
                                 </td>
                                 <td>
-                                    <input type="number" class="form-control" placeholder="支出"
+                                    <input type="text" class="form-control number-input" placeholder="支出"
                                            name="expense">
                                 </td>
                             </tr>
@@ -90,7 +161,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addSubmit()">提交</button>
+                    <button type="button" class="btn btn-primary" @click="addSubmit()">提交</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -142,11 +213,11 @@
                                     <select class="form-control categorySelect" name="category.id"></select>
                                 </td>
                                 <td>
-                                    <input type="number" class="form-control" id="earning" placeholder="收入"
+                                    <input type="text" class="form-control number-input" id="earning" placeholder="收入"
                                            name="earning">
                                 </td>
                                 <td>
-                                    <input type="number" class="form-control" id="expense" placeholder="支出"
+                                    <input type="text" class="form-control number-input" id="expense" placeholder="支出"
                                            name="expense">
                                 </td>
                             </tr>
@@ -154,8 +225,9 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="alterSubmit">提交</button>
-                    <button type="button" class="btn btn-danger" id="delete">删除</button>
+                    <button type="button" class="btn btn-primary" id="alterSubmit" @click="alterFormSubmit()">提交
+                    </button>
+                    <button type="button" class="btn btn-danger" id="delete" @click="deleteDetail()">删除</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -196,596 +268,589 @@
     </div>
 </main>
 
-
 <!--    注意: 要先导入jquery的js文件, 再导入bootstrap的js文件-->
 <script src="static/layui/layui.all.js"></script>
 <script src="static/js/jquery-3.4.1.min.js"></script>
 <script src="static/bootstrap/js/bootstrap.min.js"></script>
 <script src="static/js/util.js"></script>
 <script src="static/js/loadHeader.js"></script>
+<script src="static/js/vue.min.js"></script>
 <script>
-    // 分页数据
-    let pageData = {
-        pageNum: 1
-        , pageSize: 25
-        , total: null // 总条数
-        , isRender: true // 是否渲染分页条
-        , div: null // 分页条
-    };
+    let vue = new Vue({
+        el: "#vue",
+        data: {
+            //登录用户是否有修改和添加权限
+            canAlter: false,
+            //分页信息
+            pageInfo: {
+                pageNum: 1
+                , pageSize: 25
+                , total: null // 总条数
+                , isRender: true // 是否渲染分页条
+                , div: null // 分页条
+            },
+            //下拉框数据
+            selectData: {
+                projectOptions: []
+                , accountOptions: []
+                , categoryOptions: []
+                , departmentOptions: []
+            },
+            //修改记录回显数据
+            echoData: {
+                projectId: null,
+                accountId: null,
+                categoryId: null,
+                departmentId: null,
+            }
+        },
 
-    // 下拉框数据
-    let selectData = {
-        projectOptions: null
-        , accountOptions: null
-        , categoryOptions: null
-        , departmentOptions: null
-    };
+        methods: {
+            pageInit() {
+                // 加载表格数据
+                this.loadTable();
 
-    // 登录用户是否有修改和添加权限
-    let canAlter = false;
-
-    pageInit();
-
-    function pageInit() {
-        // 为凭证模态框添加隐藏事件处理
-        $('#imgModal').on('hide.bs.modal', function () {
-            // 关闭图片删除tips,防止误删除
-            layer.closeAll();
-            const detailId = $('#imgModal').attr('detail_id');
-            if ($('#imgModalBody').html()) {
-                // 如果有凭证图片, 则按钮显示为 查看凭证
-                $(`a[detail_id="${detailId}"]`).text('查看凭证');
-            } else {
-                $(`a[detail_id="${detailId}"]`).text('上传凭证');
-            }
-        });
-
-        // 根据登录用户的角色来开启或隐藏部分功能
-        $.get('user/getLevel').done(function (result) {
-            if (result.flag) {
-                if (result.data === 0 || result.data === 1) {
-                    canAlter = true;
-                }
-            }
-        });
-
-        // 加载表格数据
-        loadTable();
-
-        // 获取所有项目
-        $.get("setting/findProjects", function (data) {
-            selectData.projectOptions = data.data;
-            let html = '<option value="">--请选择项目--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-            $(".projectFilter").html(html);
-            $("#addForm .projectSelect").html(html);
-        });
-        // 获取所有账户
-        $.get("setting/findAccounts", function (data) {
-            selectData.accountOptions = data.data;
-            let html = '<option value="">--请选择账户--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-            $(".accountFilter").html(html);
-            $("#addForm .accountSelect").html(html);
-        });
-        // 获取所有部门
-        $.get("setting/findDepartments", function (data) {
-            selectData.departmentOptions = data.data;
-            let html = '<option value="">--请选择部门--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-            $(".departmentFilter").html(html);
-            $("#addForm .departmentSelect").html(html);
-        });
-        // 获取所有分类
-        $.get("setting/findCategorys", function (data) {
-            selectData.categoryOptions = data.data;
-            if (!data.flag) {
-                location.href = "index.html";
-            }
-            let html = '<option value="">--请选择分类--</option>';
-            if (data.data.length === 1) {
-                html = '';
-            }
-            for (let i = 0; i < data.data.length; i++) {
-                let option = data.data[i];
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-            $(".categoryFilter").html(html);
-            $("#addForm .categorySelect").html(html);
-        });
-
-        renderDate();
-
-        renderUpload();
-    }
-
-    function renderPage() {
-        let pageDiv = $('#page');
-        // 渲染分页
-        layui.laypage.render({
-            elem: pageDiv
-            , count: pageData.total  // 数据总数
-            , limit: pageData.pageSize
-            , layout: ['prev', 'page', 'next', 'count', 'limit', 'skip']
-            , limits: [25, 50, 100, 1000, 10000, 100000]
-            , jump: function (obj, isFirst) {
-                // obj包含了当前分页的所有参数，比如：
-                pageData.pageNum = obj.curr; //得到当前页，以便向服务端请求对应页的数据
-                pageData.pageSize = obj.limit; // 得到每页显示的条数
-                // 首次不执行
-                if (!isFirst) {
-                    loadTable();
-                    if (pageData.total) {
-                        obj.count = pageData.total;
+                // 获取所有项目
+                $.get("setting/findProjects", function (result) {
+                    vue.selectData.projectOptions = result.data;
+                    let html = '<option value="">--所有项目--</option>';
+                    if (result.data.length === 1) {
+                        html = '';
                     }
-                }
-            }
-        });
-        pageData.div = pageDiv;
-        pageDiv.remove();
-    }
-
-    // 条件查询
-    function filter() {
-        pageData.pageNum = 1;
-        copyFormData(true);
-        pageData.isRender = true;
-        loadTable();
-    }
-
-    // 复制表单数据
-    function copyFormData(isReverse) {
-        const source = $('#filter>form').children('.formChildren');
-        const target = $('.layui-table-tool-temp form').children('.formChildren');
-        if (isReverse) {
-            // 从target到source
-            target.each(function (i, e) {
-                source.eq(i).val($(e).val());
-            });
-        } else {
-            // 从source到target
-            source.each(function (i, e) {
-                target.eq(i).val($(e).val());
-            });
-        }
-    }
-
-    // 加载表格数据
-    function loadTable() {
-        const loadIndex = layer.load(2);
-        const data = $('.layui-table-tool-temp .filterForm').serialize() + `&pageNum=${pageData.pageNum}&pageSize=${pageData.pageSize}`;
-        $.get('detail/getAll', data, function (result) {
-            layer.close(loadIndex);
-            if (result.flag) {
-                const pageInfo = result.data;
-                pageData.total = pageInfo.total;
-                let html = `<caption>收支明细</caption>
-                            <thead>
-                                <tr>
-                                    <th lay-data="{field:'date',sort:true}">日期</th>
-                                    <th lay-data="{field:'description'}">摘要</th>
-                                    <th lay-data="{field:'project'}">项目</th>
-                                    <th lay-data="{field:'account'}">账户</th>
-                                    <th lay-data="{field:'department'}">部门</th>
-                                    <th lay-data="{field:'category'}">分类</th>
-                                    <th lay-data="{field:'earning'}">收入</th>
-                                    <th lay-data="{field:'expense'}">支出</th>
-                                    <th lay-data="{field:'balance'}">结存</th>
-                                    <th lay-data="{field:'operation'}">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
-                for (let i = 0; i < pageInfo.list.length; i++) {
-                    let detail = pageInfo.list[i];
-                    html += '<tr>\n' +
-                        '            <td>' + dateFormat(new Date(detail.date), "yyyy-MM-dd") + '</td>\n' +
-                        '            <td>' + detail.description + '</td>\n' +
-                        '            <td>' + detail.project.name + '</td>\n' +
-                        '            <td>' + detail.account.name + '</td>\n' +
-                        '            <td>' + detail.department.name + '</td>\n' +
-                        '            <td>' + detail.category.name + '</td>\n' +
-                        '            <td>' + detail.formatEarning + '</td>\n' +
-                        '            <td>' + detail.formatExpense + '</td>\n' +
-                        '            <td>' + detail.formatBalance + '</td>';
-                    let operateVoucher = '<td><a href="javascript:;" onclick="showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')" detail_id="' + detail.id + '">';
-                    if (canAlter && detail.hasVoucher) {
-                        html += operateVoucher;
-                        html += '查看凭证</a>';
-                    } else if (canAlter) {
-                        html += operateVoucher;
-                        html += '上传凭证</a>';
-                    } else if (!canAlter && detail.hasVoucher) {
-                        html += operateVoucher;
-                        html += '查看凭证</a>';
-                    } else {
-                        html += '<td><span>暂无凭证</span>';
+                    for (let i = 0; i < result.data.length; i++) {
+                        let option = result.data[i];
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
                     }
-
-                    if (canAlter) {
-                        html += ' | <a href="javascript:;" onclick="edit(' + detail.id + ')">修改</a>';
-                    }
-                    html += '</td></tr>';
-                }
-                html += '</tbody>';
-                $("#details").html(html);
-
-                // 只渲染分页条一次
-                if (pageData.isRender) {
-                    renderPage();
-                    pageData.isRender = false;
-                }
-
-                // 渲染原始表格
-                renderTable();
-
-                // 页面返回顶部
-                document.body.scrollTop = 0;
-                document.documentElement.scrollTop = 0;
-            }
-        });
-    }
-
-    //渲染模态框里的日期输入框
-    function renderDate() {
-        layui.laydate.render({
-            elem: $('#addDate')[0]
-            , type: 'datetime'
-        });
-        layui.laydate.render({
-            elem: $('#alterDate')[0]
-            , type: 'datetime'
-        });
-    }
-
-    // 显示凭证(图片弹出框)
-    function showVoucher(detailId, detailInfo, isAdd) {
-        const imgModal = $('#imgModal');
-        // 将detailId放入自定义属性中, 方便上传凭证时获取
-        imgModal.attr('detail_id', detailId);
-        // 清空之前的凭证
-        $('#imgModalBody').html('');
-        if (isAdd) {
-            // 新增记录后上传凭证操作
-            $('#imgModalTitle').text(detailInfo);
-            // 清空上传文件列表
-            $('#voucherList').html('');
-        } else {
-            // 查看凭证操作
-            if (detailInfo) {
-                $('#imgModalTitle').text('日期为: ' + detailInfo + ' 的凭证');
-                // 清空上传文件列表
-                $('#voucherList').html('');
-            }
-            $.post('detail/vouchers', {id: detailId}).done(function (result) {
-                if (result.flag) {
-                    let html = '';
-                    $(result.data).each(function (i, e) {
-                        html += ` <img src="detail/voucher/${e.url}" onclick="voucherTips(this,${e.id},${detailId})"/> `;
-                    });
-                    $('#imgModalBody').html(html);
-                }
-            });
-        }
-        imgModal.modal('show');
-    }
-
-
-    // 图片点击后显示tips
-    function voucherTips(caller, voucherId, detailId) {
-        layer.tips(`<button type="button" class="layui-btn layui-btn-danger" onclick="deleteVoucher(${voucherId},${detailId})">删除</button>`, caller, {tips: [3, '#b3ffb0']});
-    }
-
-    function deleteVoucher(voucherId, detailId) {
-        // 点击删除按钮后关闭tips
-        layer.closeAll();
-        layer.confirm('确认删除此凭证?', {icon: 3}, function (index) {
-            const loadIndex = layer.load(2);
-            $.post("detail/deleteVoucher", {voucherId}).done(function (result) {
-                layer.close(loadIndex);
-                if (result.flag) {
-                    layer.msg("删除凭证成功", {icon: 6});
-                    showVoucher(detailId);
-                } else {
-                    layer.alert(result.message, {icon: 5});
-                }
-            });
-            layer.close(index);
-        });
-    }
-
-    // 渲染layui上传组件
-    function renderUpload() {
-        // 图片显示模态框内
-        const voucherListView = $("#voucherList");
-        const editUploadListIns = layui.upload.render({
-            elem: '#uploadVoucher'
-            , url: 'detail/addVouchers' //上传接口
-            , auto: false
-            , bindAction: '#uploadVoucherSubmit'
-            , size: 500
-            , multiple: true
-            , data: {
-                id: function () {
-                    return $('#imgModal').attr('detail_id');
-                }
-            }
-            , choose: function (obj) {
-                var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
-                //读取本地文件
-                obj.preview(function (index, file, result) {
-                    var tr = $(['<tr id="upload-' + index + '">'
-                        , '<td>' + file.name + '</td>'
-                        , '<td>' + (file.size / 1024).toFixed(1) + 'kb</td>'
-                        , '<td>等待上传</td>'
-                        , '<td>'
-                        , '<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
-                        , '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
-                        , '</td>'
-                        , '</tr>'].join(''));
-
-                    //单个重传
-                    tr.find('.demo-reload').on('click', function () {
-                        obj.upload(index, file);
-                    });
-
-                    //删除
-                    tr.find('.demo-delete').on('click', function () {
-                        delete files[index]; //删除对应的文件
-                        tr.remove();
-                        editUploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
-                    });
-
-                    voucherListView.append(tr);
+                    $(".projectFilter").html(html);
                 });
-            }
-            , done: function (res, index, upload) {
-                if (res.flag) { //上传成功
-                    var tr = voucherListView.find('tr#upload-' + index)
-                        , tds = tr.children();
-                    tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
-                    tds.eq(3).html(''); //清空操作
-                    return delete this.files[index]; //删除文件队列已经上传成功的文件
+                // 获取所有账户
+                $.get("setting/findAccounts", function (data) {
+                    vue.selectData.accountOptions = data.data;
+                    let html = '<option value="">--所有账户--</option>';
+                    if (data.data.length === 1) {
+                        html = '';
+                    }
+                    for (let i = 0; i < data.data.length; i++) {
+                        let option = data.data[i];
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                    $(".accountFilter").html(html);
+                });
+                // 获取所有部门
+                $.get("setting/findDepartments", function (data) {
+                    vue.selectData.departmentOptions = data.data;
+                    let html = '<option value="">--所有部门--</option>';
+                    if (data.data.length === 1) {
+                        html = '';
+                    }
+                    for (let i = 0; i < data.data.length; i++) {
+                        let option = data.data[i];
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                    $(".departmentFilter").html(html);
+                });
+                // 获取所有分类
+                $.get("setting/findCategorys", function (data) {
+                    vue.selectData.categoryOptions = data.data;
+                    if (!data.flag) {
+                        location.href = "index.html";
+                    }
+                    let html = '<option value="">--所有分类--</option>';
+                    if (data.data.length === 1) {
+                        html = '';
+                    }
+                    for (let i = 0; i < data.data.length; i++) {
+                        let option = data.data[i];
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                    $(".categoryFilter").html(html);
+                });
+            },
+
+            renderPage() {
+                let pageDiv = $('#page');
+                // 渲染分页
+                layui.laypage.render({
+                    elem: pageDiv
+                    , count: vue.pageInfo.total  // 数据总数
+                    , limit: vue.pageInfo.pageSize
+                    , layout: ['prev', 'page', 'next', 'count', 'limit', 'skip']
+                    , limits: [25, 50, 100, 1000]
+                    , jump: function (obj, isFirst) {
+                        // obj包含了当前分页的所有参数，比如：
+                        vue.pageInfo.pageNum = obj.curr; //得到当前页，以便向服务端请求对应页的数据
+                        vue.pageInfo.pageSize = obj.limit; // 得到每页显示的条数
+                        // 首次不执行
+                        if (!isFirst) {
+                            vue.loadTable();
+                            obj.count = vue.pageInfo.total;
+                        }
+                    }
+                });
+                this.pageInfo.div = pageDiv;
+                pageDiv.remove();
+            },
+            // 条件查询
+            filter() {
+                this.pageInfo.pageNum = 1;
+                this.copyFormData(true);
+                this.pageInfo.isRender = true;
+                this.loadTable();
+            },
+            // 复制表单数据
+            copyFormData(isReverse) {
+                const source = $('#filter>form').children('.formChildren');
+                const target = $('.layui-table-tool-temp form').children('.formChildren');
+                if (isReverse) {
+                    // 从target到source
+                    target.each(function (i, e) {
+                        source.eq(i).val($(e).val());
+                    });
+                } else {
+                    // 从source到target
+                    source.each(function (i, e) {
+                        target.eq(i).val($(e).val());
+                    });
                 }
-                this.error(index, upload);
-            }
-            , allDone: function (resultInfo) {
-                // layer.msg('全部上传成功', {icon: 6});
-                // voucherListView.html('');
-                showVoucher($('#imgModal').attr('detail_id'));
-            }
-            , error: function (index, upload) {
-                var tr = voucherListView.find('tr#upload-' + index)
-                    , tds = tr.children();
-                tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
-                tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
-            }
-        })
-    }
+            },
+            // 加载表格数据
+            loadTable() {
+                const loadIndex = layer.load(2);
+                const data = $('.layui-table-tool-temp .filterForm').serialize() + `&pageNum=${this.pageInfo.pageNum}&pageSize=${this.pageInfo.pageSize}`;
+                $.get('detail/getAll', data, function (result) {
+                    layer.close(loadIndex);
+                    if (result.flag) {
+                        const pageInfo = result.data;
+                        vue.pageInfo.total = pageInfo.total;
+                        let html = '';
+                        for (let i = 0; i < pageInfo.list.length; i++) {
+                            let detail = pageInfo.list[i];
+                            html += '<tr>\n' +
+                                '            <td>' + dateFormat(new Date(detail.date), "yyyy-MM-dd") + '</td>\n' +
+                                '            <td>' + detail.description + '</td>\n' +
+                                '            <td>' + detail.project.name + '</td>\n' +
+                                '            <td>' + detail.account.name + '</td>\n' +
+                                '            <td>' + detail.department.name + '</td>\n' +
+                                '            <td>' + detail.category.name + '</td>\n' +
+                                '            <td>' + detail.formatEarning + '</td>\n' +
+                                '            <td>' + detail.formatExpense + '</td>\n' +
+                                '            <td>' + detail.formatBalance + '</td>';
 
-    // 使用layui的动态表格
-    function renderTable() {
-        // 渲染表格
-        layui.table.init('table', {
-            title: '收支明细'
-            , limit: pageData.pageSize
-            , toolbar: true
-            , page: true
-        });
+                            let operateVoucher = '<td><a href="javascript:;" onclick="vue.showVoucher(' + detail.id + ',\'' + dateFormat(new Date(detail.date), "yyyy-MM-dd HH:mm") + '\')" detail_id="' + detail.id + '">';
+                            if (vue.canAlter && detail.hasVoucher) {
+                                html += operateVoucher;
+                                html += '查看凭证</a>';
+                            } else if (vue.canAlter) {
+                                html += operateVoucher;
+                                html += '上传凭证</a>';
+                            } else if (!vue.canAlter && detail.hasVoucher) {
+                                html += operateVoucher;
+                                html += '查看凭证</a>';
+                            } else {
+                                html += '<td><span>暂无凭证</span>';
+                            }
+                            if (vue.canAlter) {
+                                html += ' | <a href="javascript:;" onclick="vue.alter(' + detail.id + ')">修改</a>';
+                            }
+                            html += '</td></tr>';
+                        }
+                        $("#details>tbody").html(html);
 
-        // 将过滤div和添加按钮放入表格头部
-        $('.layui-table-tool-temp').html($('#filter').html());
-        if (canAlter) {
-            $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="add()"
+                        // 只渲染分页条一次
+                        if (vue.pageInfo.isRender) {
+                            vue.renderPage();
+                            vue.pageInfo.isRender = false;
+                        }
+
+                        // 渲染原始表格
+                        vue.renderTable();
+                        // 页面返回顶部
+                        document.body.scrollTop = 0;
+                        document.documentElement.scrollTop = 0;
+                        this.renderTableFlag = false;
+                    }
+                });
+            },
+            //渲染模态框里的日期输入框
+            renderDate() {
+                layui.laydate.render({
+                    elem: $('#addDate')[0]
+                    , type: 'datetime'
+                });
+                layui.laydate.render({
+                    elem: $('#alterDate')[0]
+                    , type: 'datetime'
+                });
+            },
+            //显示凭证(图片弹出框)
+            showVoucher(detailId, detailInfo, isAdd) {
+                const imgModal = $('#imgModal');
+                // 将detailId放入自定义属性中, 方便上传凭证时获取
+                imgModal.attr('detail_id', detailId);
+                // 清空之前的凭证
+                $('#imgModalBody').html('');
+                if (isAdd) {
+                    // 新增记录后上传凭证操作
+                    $('#imgModalTitle').text(detailInfo);
+                    // 清空上传文件列表
+                    $('#voucherList').html('');
+                } else {
+                    // 查看凭证操作
+                    if (detailInfo) {
+                        $('#imgModalTitle').text('日期为: ' + detailInfo + ' 的凭证');
+                        // 清空上传文件列表
+                        $('#voucherList').html('');
+                    }
+                    $.post('detail/vouchers', {id: detailId}).done(function (result) {
+                        if (result.flag) {
+                            let html = '';
+                            $(result.data).each(function (i, e) {
+                                html += ` <img src="detail/voucher/${e.url}" onclick="vue.voucherTips(this,${e.id},${detailId})"/> `;
+                            });
+                            $('#imgModalBody').html(html);
+                        }
+                    });
+                }
+                imgModal.modal('show');
+            },
+            // 图片点击后显示tips
+            voucherTips(caller, voucherId, detailId) {
+                layer.tips(`<button type="button" class="layui-btn layui-btn-danger" onclick="vue.deleteVoucher(${voucherId},${detailId})">删除</button>`, caller, {tips: [3, '#b3ffb0']});
+            },
+
+            deleteVoucher(voucherId, detailId) {
+                // 点击删除按钮后关闭tips
+                layer.closeAll();
+                layer.confirm('确认删除此凭证?', {icon: 3}, function (index) {
+                    const loadIndex = layer.load(2);
+                    $.post("detail/deleteVoucher", {voucherId}).done(function (result) {
+                        layer.close(loadIndex);
+                        if (result.flag) {
+                            layer.msg("删除凭证成功", {icon: 6});
+                            vue.showVoucher(detailId);
+                        } else {
+                            layer.alert(result.message, {icon: 5});
+                        }
+                    });
+                    layer.close(index);
+                });
+            },
+            // 渲染layui上传组件
+            renderUpload() {
+                // 图片显示模态框内
+                const voucherListView = $("#voucherList");
+                const editUploadListIns = layui.upload.render({
+                    elem: '#uploadVoucher'
+                    , url: 'detail/addVouchers' //上传接口
+                    , auto: false
+                    , bindAction: '#uploadVoucherSubmit'
+                    , size: 500
+                    , multiple: true
+                    , data: {
+                        id: function () {
+                            return $('#imgModal').attr('detail_id');
+                        }
+                    }
+                    , choose: function (obj) {
+                        var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+                        //读取本地文件
+                        obj.preview(function (index, file, result) {
+                            var tr = $(['<tr id="upload-' + index + '">'
+                                , '<td>' + file.name + '</td>'
+                                , '<td>' + (file.size / 1024).toFixed(1) + 'kb</td>'
+                                , '<td>等待上传</td>'
+                                , '<td>'
+                                , '<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
+                                , '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+                                , '</td>'
+                                , '</tr>'].join(''));
+
+                            //单个重传
+                            tr.find('.demo-reload').on('click', function () {
+                                obj.upload(index, file);
+                            });
+
+                            //删除
+                            tr.find('.demo-delete').on('click', function () {
+                                delete files[index]; //删除对应的文件
+                                tr.remove();
+                                editUploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+                            });
+
+                            voucherListView.append(tr);
+                        });
+                    }
+                    , done: function (res, index, upload) {
+                        if (res.flag) { //上传成功
+                            var tr = voucherListView.find('tr#upload-' + index)
+                                , tds = tr.children();
+                            tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+                            tds.eq(3).html(''); //清空操作
+                            return delete this.files[index]; //删除文件队列已经上传成功的文件
+                        }
+                        this.error(index, upload);
+                    }
+                    , allDone: function (resultInfo) {
+                        // layer.msg('全部上传成功', {icon: 6});
+                        // voucherListView.html('');
+                        vue.showVoucher($('#imgModal').attr('detail_id'));
+                    }
+                    , error: function (index, upload) {
+                        var tr = voucherListView.find('tr#upload-' + index)
+                            , tds = tr.children();
+                        tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+                        tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+                    }
+                });
+            },
+            // 使用layui的动态表格
+            renderTable() {
+                // 渲染表格
+                layui.table.init('table', {
+                    title: '收支明细'
+                    , limit: vue.pageInfo.pageSize
+                    , toolbar: true
+                    , page: true
+                });
+
+                // 将过滤div和添加按钮放入表格头部
+                $('.layui-table-tool-temp').html($('#filter').html());
+                if (this.canAlter) {
+                    $('.layui-table-tool-self').prepend(`<div class="layui-inline" title="添加" onclick="vue.showAddModal()"
             style="border: 1px solid #ccc;width: 26px;height: 26px;padding: 5px;line-height: 16px;cursor: pointer;text-align: center;">
             <i class="glyphicon glyphicon-plus"  style="display: inline-block !important;"></i></div>`);
-        }
-
-        // 渲染日期范围
-        layui.laydate.render({
-            elem: $('.layui-table-tool-temp .duringDate')[0]
-            , range: '~'
-            , type: 'month'
-            , theme: 'grid'
-            , done: function (value, date, endDate) {
-                $('.layui-table-tool-temp .duringDate').val(value);
-                filter();
-            }
-        });
-
-        // 将分页栏放入表格尾部
-        $('.layui-table-page').html(pageData.div);
-
-        // 将表单数据从源表单复制到新渲染的表格中
-        copyFormData(false);
-    }
-
-    // 修改
-    function edit(id) {
-        // 数据回显
-        echoDetail(id);
-        // 添加点击事件
-        submit("update");
-        submit("delete");
-    }
-
-    // 添加记录
-    function add() {
-        $('#addForm')[0].reset();
-        $("#addModalTitle").text("添加");
-        // 自动获取当前日期
-        $("#addDate").val(dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
-        $('#addModal').modal({
-            show: true,
-            backdrop: false
-        });
-    }
-
-
-    function addSubmit() {
-        layer.confirm("确认提交?", {icon: 3}, function (index) {
-            const load = layer.load(2);
-            $.post("detail/add", $("#addForm").serialize(), function (data) {
-                layer.close(load);
-                if (data.flag) {
-                    $('#addModal').modal('hide');
-                    loadTable();
-                    layer.msg('操作成功, 请上传凭证(图片)', {icon: 6});
-                    setTimeout(function () {
-                        showVoucher(data.data, '请上传凭证', true)
-                    }, 1500)
-                } else {
-                    layer.alert(data.message, {icon: 5});
                 }
-            });
-            layer.close(index);
-        });
-    }
 
-    let echoData = {
-        projectId: null,
-        accountId: null,
-        categoryId: null,
-        departmentId: null,
-    };
+                // 渲染日期范围
+                layui.laydate.render({
+                    elem: $('.layui-table-tool-temp .duringDate')[0]
+                    , range: '~'
+                    , type: 'month'
+                    , theme: 'grid'
+                    , done: function (value, date, endDate) {
+                        $('.layui-table-tool-temp .duringDate').val(value);
+                        vue.filter();
+                    }
+                });
 
-    // 表单数据回显
-    function echoDetail(id) {
-        const loadIndex = layer.load(2);
-        $.get("detail/findOne", {"id": id}, function (data) {
-            layer.close(loadIndex);
-            if (data.flag) {
-                $("#alterDate").val(dateFormat(new Date(data.data.date), "yyyy-MM-dd HH:mm:ss"));
-                $("#description").val(data.data.description);
-                $("#earning").val(data.data.earning);
-                $("#expense").val(data.data.expense);
+                // 将分页栏放入表格尾部
+                $('.layui-table-page').html(this.pageInfo.div);
 
-                echoData.projectId = data.data.project.id;
-                echoData.accountId = data.data.account.id;
-                echoData.categoryId = data.data.category.id;
-                echoData.departmentId = data.data.department.id;
+                // 将表单数据从源表单复制到新渲染的表格中
+                this.copyFormData(false);
+            },
+            // 修改
+            alter(id) {
+                // 数据回显
+                this.showAlterModal(id);
+            },
 
-                $("#hidden_id").val(id);
-                loadSelects();
-                $('#alterModal').modal({
+            //显示添加模态框
+            showAddModal() {
+                $('#addForm')[0].reset();
+                $("#addModalTitle").text("添加");
+                // 自动获取当前日期
+                $("#addDate").val(dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+                $('#addModal').modal({
                     show: true,
                     backdrop: false
                 });
-            }
-        });
-    }
+            },
 
-    // 加载模态框所有选项
-    function loadSelects() {
-        // 加载所有项目
-        const projectOptions = selectData.projectOptions;
-        let html = '<option value="">--请选择项目--</option>';
-        if (projectOptions.length === 1) {
-            html = '';
-        }
-        for (let i = 0; i < projectOptions.length; i++) {
-            let option = projectOptions[i];
-            if (echoData.projectId && option.id === echoData.projectId) {
-                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-            } else {
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-        }
-        $("#alterForm .projectSelect").html(html);
-
-        // 加载所有账户
-        const accountOptions = selectData.accountOptions;
-        html = '<option value="">--请选择账户--</option>';
-        if (accountOptions.length === 1) {
-            html = '';
-        }
-        for (let i = 0; i < accountOptions.length; i++) {
-            let option = accountOptions[i];
-            if (echoData.accountId && option.id === echoData.accountId) {
-                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-            } else {
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-        }
-        $("#alterForm .accountSelect").html(html);
-
-        // 加载所有分类
-        const categoryOptions = selectData.categoryOptions;
-        html = '<option value="">--请选择分类--</option>';
-        if (categoryOptions.length === 1) {
-            html = '';
-        }
-        for (let i = 0; i < categoryOptions.length; i++) {
-            let option = categoryOptions[i];
-            if (echoData.categoryId && option.id === echoData.categoryId) {
-                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-            } else {
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-        }
-        $("#alterForm .categorySelect").html(html);
-
-        // 加载所有部门
-        const departmentOptions = selectData.departmentOptions;
-        html = '<option value="">--请选择部门--</option>';
-        if (departmentOptions.length === 1) {
-            html = '';
-        }
-        for (let i = 0; i < departmentOptions.length; i++) {
-            let option = departmentOptions[i];
-            if (echoData.departmentId && option.id === echoData.departmentId) {
-                html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
-            } else {
-                html += '<option value="' + option.id + '">' + option.name + '</option>';
-            }
-        }
-        $("#alterForm .departmentSelect").html(html);
-    }
-
-    // 表单提交
-    function submit(method) {
-        let button = "AlterSubmit";
-        let msg = "修改?";
-        if (method === "delete") {
-            button = "delete";
-            msg = "删除!!!!!!!???????";
-        }
-        $("#" + button).off().click(function () {
-            layer.confirm("确认" + msg, {icon: 3}, function (index) {
-                const load = layer.load(2);
-                $.post("detail/" + method, $("#alterForm").serialize(), function (data) {
-                    layer.close(load);
+            addSubmit() {
+                let numberInputs = $("#addForm .number-input");
+                for (const i of numberInputs) {
+                    if (!/^\d*$/.test(i.value)) {
+                        layer.alert("收入支出项只能输入数字!", {icon: 5});
+                        return;
+                    }
+                }
+                layer.confirm("确认提交?", {icon: 3}, function (index) {
+                    const load = layer.load(2);
+                    $.post("detail/add", $("#addForm").serialize(), function (data) {
+                        layer.close(load);
+                        if (data.flag) {
+                            $('#addModal').modal('hide');
+                            vue.loadTable();
+                            layer.msg('操作成功, 请上传凭证(图片)', {icon: 6});
+                            setTimeout(function () {
+                                vue.showVoucher(data.data, '请上传凭证', true)
+                            }, 1500)
+                        } else {
+                            layer.alert(data.message, {icon: 5});
+                        }
+                    });
+                    layer.close(index);
+                });
+            },
+            // 修改模态框数据回显
+            showAlterModal(id) {
+                const loadIndex = layer.load(2);
+                $.get("detail/findOne", {"id": id}, function (data) {
+                    layer.close(loadIndex);
                     if (data.flag) {
-                        $('#alterModal').modal('hide');
-                        layer.msg('操作成功', {icon: 6});
-                        $("#alterForm")[0].reset();
-                        loadTable();
-                    } else {
-                        layer.alert(data.message, {icon: 5});
+                        $("#alterDate").val(dateFormat(new Date(data.data.date), "yyyy-MM-dd HH:mm:ss"));
+                        $("#description").val(data.data.description);
+                        $("#earning").val(data.data.earning);
+                        $("#expense").val(data.data.expense);
+
+                        vue.echoData.projectId = data.data.project.id;
+                        vue.echoData.accountId = data.data.account.id;
+                        vue.echoData.categoryId = data.data.category.id;
+                        vue.echoData.departmentId = data.data.department.id;
+
+                        $("#hidden_id").val(id);
+                        vue.resetAlterModalSelects();
+                        $('#alterModal').modal({
+                            show: true,
+                            backdrop: false
+                        });
                     }
                 });
-                layer.close(index);
+            },
+            // 重置修改模态框所有选项
+            resetAlterModalSelects() {
+                // 加载所有项目
+                const projectOptions = this.selectData.projectOptions;
+                let html = '';
+                if (projectOptions.length === 1) {
+                    html = '';
+                }
+                for (let i = 0; i < projectOptions.length; i++) {
+                    let option = projectOptions[i];
+                    if (this.echoData.projectId && option.id === this.echoData.projectId) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#alterForm .projectSelect").html(html);
+
+                // 加载所有账户
+                const accountOptions = this.selectData.accountOptions;
+                html = '';
+                if (accountOptions.length === 1) {
+                    html = '';
+                }
+                for (let i = 0; i < accountOptions.length; i++) {
+                    let option = accountOptions[i];
+                    if (this.echoData.accountId && option.id === this.echoData.accountId) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#alterForm .accountSelect").html(html);
+
+                // 加载所有分类
+                const categoryOptions = this.selectData.categoryOptions;
+                html = '';
+                if (categoryOptions.length === 1) {
+                    html = '';
+                }
+                for (let i = 0; i < categoryOptions.length; i++) {
+                    let option = categoryOptions[i];
+                    if (this.echoData.categoryId && option.id === this.echoData.categoryId) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#alterForm .categorySelect").html(html);
+
+                // 加载所有部门
+                const departmentOptions = this.selectData.departmentOptions;
+                html = '';
+                if (departmentOptions.length === 1) {
+                    html = '';
+                }
+                for (let i = 0; i < departmentOptions.length; i++) {
+                    let option = departmentOptions[i];
+                    if (this.echoData.departmentId && option.id === this.echoData.departmentId) {
+                        html += '<option value="' + option.id + '" selected>' + option.name + '</option>';
+                    } else {
+                        html += '<option value="' + option.id + '">' + option.name + '</option>';
+                    }
+                }
+                $("#alterForm .departmentSelect").html(html);
+            },
+            // 修改表单提交
+            alterFormSubmit() {
+                let numberInputs = $("#alterForm .number-input");
+                for (const i of numberInputs) {
+                    if (!/^\d*$/.test(i.value)) {
+                        layer.alert("收入支出项只能输入数字!", {icon: 5});
+                        return;
+                    }
+                }
+                layer.confirm("确认修改?", {icon: 3}, function (index) {
+                    const load = layer.load(2);
+                    $.post("detail/update", $("#alterForm").serialize(), function (data) {
+                        layer.close(load);
+                        if (data.flag) {
+                            $('#alterModal').modal('hide');
+                            layer.msg('修改成功', {icon: 6});
+                            $("#alterForm")[0].reset();
+                            vue.loadTable();
+                        } else {
+                            layer.alert(data.message, {icon: 5});
+                        }
+                    });
+                    layer.close(index);
+                });
+
+            },
+            deleteDetail() {
+                layer.confirm("确认删除!!!!!!!???????", {icon: 7}, function (index) {
+                    const load = layer.load(2);
+                    $.post("detail/delete", $("#alterForm").serialize(), function (data) {
+                        layer.close(load);
+                        if (data.flag) {
+                            $('#alterModal').modal('hide');
+                            layer.msg('删除成功', {icon: 6});
+                            $("#alterForm")[0].reset();
+                            vue.loadTable();
+                        } else {
+                            layer.alert(data.message, {icon: 5});
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+        },
+        beforeCreate() {
+        },
+        created() {
+            // 根据登录用户的角色来开启或隐藏部分功能
+            $.get('user/getLevel').done(function (result) {
+                if (result.flag) {
+                    if (result.data === 0 || result.data === 1) {
+                        vue.canAlter = true;
+                    }
+                }
+                vue.pageInit();
             });
-        });
-    }
+        },
+        beforeMount() {
+        },
+        mounted() {
+            //为凭证模态框添加隐藏事件处理
+            $('#imgModal').on('hide.bs.modal', function () {
+                //关闭图片删除tips,防止误删除
+                layer.closeAll();
+                const detailId = $('#imgModal').attr('detail_id');
+                if ($('#imgModalBody').html()) {
+                    //如果有凭证图片, 则按钮显示为 查看凭证
+                    $(`a[detail_id="${detailId}"]`).text('查看凭证');
+                } else {
+                    $(`a[detail_id="${detailId}"]`).text('上传凭证');
+                }
+            });
+
+            this.renderDate();
+            this.renderUpload();
+        }
+    });
 </script>
 </body>
 </html>

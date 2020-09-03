@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class ExcelService {
     @Autowired
     private DetailDao dao;
@@ -36,6 +35,7 @@ public class ExcelService {
      * @throws IllegalAccessException
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public void export(HttpServletResponse response) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         List<Detail> data = dao.listAll();
         ExportExcelUtil.exportExcelToRemote(fileName, title, headers, data, response);

@@ -279,7 +279,7 @@
                     layer.close(loadIdx);
                     if (result.flag) {
                         layer.msg('导入成功!', {icon: 6});
-                        pageInit();
+                        setTimeout(location.reload(),1000)
                     } else {
                         if (!result.message) {
                             layer.msg('请刷新页面后重试',{icon: 5})
@@ -351,7 +351,7 @@
                 layer.close(load);
                 if (data.flag) {
                     layer.msg("更新成功!", {icon: 6});
-                    loadTable();
+                    setTimeout(location.reload(), 1000);
                 } else {
                     layer.alert(data.message, {icon: 5});
                 }

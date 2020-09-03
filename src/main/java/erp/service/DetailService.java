@@ -144,9 +144,9 @@ public class DetailService {
         deleteLocalVoucherFiles(urls);
         // 删除凭证记录
         voucherDao.deleteByDetailId(form.getId());
-
         // 删除明细记录
         detailDao.delete(form.getId());
+        //处理目标记录之后的记录的Balance
         handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()));
     }
 
