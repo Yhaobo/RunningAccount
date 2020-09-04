@@ -1,7 +1,7 @@
 package erp.service;
 
 import erp.dao.UserDao;
-import erp.domain.User;
+import erp.entity.User;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

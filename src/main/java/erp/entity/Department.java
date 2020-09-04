@@ -1,15 +1,15 @@
-package erp.domain;
+package erp.entity;
 
 import java.io.Serializable;
 
-public class Project  implements Serializable {
+public class Department implements Serializable {
     private Integer id;
     private String name;
 
-    public Project() {
+    public Department() {
     }
 
-    public Project(String name) {
+    public Department(String name) {
         this.name = name;
     }
 

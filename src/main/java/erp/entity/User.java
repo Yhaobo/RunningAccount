@@ -1,4 +1,4 @@
-package erp.domain;
+package erp.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

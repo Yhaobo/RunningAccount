@@ -10,7 +10,7 @@ import java.util.Date;
  * @date 2020/3/28
  */
 @Data
-public class SummarizeFilterVo implements Serializable {
+public class SummarizeConditionQueryVO implements Serializable {
     private String duringDate;
     private Date frontDate;
     private Date backDate;

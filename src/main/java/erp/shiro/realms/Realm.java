@@ -1,6 +1,6 @@
 package erp.shiro.realms;
 
-import erp.domain.User;
+import erp.entity.User;
 import erp.service.UserService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.CredentialsMatcher;

@@ -302,14 +302,12 @@
                 accountId: null,
                 categoryId: null,
                 departmentId: null,
-            }
+            },
+            formSubmitErrorMessage: "操作失败,请仔细检查输入项"
         },
 
         methods: {
-            pageInit() {
-                // 加载表格数据
-                this.loadTable();
-
+            LoadSelects() {
                 // 获取所有项目
                 $.get("setting/findProjects", function (result) {
                     vue.selectData.projectOptions = result.data;
@@ -660,14 +658,14 @@
             addSubmit() {
                 let numberInputs = $("#addForm .number-input");
                 for (const i of numberInputs) {
-                    if (!/^\d*$/.test(i.value)) {
-                        layer.alert("收入支出项只能输入数字!", {icon: 5});
+                    if (!/^\d*((\.{1}\d{1,2})|\d*)$/.test(i.value)) {
+                        layer.alert("收入支出项只能输入数字或小数点后两位小数!", {icon: 5});
                         return;
                     }
                 }
                 layer.confirm("确认提交?", {icon: 3}, function (index) {
                     const load = layer.load(2);
-                    $.post("detail/add", $("#addForm").serialize(), function (data) {
+                    $.post("detail/add", $("#addForm").serialize()).done(function (data) {
                         layer.close(load);
                         if (data.flag) {
                             $('#addModal').modal('hide');
@@ -679,6 +677,9 @@
                         } else {
                             layer.alert(data.message, {icon: 5});
                         }
+                    }).fail(function () {
+                        layer.close(load);
+                        layer.alert(vue.formSubmitErrorMessage, {icon: 5});
                     });
                     layer.close(index);
                 });
@@ -778,8 +779,8 @@
             alterFormSubmit() {
                 let numberInputs = $("#alterForm .number-input");
                 for (const i of numberInputs) {
-                    if (!/^\d*$/.test(i.value)) {
-                        layer.alert("收入支出项只能输入数字!", {icon: 5});
+                    if (!/^\d*((\.{1}\d{1,2})|\d*)$/.test(i.value)) {
+                        layer.alert("收入支出项只能输入数字或小数点后两位小数!", {icon: 5});
                         return;
                     }
                 }
@@ -795,6 +796,9 @@
                         } else {
                             layer.alert(data.message, {icon: 5});
                         }
+                    }).fail(function () {
+                        layer.close(load);
+                        layer.alert(vue.formSubmitErrorMessage, {icon: 5});
                     });
                     layer.close(index);
                 });
@@ -821,6 +825,7 @@
         beforeCreate() {
         },
         created() {
+            this.LoadSelects();
             // 根据登录用户的角色来开启或隐藏部分功能
             $.get('user/getLevel').done(function (result) {
                 if (result.flag) {
@@ -828,7 +833,8 @@
                         vue.canAlter = true;
                     }
                 }
-                vue.pageInit();
+                // 加载表格数据
+                vue.loadTable();
             });
         },
         beforeMount() {

@@ -1,9 +1,9 @@
 package erp.dao;
 
-import erp.domain.Account;
-import erp.domain.Category;
-import erp.domain.Department;
-import erp.domain.Project;
+import erp.entity.Account;
+import erp.entity.Category;
+import erp.entity.Department;
+import erp.entity.Project;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

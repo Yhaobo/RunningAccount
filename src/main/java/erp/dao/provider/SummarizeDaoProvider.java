@@ -1,6 +1,6 @@
 package erp.dao.provider;
 
-import erp.vo.req.SummarizeFilterVo;
+import erp.vo.req.SummarizeConditionQueryVO;
 import org.apache.ibatis.jdbc.SQL;
 
 /**
@@ -8,7 +8,7 @@ import org.apache.ibatis.jdbc.SQL;
  * @date 2020/3/28
  */
 public class SummarizeDaoProvider {
-    public String listByFilterSql(SummarizeFilterVo vo) {
+    public String listByFilterSql(SummarizeConditionQueryVO vo) {
         return new SQL() {{
             if ("month".equals(vo.getGroupPolicy())) {
                 //按月

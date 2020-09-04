@@ -1,7 +1,7 @@
 package erp.service;
 
 import erp.dao.DetailDao;
-import erp.domain.Detail;
+import erp.entity.Detail;
 import erp.util.ExportExcelUtil;
 import erp.util.ImportExcelUtil;
 import org.springframework.beans.factory.annotation.Autowired;

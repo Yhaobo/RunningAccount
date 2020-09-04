@@ -1,6 +1,6 @@
 package erp.controller;
 
-import erp.domain.*;
+import erp.entity.*;
 import erp.service.SettingService;
 import erp.util.ResultInfo;
 import org.slf4j.Logger;

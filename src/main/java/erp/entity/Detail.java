@@ -1,4 +1,4 @@
-package erp.domain;
+package erp.entity;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -8,7 +8,6 @@ import java.util.Date;
 
 /**
  * 收支明细表的实体类
- * 此类的所有BigDecimal类型的属性setter时,会舍弃小数点2位之后的部分
  */
 public class Detail implements Serializable {
     private Integer id;
@@ -84,9 +83,7 @@ public class Detail implements Serializable {
     }
 
     public void setEarning(BigDecimal earning) {
-        if (earning != null) {
-            this.earning = earning.setScale(2, BigDecimal.ROUND_DOWN);
-        }
+        this.earning = earning;
     }
 
     public BigDecimal getExpense() {
@@ -94,9 +91,7 @@ public class Detail implements Serializable {
     }
 
     public void setExpense(BigDecimal expense) {
-        if (expense != null) {
-            this.expense = expense.setScale(2, BigDecimal.ROUND_DOWN);
-        }
+        this.expense = expense;
     }
 
     public BigDecimal getBalance() {
@@ -104,9 +99,7 @@ public class Detail implements Serializable {
     }
 
     public void setBalance(BigDecimal balance) {
-        if (balance != null) {
-            this.balance = balance.setScale(2, BigDecimal.ROUND_DOWN);
-        }
+        this.balance = balance;
     }
 
     @Override

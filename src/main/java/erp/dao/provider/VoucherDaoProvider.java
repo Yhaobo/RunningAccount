@@ -1,6 +1,6 @@
 package erp.dao.provider;
 
-import erp.domain.Voucher;
+import erp.entity.Voucher;
 import org.apache.ibatis.jdbc.SQL;
 
 import java.util.List;

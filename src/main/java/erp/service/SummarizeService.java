@@ -2,9 +2,9 @@ package erp.service;
 
 import erp.dao.SummarizeDao;
 import erp.util.MyUtils;
-import erp.vo.req.SummarizeFilterVo;
-import erp.vo.resp.DetailRespVo;
-import erp.vo.resp.SummarizeRespVo;
+import erp.vo.req.SummarizeConditionQueryVO;
+import erp.vo.resp.DetailRespVO;
+import erp.vo.resp.SummarizeRespVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class SummarizeService {
     private SummarizeDao summarizeDao;
 
     @Transactional(readOnly = true)
-    public List<DetailRespVo> listByFilter(SummarizeFilterVo vo) throws ParseException {
+    public List<DetailRespVO> listByFilter(SummarizeConditionQueryVO vo) throws ParseException {
         //处理日期格式
         if (!StringUtils.isEmpty(vo.getDuringDate())) {
             String[] dates = vo.getDuringDate().split(" ~ ");
@@ -57,7 +57,7 @@ public class SummarizeService {
         // 将DO的数据传递给VO
         List detailList = summarizeDao.listDetailByFilter(vo);
         for (int i = 0; i < detailList.size(); i++) {
-            SummarizeRespVo detailRespVo = new SummarizeRespVo();
+            SummarizeRespVO detailRespVo = new SummarizeRespVO();
             BeanUtils.copyProperties(detailList.get(i), detailRespVo);
             detailList.set(i, detailRespVo);
         }

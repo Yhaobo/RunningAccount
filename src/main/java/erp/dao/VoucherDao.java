@@ -1,7 +1,7 @@
 package erp.dao;
 
 import erp.dao.provider.VoucherDaoProvider;
-import erp.domain.Voucher;
+import erp.entity.Voucher;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;

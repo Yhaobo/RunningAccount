@@ -9,6 +9,6 @@ import java.util.Date;
  * @date 2020/5/18
  */
 @Data
-public class SummarizeRespVo extends FormatMoney {
+public class SummarizeRespVO extends FormatMoney {
     private Date date;
 }

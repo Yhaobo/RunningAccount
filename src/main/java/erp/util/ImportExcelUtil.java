@@ -1,6 +1,6 @@
 package erp.util;
 
-import erp.domain.*;
+import erp.entity.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;

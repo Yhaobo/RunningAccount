@@ -1,7 +1,7 @@
 package erp.dao.provider;
 
-import erp.domain.Detail;
-import erp.vo.req.DetailFilterVo;
+import erp.entity.Detail;
+import erp.vo.req.DetailConditionQueryVO;
 import org.apache.ibatis.jdbc.SQL;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  * @date 2020/3/13
  */
 public class DetailDaoProvider {
-    public String listByFilterSql(DetailFilterVo vo) {
+    public String listByFilterSql(DetailConditionQueryVO vo) {
         return new SQL() {{
             SELECT("*");
             FROM("detail");

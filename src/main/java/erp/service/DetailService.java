@@ -2,12 +2,12 @@ package erp.service;
 
 import erp.dao.DetailDao;
 import erp.dao.VoucherDao;
-import erp.domain.Detail;
-import erp.domain.Voucher;
+import erp.entity.Detail;
+import erp.entity.Voucher;
 import erp.util.MyException;
 import erp.util.MyUtils;
-import erp.vo.req.DetailFilterVo;
-import erp.vo.resp.DetailRespVo;
+import erp.vo.req.DetailConditionQueryVO;
+import erp.vo.resp.DetailRespVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,7 +42,7 @@ public class DetailService {
     }
 
     @Transactional(readOnly = true)
-    public List<DetailRespVo> findAll(DetailFilterVo vo) {
+    public List<DetailRespVO> findAll(DetailConditionQueryVO vo) {
         // 所有收支记录DO
         List details = detailDao.listByFilter(vo);
         // 拥有凭证的收支记录的id集合
@@ -50,7 +50,7 @@ public class DetailService {
         for (int i = 0; i < details.size(); i++) {
             Detail detail = (Detail) details.get(i);
             // 用于返回前端的VO
-            DetailRespVo detailRespVo = new DetailRespVo();
+            DetailRespVO detailRespVo = new DetailRespVO();
             // 将DO的数据传递给VO
             BeanUtils.copyProperties(detail, detailRespVo);
 
@@ -240,7 +240,7 @@ public class DetailService {
      */
     private void handleBalance(Detail detail) {
         //获取期初
-        Detail previous = detailDao.findBeforeOne(detail.getDate());//获取前一条记录
+        Detail previous = detailDao.findBeforeOne(detail.getDate());
         BigDecimal qi_chu = previous == null ? new BigDecimal(0) : previous.getBalance();
         //设置结存(当前结存=之前结存+当前收入-当前支出)
         detail.setBalance(qi_chu.add(detail.getEarning()).subtract(detail.getExpense()));

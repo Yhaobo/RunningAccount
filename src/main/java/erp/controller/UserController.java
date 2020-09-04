@@ -1,6 +1,6 @@
 package erp.controller;
 
-import erp.domain.User;
+import erp.entity.User;
 import erp.service.UserService;
 import erp.util.ResultInfo;
 import lombok.extern.slf4j.Slf4j;

@@ -2,13 +2,14 @@ package erp.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageSerializable;
-import erp.domain.Detail;
+import erp.entity.Detail;
 import erp.service.DetailService;
 import erp.service.ExcelService;
 import erp.util.MyException;
 import erp.util.ResultInfo;
-import erp.vo.req.DetailFilterVo;
-import erp.vo.resp.DetailRespVo;
+import erp.vo.req.DetailConditionQueryVO;
+import erp.vo.req.DetailFormReqVO;
+import erp.vo.resp.DetailRespVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -35,7 +36,7 @@ public class DetailController {
     private ExcelService excelService;
 
     @RequestMapping("/getAll")
-    public ResultInfo getAll(DetailFilterVo vo, String duringDate) {
+    public ResultInfo getAll(DetailConditionQueryVO vo, String duringDate) {
         try {
             // 分页
             PageHelper.startPage(vo.getPageNum(), vo.getPageSize());
@@ -55,8 +56,8 @@ public class DetailController {
                     vo.setBackDate(calendar.getTime());
                 }
             }
-            List<DetailRespVo> detailRespVos = detailService.findAll(vo);
-            PageSerializable<DetailRespVo> pageInfo = new PageSerializable<>(detailRespVos);
+            List<DetailRespVO> detailRespVOS = detailService.findAll(vo);
+            PageSerializable<DetailRespVO> pageInfo = new PageSerializable<>(detailRespVOS);
             return new ResultInfo(true, pageInfo);
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,7 +73,7 @@ public class DetailController {
     }
 
     @RequestMapping("/add")
-    public synchronized ResultInfo add(Detail form) {
+    public synchronized ResultInfo add(DetailFormReqVO form) {
         try {
             detailService.insert(form);
             return new ResultInfo(true, form.getId());
@@ -84,7 +85,7 @@ public class DetailController {
     }
 
     @RequestMapping("/update")
-    public synchronized ResultInfo update(Detail form) {
+    public synchronized ResultInfo update(DetailFormReqVO form) {
         try {
             detailService.update(form);
         } catch (MyException e) {
@@ -125,7 +126,7 @@ public class DetailController {
             detailService.insertVoucher(file, id);
             return new ResultInfo(true);
         } catch (Exception e) {
-            log.error("[method:addVouchers] " +e);
+            log.error("[method:addVouchers] " + e);
             e.printStackTrace();
             return new ResultInfo(false);
         }
@@ -137,7 +138,7 @@ public class DetailController {
             detailService.deleteVoucher(voucherId);
             return new ResultInfo(true);
         } catch (Exception e) {
-            log.error("[method:deleteVoucher] " +e);
+            log.error("[method:deleteVoucher] " + e);
             e.printStackTrace();
             return new ResultInfo(false, "删除凭证失败");
         }
@@ -178,7 +179,7 @@ public class DetailController {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("[method:importing]" + e.getMessage());
-            return new ResultInfo(false,"导入失败!");
+            return new ResultInfo(false, "导入失败!");
         } finally {
             file.getInputStream().close();
         }

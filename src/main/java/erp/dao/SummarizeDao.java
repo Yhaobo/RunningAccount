@@ -1,8 +1,8 @@
 package erp.dao;
 
 import erp.dao.provider.SummarizeDaoProvider;
-import erp.domain.Detail;
-import erp.vo.req.SummarizeFilterVo;
+import erp.entity.Detail;
+import erp.vo.req.SummarizeConditionQueryVO;
 import org.apache.ibatis.annotations.SelectProvider;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +21,5 @@ public interface SummarizeDao {
      * @return
      */
     @SelectProvider(type = SummarizeDaoProvider.class, method = "listByFilterSql")
-    List<Detail> listDetailByFilter(SummarizeFilterVo vo);
+    List<Detail> listDetailByFilter(SummarizeConditionQueryVO vo);
 }

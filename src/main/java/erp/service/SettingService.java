@@ -1,10 +1,10 @@
 package erp.service;
 
 import erp.dao.ForeignTableDao;
-import erp.domain.Account;
-import erp.domain.Category;
-import erp.domain.Department;
-import erp.domain.Project;
+import erp.entity.Account;
+import erp.entity.Category;
+import erp.entity.Department;
+import erp.entity.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
