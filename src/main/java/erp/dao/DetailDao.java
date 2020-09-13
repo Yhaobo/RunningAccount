@@ -2,7 +2,7 @@ package erp.dao;
 
 import erp.dao.provider.DetailDaoProvider;
 import erp.entity.Detail;
-import erp.vo.req.DetailConditionQueryVO;
+import erp.entity.vo.req.DetailConditionQueryVO;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -14,11 +14,11 @@ import java.util.Set;
 @Repository
 public interface DetailDao {
     /**
-     * 查询所有
-     *
+     * 查询所有账户ID为accountId的记录
+     * @param accountId
      * @return
      */
-    @Select("SELECT * FROM detail ORDER BY d_date DESC")
+    @Select("SELECT * FROM detail WHERE a_id=#{accountId} ORDER BY d_date DESC")
     @Results(id = "detailMap", value = {
             @Result(id = true, column = "d_id", property = "id"),
             @Result(column = "d_date", property = "date"),
@@ -31,7 +31,7 @@ public interface DetailDao {
             @Result(column = "d_expense", property = "expense"),
             @Result(column = "d_balance", property = "balance")
     })
-    List<Detail> listAll();
+    List<Detail> listAllByAccountId(Integer accountId);
 
     /**
      * 添加一条记录, 并返回自增主键的 id 给 detail
@@ -79,17 +79,18 @@ public interface DetailDao {
      * @param late
      * @param before
      */
-    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{before} and d_date<#{late}")
-    void updateDuring(@Param("change") BigDecimal change, @Param("before") Date before, @Param("late") Date late);
+    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{before} and d_date<#{late} and a_id=#{accountId}")
+    void updateDuring(@Param("change") BigDecimal change, @Param("before") Date before, @Param("late") Date late, @Param("accountId") Integer accountId);
 
     /**
-     * 修改date时间之后的所有记录的结存
+     * 修改date时间之后的所有账户ID为accountId记录的结存
      *
      * @param change
      * @param date
+     * @param accountId
      */
-    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{date}")
-    void updateLater(@Param("change") BigDecimal change, @Param("date") Date date);
+    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{date} and a_id=#{accountId}")
+    void updateLater(@Param("change") BigDecimal change, @Param("date") Date date, @Param("accountId") Integer accountId);
 
     /**
      * 查询date之前的一条记录
@@ -97,9 +98,9 @@ public interface DetailDao {
      * @param date
      * @return
      */
-    @Select("select * from detail where d_date<#{date} order by d_date DESC limit 1")
+    @Select("select * from detail where d_date<#{date} and a_id=#{accountId} order by d_date DESC limit 1")
     @ResultMap("detailMap")
-    Detail findBeforeOne(Date date);
+    Detail findBeforeOne(Date date,@Param("accountId")Integer accountId);
 
     /**
      * 根据id删除一条记录
@@ -110,7 +111,7 @@ public interface DetailDao {
     void delete(int id);
 
     /**
-     * 根据条件来获取记录
+     * 根据查询条件来获取记录
      *
      * @param vo
      * @return

@@ -1,4 +1,4 @@
-package erp.shiro.config;
+package erp.config;
 
 import erp.shiro.realms.Realm;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
@@ -30,6 +30,9 @@ public class ShiroConfig {
     public ShiroFilterChainDefinition shiroFilterChainDefinition() {
         DefaultShiroFilterChainDefinition shiroFilterChainDefinition = new DefaultShiroFilterChainDefinition();
         shiroFilterChainDefinition.addPathDefinition("/index.html", "anon");
+        shiroFilterChainDefinition.addPathDefinition("/swagger*/**", "anon");
+        shiroFilterChainDefinition.addPathDefinition("/v2/api-docs/**", "anon");
+        shiroFilterChainDefinition.addPathDefinition("/webjars/springfox-swagger-ui/**", "anon");
         shiroFilterChainDefinition.addPathDefinition("/static/**", "anon");
         shiroFilterChainDefinition.addPathDefinition("/user/login", "anon");
         shiroFilterChainDefinition.addPathDefinition("/druid/**", "anon");

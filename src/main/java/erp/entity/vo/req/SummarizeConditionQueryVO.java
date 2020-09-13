@@ -1,4 +1,4 @@
-package erp.vo.req;
+package erp.entity.vo.req;
 
 import lombok.Data;
 

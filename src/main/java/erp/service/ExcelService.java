@@ -36,8 +36,8 @@ public class ExcelService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public void export(HttpServletResponse response) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-        List<Detail> data = dao.listAll();
+    public void export(HttpServletResponse response,Integer accountId) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
+        List<Detail> data = dao.listAllByAccountId(accountId);
         ExportExcelUtil.exportExcelToRemote(fileName, title, headers, data, response);
     }
 

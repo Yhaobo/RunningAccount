@@ -2,7 +2,7 @@ package erp.util;
 
 import erp.dao.DetailDao;
 import erp.entity.*;
-import erp.vo.resp.FormatMoney;
+import erp.entity.vo.resp.FormatMoney;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;

@@ -7,9 +7,9 @@ import erp.service.DetailService;
 import erp.service.ExcelService;
 import erp.util.MyException;
 import erp.util.ResultInfo;
-import erp.vo.req.DetailConditionQueryVO;
-import erp.vo.req.DetailFormReqVO;
-import erp.vo.resp.DetailRespVO;
+import erp.entity.vo.req.DetailConditionQueryVO;
+import erp.entity.vo.req.DetailFormReqVO;
+import erp.entity.vo.resp.DetailRespVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -159,10 +159,10 @@ public class DetailController {
         }
     }
 
-    @RequestMapping("/excel/export")
-    public void export(HttpServletResponse response) throws IOException {
+    @GetMapping("/excel/export/{accountId}")
+    public void export(HttpServletResponse response, @PathVariable Integer accountId) throws IOException {
         try {
-            excelService.export(response);
+            excelService.export(response,accountId);
         } catch (Exception e) {
             log.error("[method:export]" + e.getMessage());
         }

@@ -1,14 +1,17 @@
 package erp.service;
 
 import erp.dao.DetailDao;
+import erp.dao.ForeignTableDao;
 import erp.dao.VoucherDao;
+import erp.entity.Account;
 import erp.entity.Detail;
 import erp.entity.Voucher;
 import erp.util.MyException;
 import erp.util.MyUtils;
-import erp.vo.req.DetailConditionQueryVO;
-import erp.vo.resp.DetailRespVO;
+import erp.entity.vo.req.DetailConditionQueryVO;
+import erp.entity.vo.resp.DetailRespVO;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,18 +31,17 @@ import java.util.Set;
 @Service
 public class DetailService {
 
+    @Autowired
     private DetailDao detailDao;
+    @Autowired
     private VoucherDao voucherDao;
+    @Autowired
+    private ForeignTableDao foreignTableDao;
 
     @Value("${home.location}")
     private String location;
 
     private String parentPath = "voucher\\";
-
-    public DetailService(DetailDao detailDao, VoucherDao voucherDao) {
-        this.detailDao = detailDao;
-        this.voucherDao = voucherDao;
-    }
 
     @Transactional(readOnly = true)
     public List<DetailRespVO> findAll(DetailConditionQueryVO vo) {
@@ -92,7 +94,7 @@ public class DetailService {
         //添加到数据库
         detailDao.insert(form);
         //如果是插入时间是以前,就需要调整本次插入记录之后的所有记录的结存
-        handleLaterBalance(form.getDate(), form.getEarning().subtract(form.getExpense()));
+        handleLaterBalance(form.getDate(), form.getEarning().subtract(form.getExpense()), form.getAccount().getId());
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 30)
@@ -125,7 +127,7 @@ public class DetailService {
             BigDecimal expenseDifference = form.getExpense().subtract(old.getExpense());
             BigDecimal balanceDifference = earningDifference.subtract(expenseDifference);
             //得到被修改记录后面的所有记录并更新
-            handleLaterBalance(form.getDate(), balanceDifference);
+            handleLaterBalance(form.getDate(), balanceDifference, form.getAccount().getId());
         }
         //更新当前记录
         handleBalance(form);
@@ -147,7 +149,7 @@ public class DetailService {
         // 删除明细记录
         detailDao.delete(form.getId());
         //处理目标记录之后的记录的Balance
-        handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()));
+        handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()), form.getAccount().getId());
     }
 
     /**
@@ -155,12 +157,15 @@ public class DetailService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateAllBalance() {
-        List<Detail> detailList = detailDao.listAll();
-        BigDecimal balance = new BigDecimal(0);
-        for (int i = detailList.size() - 1; i >= 0; i--) {
-            balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));
-            detailList.get(i).setBalance(balance);
-            detailDao.update(detailList.get(i));
+        List<Account> accounts = foreignTableDao.listAccount();
+        for (Account account : accounts) {
+            List<Detail> detailList = detailDao.listAllByAccountId(account.getId());
+            BigDecimal balance = new BigDecimal(0);
+            for (int i = detailList.size() - 1; i >= 0; i--) {
+                balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));
+                detailList.get(i).setBalance(balance);
+                detailDao.update(detailList.get(i));
+            }
         }
     }
 
@@ -240,7 +245,7 @@ public class DetailService {
      */
     private void handleBalance(Detail detail) {
         //获取期初
-        Detail previous = detailDao.findBeforeOne(detail.getDate());
+        Detail previous = detailDao.findBeforeOne(detail.getDate(),detail.getAccount().getId());
         BigDecimal qi_chu = previous == null ? new BigDecimal(0) : previous.getBalance();
         //设置结存(当前结存=之前结存+当前收入-当前支出)
         detail.setBalance(qi_chu.add(detail.getEarning()).subtract(detail.getExpense()));
@@ -258,10 +263,10 @@ public class DetailService {
         BigDecimal difference = previous.getEarning().subtract(previous.getExpense());
         if (isForward) {
             //日期提前
-            detailDao.updateDuring(difference, current.getDate(), previous.getDate());
+            detailDao.updateDuring(difference, current.getDate(), previous.getDate(), current.getAccount().getId());
         } else {
             //日期推后
-            detailDao.updateDuring(difference.negate(), previous.getDate(), current.getDate());
+            detailDao.updateDuring(difference.negate(), previous.getDate(), current.getDate(), current.getAccount().getId());
         }
     }
 
@@ -270,9 +275,10 @@ public class DetailService {
      *
      * @param date              时间
      * @param balanceDifference 要修改的结存差值
+     * @param accountId 账户ID
      */
-    private void handleLaterBalance(Date date, BigDecimal balanceDifference) {
-        detailDao.updateLater(balanceDifference, date);
+    private void handleLaterBalance(Date date, BigDecimal balanceDifference, Integer accountId) {
+        detailDao.updateLater(balanceDifference, date, accountId);
     }
 
     /**

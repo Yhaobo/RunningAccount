@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @ServletComponentScan
 @MapperScan("erp.dao")
-public class WebApplication {
+public class ERPApplication {
     public static void main(String[] args) {
-        SpringApplication.run(WebApplication.class, args);
+        SpringApplication.run(ERPApplication.class, args);
     }
 }

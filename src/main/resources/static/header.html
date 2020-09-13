@@ -6,7 +6,7 @@
             <a class="navbar-brand dropdown-toggle " data-toggle="dropdown" role="button" aria-haspopup="true"
                aria-expanded="false" style="width: 300px">企业财务流水管理系统<span class="caret"></span></a>
             <ul class="dropdown-menu">
-                <li class="hidden"><a href="detail/excel/export" class="glyphicon glyphicon-export"> 导出所有数据为Excel</a></li>
+                <li class="hidden"><a href="javascript:;" onclick="exportExcel()" class="glyphicon glyphicon-export"> 导出数据为Excel</a></li>
                 <li role="separator" class="divider hidden"></li>
                 <li class="hidden"><a href="javascript:;" onclick="updateBalance()" class="glyphicon glyphicon-refresh">
                     重新计算并更新所有结存</a>
@@ -25,42 +25,6 @@
             <ul class="nav navbar-nav">
                 <li id="header_detail"><a href="detail_list.html">收支明细 <span class="sr-only">(current)</span></a></li>
                 <li id="header_summarize"><a href="summarize.html">收支汇总 <span class="sr-only">(current)</span></a></li>
-                <!--                <li class="dropdown">-->
-                <!--                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
-                <!--                       aria-expanded="false">收支汇总<span class="caret"></span></a>-->
-                <!--                    <ul class="dropdown-menu">-->
-                <!--                        <li><a href="summarize.html?title=收支每月汇总">所有<span class="sr-only">(current)</span></a>-->
-                <!--                        </li>-->
-                <!--                        <li class="dropdown-submenu">-->
-                <!--                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"-->
-                <!--                               aria-haspopup="true"-->
-                <!--                               aria-expanded="false">按项目</a>-->
-                <!--                            <ul class="dropdown-menu" id="header_project">-->
-                <!--                            </ul>-->
-                <!--                        </li>-->
-                <!--                        <li class="dropdown-submenu">-->
-                <!--                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"-->
-                <!--                               aria-haspopup="true"-->
-                <!--                               aria-expanded="false">按账户</a>-->
-                <!--                            <ul class="dropdown-menu" id="header_account">-->
-                <!--                            </ul>-->
-                <!--                        </li>-->
-                <!--                        <li class="dropdown-submenu">-->
-                <!--                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"-->
-                <!--                               aria-haspopup="true"-->
-                <!--                               aria-expanded="false">按部门</a>-->
-                <!--                            <ul class="dropdown-menu" id="header_department">-->
-                <!--                            </ul>-->
-                <!--                        </li>-->
-                <!--                        <li class="dropdown-submenu">-->
-                <!--                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"-->
-                <!--                               aria-haspopup="true"-->
-                <!--                               aria-expanded="false">按分类</a>-->
-                <!--                            <ul class="dropdown-menu" id="header_category">-->
-                <!--                            </ul>-->
-                <!--                        </li>-->
-                <!--                    </ul>-->
-                <!--                </li>-->
             </ul>
 
 
@@ -138,7 +102,26 @@
 </div>
 
 <script>
-
+    function exportExcel(accountId) {
+        if (accountId) {
+            layer.closeAll();
+            location.href = 'detail/excel/export/' + accountId;
+        }else {
+            $.get('setting/findAccounts').done((result)=>{
+                let html = `<select class="form-control" onchange="exportExcel(this.value)"><option>--请选择账户--</option>`;
+                for (const account of result.data) {
+                    html+=`<option value="${account.id}">${account.name}</option>`
+                }
+                html += `</select>`;
+                console.log(html)
+                layer.open({
+                    type: 1,
+                    content: html,
+                    title :'根据账户导出数据'
+                });
+            });
+        }
+    }
     //根据登录用户的角色来开启或隐藏部分功能
     $.get('user/getLevel').done(function (result) {
         if (result.flag) {
@@ -279,10 +262,10 @@
                     layer.close(loadIdx);
                     if (result.flag) {
                         layer.msg('导入成功!', {icon: 6});
-                        setTimeout(location.reload(),1000)
+                        setTimeout(location.reload(), 1000)
                     } else {
                         if (!result.message) {
-                            layer.msg('请刷新页面后重试',{icon: 5})
+                            layer.msg('请刷新页面后重试', {icon: 5})
                             return;
                         }
                         layer.msg(result.message, {icon: 5});
@@ -296,52 +279,6 @@
         });
     }
 
-    function loadHeaderSelects() {
-        //获取所有项目
-        $.get("setting/findProjects", function (data) {
-            var html = '';
-            if (data.flag) {
-                for (var i = 0; i < data.data.length; i++) {
-                    var item = data.data[i];
-                    html += '' + item.id + '<li><a href="summarize.html?p_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
-                }
-                $("#header_project").html(html);
-            }
-        });
-        //获取所有分类
-        $.get("setting/findCategorys", function (data) {
-            var html = '';
-            if (data.flag) {
-                for (var i = 0; i < data.data.length; i++) {
-                    var item = data.data[i];
-                    html += '' + item.id + '<li><a href="summarize.html?c_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
-                }
-                $("#header_category").html(html);
-            }
-        });
-        //获取所有部门
-        $.get("setting/findDepartments", function (data) {
-            var html = '';
-            if (data.flag) {
-                for (var i = 0; i < data.data.length; i++) {
-                    var item = data.data[i];
-                    html += '' + item.id + '<li><a href="summarize.html?dep_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
-                }
-                $("#header_department").html(html);
-            }
-        });
-        //获取所有账户
-        $.get("setting/findAccounts", function (data) {
-            var html = '';
-            if (data.flag) {
-                for (var i = 0; i < data.data.length; i++) {
-                    var item = data.data[i];
-                    html += '' + item.id + '<li><a href="summarize.html?a_id=&title=每月汇总">' + item.name + '' + item.name + '</a></li>';
-                }
-                $("#header_account").html(html);
-            }
-        });
-    }
 
     //手动更新结存功能
     function updateBalance() {

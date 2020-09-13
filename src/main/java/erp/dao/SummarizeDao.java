@@ -2,7 +2,7 @@ package erp.dao;
 
 import erp.dao.provider.SummarizeDaoProvider;
 import erp.entity.Detail;
-import erp.vo.req.SummarizeConditionQueryVO;
+import erp.entity.vo.req.SummarizeConditionQueryVO;
 import org.apache.ibatis.annotations.SelectProvider;
 import org.springframework.stereotype.Repository;
 

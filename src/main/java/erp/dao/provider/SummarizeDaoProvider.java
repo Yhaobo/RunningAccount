@@ -1,6 +1,6 @@
 package erp.dao.provider;
 
-import erp.vo.req.SummarizeConditionQueryVO;
+import erp.entity.vo.req.SummarizeConditionQueryVO;
 import org.apache.ibatis.jdbc.SQL;
 
 /**

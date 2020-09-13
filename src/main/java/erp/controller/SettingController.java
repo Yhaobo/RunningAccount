@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -26,7 +27,7 @@ public class SettingController {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @RequestMapping("/findCategorys")
+    @GetMapping("/findCategorys")
     @ResponseBody
     public ResultInfo findCategorys() {
         List<Category> directions = settingService.findCategorys();
@@ -61,7 +62,7 @@ public class SettingController {
         }
     }
 
-    @RequestMapping("/findDepartments")
+    @GetMapping("/findDepartments")
     @ResponseBody
     public ResultInfo findDepartments() {
         List<Department> departments = settingService.findDepartments();
@@ -97,7 +98,7 @@ public class SettingController {
         }
     }
 
-    @RequestMapping("/findAccounts")
+    @GetMapping("/findAccounts")
     @ResponseBody
     public ResultInfo findAccounts() {
         List<Account> accounts = settingService.findAccounts();
@@ -134,7 +135,7 @@ public class SettingController {
         }
     }
 
-    @RequestMapping("/findProjects")
+    @GetMapping("/findProjects")
     @ResponseBody
     public ResultInfo findProjects() {
         List<Project> projects = settingService.findProjects();

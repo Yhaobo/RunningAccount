@@ -2,9 +2,9 @@ package erp.service;
 
 import erp.dao.SummarizeDao;
 import erp.util.MyUtils;
-import erp.vo.req.SummarizeConditionQueryVO;
-import erp.vo.resp.DetailRespVO;
-import erp.vo.resp.SummarizeRespVO;
+import erp.entity.vo.req.SummarizeConditionQueryVO;
+import erp.entity.vo.resp.DetailRespVO;
+import erp.entity.vo.resp.SummarizeRespVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
