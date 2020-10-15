@@ -2,16 +2,19 @@ package erp.controller;
 
 import erp.entity.User;
 import erp.service.UserService;
-import erp.util.ResultInfo;
+import erp.util.R;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Base64;
+import java.util.List;
 
 /**
  * 用户
@@ -23,47 +26,71 @@ public class UserController {
     @Autowired
     private UserService service;
 
-    @RequestMapping("/login")
-    public ResultInfo login(User form) {
-        Subject user = SecurityUtils.getSubject();
-        if (user.isAuthenticated()) {
-            return new ResultInfo(true);
+    @PostMapping("login")
+    public R login(@RequestBody User loginForm) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.isAuthenticated()) {
+            return R.ok().data(subject.getPrincipal());
         }
         try {
-            user.login(new UsernamePasswordToken(form.getU_username(), form.getU_password()));
-            return new ResultInfo(true);
+            //密码解码
+            loginForm.setPassword(new String(Base64.getDecoder().decode(loginForm.getPassword())));
+
+            subject.login(new UsernamePasswordToken(loginForm.getUsername(), loginForm.getPassword()));
+            return R.ok().data(subject.getPrincipal());
+        } catch (UnknownAccountException e) {
+            log.error(e.getMessage(), e);
+            return R.fail().message(e.getMessage());
         } catch (AuthenticationException e) {
-            log.error("[method:login]" + e.getMessage());
-            return new ResultInfo(false, "用户名或密码错误!");
+            log.error(e.getMessage(), e);
+            return R.fail().message("密码错误");
         }
     }
 
-    @PostMapping("/alter")
-    public ResultInfo alter(String[] password, User user) {
-        if (password[0].equals(password[1])&&password[0].length()>=6) {
+    @PutMapping
+    public R alter(@RequestBody User user) {
+        //密码解码
+        user.setPassword(new String(Base64.getDecoder().decode(user.getPassword())));
+        service.updateByUser(user);
+        return R.ok();
+    }
+
+    @GetMapping("listUsername/{level}")
+    public R getUsername(@PathVariable Integer level) {
+        List<User> username = service.getUsernameByLevel(level);
+        return R.ok().data(username);
+    }
+
+    @DeleteMapping("logout")
+    public R logout() {
+        SecurityUtils.getSubject().logout();
+        return R.ok().message("成功登出");
+    }
+
+    @PostMapping
+    public R insert(@RequestBody User user) {
+        if (user.getLevel() != null && user.getLevel() != 0) {
+            //密码解码
+            user.setPassword(new String(Base64.getDecoder().decode(user.getPassword())));
             try {
-                user.setU_password(password[0]);
-                service.updateByUser(user);
-                return new ResultInfo(true, user.getU_level());
-            } catch (Exception e) {
-                log.error("[method:alter]" + e.getMessage());
-                e.printStackTrace();
-                return new ResultInfo(false, "修改失败");
+                service.insert(user);
+            } catch (DuplicateKeyException e) {
+                log.error("", e);
+                return R.fail().message("此用户名已存在");
             }
+            return R.ok();
         } else {
-            return new ResultInfo(false, "密码不一致或长度没有达到6位");
+            return R.fail().message("管理员账号只允许一个");
         }
     }
 
-    @RequestMapping("/getLevel")
-    public ResultInfo getLevel() {
-        Object principal = SecurityUtils.getSubject().getPrincipal();
-        return new ResultInfo(true, principal);
-    }
-
-    @RequestMapping("/getUsername")
-    public ResultInfo getUsername(Integer u_level) {
-        String username = service.getUsernameByLevel(u_level);
-        return new ResultInfo(true,"",username);
+    @DeleteMapping
+    public R delete(@RequestBody User user) {
+        if (user.getLevel() != null && user.getLevel() != 0) {
+            service.delete(user);
+            return R.ok();
+        } else {
+            return R.fail().message("管理员账号不允许删除");
+        }
     }
 }

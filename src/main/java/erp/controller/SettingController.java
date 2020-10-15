@@ -1,173 +1,159 @@
 package erp.controller;
 
 import erp.entity.*;
-import erp.service.SettingService;
-import erp.util.ResultInfo;
+import erp.service.OptionService;
+import erp.util.R;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 基础设置
  */
-@Controller
-@RequestMapping("/setting")
+@RestController
+@RequestMapping("/option")
 public class SettingController {
     @Autowired
-    private SettingService settingService;
+    private OptionService optionService;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping("/findCategorys")
-    @ResponseBody
-    public ResultInfo findCategorys() {
-        List<Category> directions = settingService.findCategorys();
-        return new ResultInfo(true, directions);
+    @GetMapping("/all")
+    public R getAllOption() {
+        Map<String, List> map = new HashMap<>(8);
+        map.put("accountOptions", optionService.findAccounts());
+        map.put("departmentOptions", optionService.findDepartments());
+        map.put("projectOptions", optionService.findProjects());
+        map.put("categoryOptions", optionService.findCategories());
+        return R.ok().data(map);
     }
 
-    @RequestMapping("/addCategory")
-    @ResponseBody
-    public ResultInfo addCategory(Category category) {
-        if (category.getName().isEmpty()) {
-            return new ResultInfo(false, "不能为空!");
+    @GetMapping("/category")
+    public R findCategory() {
+        List<Category> categories = optionService.findCategories();
+        return R.ok().data(categories);
+    }
+
+    @PostMapping("/category")
+    public R addCategory(@RequestBody Option option) {
+        if (StringUtils.isEmpty(option.getName())) {
+            return R.fail().message("不能为空!");
         }
 
         try {
-            settingService.addCategory(category);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:addCategory]" + e.getMessage());
-            return new ResultInfo(false, "添加失败!");
+            optionService.addCategory(option);
+            return R.ok().data(option.getId());
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
         }
     }
 
-    @RequestMapping("/updateCategory")
-    @ResponseBody
-    public ResultInfo updateCategory(Category category, HttpServletRequest request) throws IOException {
+    @PutMapping("/category")
+    public R updateCategory(@RequestBody Category category) {
         try {
-            settingService.updateCategory(category);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:updateCategory]" + e.getMessage());
-            return new ResultInfo(false, "修改失败!");
+            optionService.updateCategory(category);
+            return R.ok();
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
         }
     }
 
-    @GetMapping("/findDepartments")
-    @ResponseBody
-    public ResultInfo findDepartments() {
-        List<Department> departments = settingService.findDepartments();
-        return new ResultInfo(true, departments);
+    @GetMapping("/department")
+    public R findDepartments() {
+        List<Department> departments = optionService.findDepartments();
+        return R.ok().data(departments);
     }
 
-    @RequestMapping("/addDepartment")
-    @ResponseBody
-    public ResultInfo addDepartment(Department department) {
-        if (department.getName().isEmpty()) {
-            return new ResultInfo(false, "不能为空!");
-        }
-        try {
-            settingService.addDepartment(department);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:addDepartment]" + e.getMessage());
-
-            return new ResultInfo(false, "添加失败!");
-        }
-    }
-
-    @RequestMapping("/updateDepartment")
-    @ResponseBody
-    public ResultInfo updateDepartment(Department department, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        try {
-            settingService.updateDepartment(department);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:updateDepartment]" + e.getMessage());
-
-            return new ResultInfo(false, "修改失败!");
-        }
-    }
-
-    @GetMapping("/findAccounts")
-    @ResponseBody
-    public ResultInfo findAccounts() {
-        List<Account> accounts = settingService.findAccounts();
-        return new ResultInfo(true, accounts);
-    }
-
-    @RequestMapping("/addAccount")
-    @ResponseBody
-    public ResultInfo addAccount(Account account) {
-        if (account.getName().isEmpty()) {
-            return new ResultInfo(false, "不能为空!");
+    @PostMapping("/department")
+    public R addDepartment(@RequestBody Option option) {
+        if (StringUtils.isEmpty(option.getName())) {
+            return R.fail().message("不能为空!");
         }
 
         try {
-            settingService.addAccount(account);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:addAccount]" + e.getMessage());
-
-            return new ResultInfo(false, "添加失败!");
+            optionService.addDepartment(option);
+            return R.ok().data(option.getId());
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
         }
     }
 
-    @RequestMapping("/updateAccount")
-    @ResponseBody
-    public ResultInfo updateAccount(Account account, HttpServletResponse response, HttpServletRequest request) throws IOException {
+    @PutMapping("/department")
+    public R updateDepartment(@RequestBody Department department) {
         try {
-            settingService.updateAccount(account);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:updateAccount]" + e.getMessage());
-
-            return new ResultInfo(false, "修改失败!");
+            optionService.updateDepartment(department);
+            return R.ok();
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
         }
     }
 
-    @GetMapping("/findProjects")
-    @ResponseBody
-    public ResultInfo findProjects() {
-        List<Project> projects = settingService.findProjects();
-        return new ResultInfo(true, projects);
+    @GetMapping("/account")
+    public R findAccounts() {
+        List<Account> accounts = optionService.findAccounts();
+        return R.ok().data(accounts);
     }
 
-    @RequestMapping("/addProject")
-    @ResponseBody
-    public ResultInfo addProject(Project project) {
-        if (project.getName().isEmpty()) {
-            return new ResultInfo(false, "不能为空!");
+    @PostMapping("/account")
+    public R addAccount(@RequestBody Option option) {
+        if (StringUtils.isEmpty(option.getName())) {
+            return R.fail().message("不能为空!");
         }
+
         try {
-            settingService.addProject(project);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:addProject]" + e.getMessage());
-
-            return new ResultInfo(false, "添加失败!");
+            optionService.addAccount(option);
+            return R.ok().data(option.getId());
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
         }
     }
 
-    @RequestMapping("/updateProject")
-    @ResponseBody
-    public ResultInfo updateProject(Project project, HttpServletResponse response, HttpServletRequest request) throws IOException {
+    @PutMapping("/account")
+    public R updateAccount(@RequestBody Account account) {
         try {
-            settingService.updateProject(project);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:updateProject]" + e.getMessage());
-
-            return new ResultInfo(false, "修改失败!");
+            optionService.updateAccount(account);
+            return R.ok();
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
         }
+
+    }
+
+    @GetMapping("/project")
+    public R findProjects() {
+        List<Project> projects = optionService.findProjects();
+        return R.ok().data(projects);
+    }
+
+    @PostMapping("/project")
+    public R addProject(@RequestBody Option option) {
+        if (StringUtils.isEmpty(option.getName())) {
+            return R.fail().message("不能为空!");
+        }
+
+        try {
+            optionService.addProject(option);
+            return R.ok().data(option.getId());
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
+        }
+    }
+
+    @PutMapping("/project")
+    public R updateProject(@RequestBody Project project) {
+        try {
+            optionService.updateProject(project);
+            return R.ok();
+        } catch (DuplicateKeyException e) {
+            return R.fail().message("此选项名已存在");
+        }
+
     }
 }

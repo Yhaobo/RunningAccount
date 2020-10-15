@@ -1,13 +1,7 @@
 package erp.dao;
 
-import erp.entity.Account;
-import erp.entity.Category;
-import erp.entity.Department;
-import erp.entity.Project;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import erp.entity.*;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,9 +35,10 @@ public interface ForeignTableDao {
     @Select("select id, name from project ")
     List<Project> listProject();
 
-    @Insert("insert into ${tableName}(name) values(#{entity.name})")
-    void insert(@Param("tableName") String tableName, @Param("entity") Object entity);
+    @Insert("insert into ${tableName}(name) values(#{option.name})")
+    @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "option.id")
+    void insert(@Param("tableName") String tableName, @Param("option") Option option);
 
-    @Update("update ${tableName} set name=#{entity.name} where id=#{entity.id}")
-    void update(@Param("tableName") String tableName, @Param("entity") Object entity);
+    @Update("update ${tableName} set name=#{option.name} where id=#{option.id}")
+    void update(@Param("tableName") String tableName, @Param("option") Option option);
 }

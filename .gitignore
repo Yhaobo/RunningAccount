@@ -1,8 +1,10 @@
 /*.iml
 /target/
 /.idea/
-/src/main/resources/druid.properties
 /src/test/
 /src/main/resources/static/test.html
-/src/main/resources/application-private.yml
+/src/main/resources/application-prod.yml
+/src/main/resources/application-dev.yml
 /log/
+/data/
+/src/main/resources/static/

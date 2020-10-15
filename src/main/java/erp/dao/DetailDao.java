@@ -2,7 +2,7 @@ package erp.dao;
 
 import erp.dao.provider.DetailDaoProvider;
 import erp.entity.Detail;
-import erp.entity.vo.req.DetailConditionQueryVO;
+import erp.entity.dto.req.DetailQueryConditionDTO;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -118,13 +118,13 @@ public interface DetailDao {
      */
     @SelectProvider(type = DetailDaoProvider.class, method = "listByFilterSql")
     @ResultMap("detailMap")
-    List<Detail> listByFilter(DetailConditionQueryVO vo);
+    List<Detail> listByFilter(DetailQueryConditionDTO vo);
 
     /**
      * 返回拥有凭证的明细记录的id的Set集合
      *
      * @return
      */
-    @Select("SELECT d_id FROM voucher ")
-    Set<Integer> listDetailIdFromVouchers();
+    @Select("SELECT detail_id FROM voucher ")
+    Set<Integer> listDetailIdFromVoucher();
 }

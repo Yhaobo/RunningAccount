@@ -6,22 +6,20 @@ import erp.dao.VoucherDao;
 import erp.entity.Account;
 import erp.entity.Detail;
 import erp.entity.Voucher;
+import erp.entity.dto.req.DetailQueryConditionDTO;
+import erp.entity.dto.resp.DetailRespDTO;
 import erp.util.MyException;
 import erp.util.MyUtils;
-import erp.entity.vo.req.DetailConditionQueryVO;
-import erp.entity.vo.resp.DetailRespVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
@@ -38,48 +36,54 @@ public class DetailService {
     @Autowired
     private ForeignTableDao foreignTableDao;
 
-    @Value("${home.location}")
+    @Value("${erp.home.location}")
     private String location;
 
     private String parentPath = "voucher\\";
 
     @Transactional(readOnly = true)
-    public List<DetailRespVO> findAll(DetailConditionQueryVO vo) {
-        // 所有收支记录DO
-        List details = detailDao.listByFilter(vo);
-        // 拥有凭证的收支记录的id集合
-        Set<Integer> DetailIdFromVouchers = detailDao.listDetailIdFromVouchers();
-        for (int i = 0; i < details.size(); i++) {
-            Detail detail = (Detail) details.get(i);
-            // 用于返回前端的VO
-            DetailRespVO detailRespVo = new DetailRespVO();
-            // 将DO的数据传递给VO
-            BeanUtils.copyProperties(detail, detailRespVo);
+    public List<DetailRespDTO> findAll(DetailQueryConditionDTO conditionDTO) {
+        List details = null;
+        if (conditionDTO.getJustNoVoucher()) {
+            //仅查询没有凭证的记录
+            details = detailDao.listByFilter(conditionDTO);
+        } else {
+            // 所有收支记录DO
+            details = detailDao.listByFilter(conditionDTO);
+            // 拥有凭证的收支记录的id集合
+            Set<Integer> detailIdFromVoucher = detailDao.listDetailIdFromVoucher();
+            for (int i = 0; i < details.size(); i++) {
+                Detail detail = (Detail) details.get(i);
+                // 用于返回前端的VO
+                DetailRespDTO detailRespDTO = new DetailRespDTO();
+                // 将DO的数据传递给VO
+                BeanUtils.copyProperties(detail, detailRespDTO);
 
-            if (DetailIdFromVouchers.contains(detail.getId())) {
-                // 有凭证
-                detailRespVo.setHasVoucher(true);
-            } else {
-                // 没有凭证
-                detailRespVo.setHasVoucher(false);
+                if (detailIdFromVoucher.contains(detail.getId())) {
+                    // 有凭证
+                    detailRespDTO.setHasVoucher(true);
+                } else {
+                    // 没有凭证
+                    detailRespDTO.setHasVoucher(false);
+                }
+                details.set(i, detailRespDTO);
             }
-            details.set(i, detailRespVo);
         }
-
-        //格式化所有数字
-        MyUtils.formatNumber(details);
         return details;
     }
 
     @Transactional(readOnly = true)
-    public Detail findOneById(int id) {
-        return detailDao.getById(id);
+    public DetailRespDTO findOneById(int id) {
+        final Detail detail = detailDao.getById(id);
+        final DetailRespDTO detailRespDTO = new DetailRespDTO();
+        BeanUtils.copyProperties(detail, detailRespDTO);
+        return detailRespDTO;
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void insert(Detail form) {
         //处理空值
-        if (form.getDescription().length() < 1) {
+        if (form.getDescription() == null || form.getDescription().length() < 1) {
             form.setDescription("无");
         }
         //处理null值
@@ -91,25 +95,23 @@ public class DetailService {
         }
         //设置结存
         handleBalance(form);
-        //添加到数据库
-        detailDao.insert(form);
+
+        try {
+            //添加到数据库
+            detailDao.insert(form);
+        } catch (DuplicateKeyException e) {
+            //时间重复,则时间增加一秒, 再次插入
+            final Date date = form.getDate();
+            date.setTime(date.getTime() + 1000);
+            detailDao.insert(form);
+        }
         //如果是插入时间是以前,就需要调整本次插入记录之后的所有记录的结存
         handleLaterBalance(form.getDate(), form.getEarning().subtract(form.getExpense()), form.getAccount().getId());
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void update(Detail form) throws Exception {
-        //判断id是否为表单默认值0
-        if (form.getId() == 0) {
-            throw new MyException("请刷新页面,重新操作!");
-        }
-        //处理null值
-        if (form.getEarning() == null) {
-            form.setEarning(new BigDecimal(0));
-        }
-        if (form.getExpense() == null) {
-            form.setExpense(new BigDecimal(0));
-        }
+
         //获取被修改之前的旧记录
         Detail old = detailDao.getById(form.getId());
         //处理修改时间之后的结存不一致
@@ -142,7 +144,7 @@ public class DetailService {
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void delete(Detail form) throws MyException {
         // 删除本地凭证文件
-        String[] urls = voucherDao.listUrlByDetailId(form.getId());
+        String[] urls = voucherDao.listUriByDetailId(form.getId());
         deleteLocalVoucherFiles(urls);
         // 删除凭证记录
         voucherDao.deleteByDetailId(form.getId());
@@ -172,27 +174,31 @@ public class DetailService {
     /**
      * 上传图片凭证的保存和记录
      *
-     * @param file 图片凭证文件
-     * @param id   对应的一条记录的id
+     * @param file     图片凭证文件
+     * @param detailId 对应的一条记录的id
      */
     @Transactional(rollbackFor = Exception.class, timeout = 30)
-    public void insertVoucher(MultipartFile file, Integer id) throws Exception {
+    public void insertVoucher(MultipartFile file, Integer detailId) throws Exception {
         String uuid = MyUtils.getUUID();
-        String url = uuid + "_" + LocalDate.now().toString() + "_" + file.getOriginalFilename();
-        String filePath = getLocalVoucherFilePath(url);
+        String fileName = LocalDate.now().toString() + "_" + uuid + "_" + file.getOriginalFilename();
+        String filePath = getLocalVoucherFilePath(fileName);
 
         // 数据库记录关联
-        voucherDao.insert(new Voucher(url, id));
+        voucherDao.insert(new Voucher(fileName, detailId));
 
         // 保存文件到磁盘
         File localFile = new File(filePath);
+
         // 自动创建上级目录
         if (!localFile.getParentFile().exists()) {
             if (!localFile.getParentFile().mkdirs()) {
                 throw new MyException("目录创建失败");
             }
         }
-        file.transferTo(localFile);
+
+        final FileOutputStream fileOutputStream = new FileOutputStream(localFile);
+        fileOutputStream.write(file.getBytes());
+        fileOutputStream.close();
     }
 
     /**
@@ -207,7 +213,7 @@ public class DetailService {
      * @param fileName 对应voucher图片的文件名
      * @param response 直接返回文件流
      */
-    public void listVoucherByUrl(String fileName, HttpServletResponse response) throws Exception {
+    public void getImg(String fileName, HttpServletResponse response) throws Exception {
         String filePath = getLocalVoucherFilePath(fileName);
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(filePath));
              OutputStream outputStream = response.getOutputStream()) {
@@ -245,7 +251,7 @@ public class DetailService {
      */
     private void handleBalance(Detail detail) {
         //获取期初
-        Detail previous = detailDao.findBeforeOne(detail.getDate(),detail.getAccount().getId());
+        Detail previous = detailDao.findBeforeOne(detail.getDate(), detail.getAccount().getId());
         BigDecimal qi_chu = previous == null ? new BigDecimal(0) : previous.getBalance();
         //设置结存(当前结存=之前结存+当前收入-当前支出)
         detail.setBalance(qi_chu.add(detail.getEarning()).subtract(detail.getExpense()));
@@ -275,7 +281,7 @@ public class DetailService {
      *
      * @param date              时间
      * @param balanceDifference 要修改的结存差值
-     * @param accountId 账户ID
+     * @param accountId         账户ID
      */
     private void handleLaterBalance(Date date, BigDecimal balanceDifference, Integer accountId) {
         detailDao.updateLater(balanceDifference, date, accountId);
@@ -286,7 +292,7 @@ public class DetailService {
      * @return 返回凭证文件的本地路径
      */
     private String getLocalVoucherFilePath(String fileName) {
-        return location + parentPath + fileName.charAt(0) + "\\" + fileName;
+        return location + parentPath + fileName.substring(0, fileName.indexOf("-")) + "\\" + fileName;
     }
 
     /**

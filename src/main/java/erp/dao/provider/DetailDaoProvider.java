@@ -1,7 +1,7 @@
 package erp.dao.provider;
 
 import erp.entity.Detail;
-import erp.entity.vo.req.DetailConditionQueryVO;
+import erp.entity.dto.req.DetailQueryConditionDTO;
 import org.apache.ibatis.jdbc.SQL;
 
 import java.util.List;
@@ -11,26 +11,30 @@ import java.util.List;
  * @date 2020/3/13
  */
 public class DetailDaoProvider {
-    public String listByFilterSql(DetailConditionQueryVO vo) {
+    public String listByFilterSql(DetailQueryConditionDTO dto) {
         return new SQL() {{
             SELECT("*");
             FROM("detail");
-            if (vo.getBackDate() != null && vo.getFrontDate() != null) {
-                WHERE("d_date between #{frontDate} and #{backDate}");
+            if (dto.getJustNoVoucher()) {
+                LEFT_OUTER_JOIN("voucher on detail.d_id=voucher.detail_id");
+                WHERE("detail_id is null");
             }
-            if (vo.getDescription() != null && vo.getDescription().length() > 2) {
+            if (dto.getEndDate() != null && dto.getBeginDate() != null) {
+                WHERE("d_date between #{beginDate} and #{endDate}");
+            }
+            if (dto.getDescription() != null && dto.getDescription().length() > 2) {
                 WHERE("d_description like #{description}");
             }
-            if (vo.getProjectId() != null) {
+            if (dto.getProjectId() != null) {
                 WHERE("p_id=#{projectId}");
             }
-            if (vo.getAccountId() != null) {
+            if (dto.getAccountId() != null) {
                 WHERE("a_id=#{accountId}");
             }
-            if (vo.getDepartmentId() != null) {
+            if (dto.getDepartmentId() != null) {
                 WHERE("dep_id=#{departmentId}");
             }
-            if (vo.getCategoryId() != null) {
+            if (dto.getCategoryId() != null) {
                 WHERE("c_id=#{categoryId}");
             }
             ORDER_BY("d_date desc");

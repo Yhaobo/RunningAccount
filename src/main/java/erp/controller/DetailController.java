@@ -3,23 +3,22 @@ package erp.controller;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageSerializable;
 import erp.entity.Detail;
+import erp.entity.dto.req.DetailFormReqDTO;
+import erp.entity.dto.req.DetailQueryConditionDTO;
+import erp.entity.dto.resp.DetailRespDTO;
 import erp.service.DetailService;
 import erp.service.ExcelService;
-import erp.util.MyException;
-import erp.util.ResultInfo;
-import erp.entity.vo.req.DetailConditionQueryVO;
-import erp.entity.vo.req.DetailFormReqVO;
-import erp.entity.vo.resp.DetailRespVO;
+import erp.util.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -35,151 +34,95 @@ public class DetailController {
     @Autowired
     private ExcelService excelService;
 
-    @RequestMapping("/getAll")
-    public ResultInfo getAll(DetailConditionQueryVO vo, String duringDate) {
-        try {
-            // 分页
-            PageHelper.startPage(vo.getPageNum(), vo.getPageSize());
+    @GetMapping("")
+    public R getAll(DetailQueryConditionDTO vo) {
+        // 分页
+        PageHelper.startPage(vo.getCurrentPage(), vo.getPageSize());
 
-            //处理日期格式
-            if (!StringUtils.isEmpty(duringDate)) {
-                String[] dates = duringDate.split(" ~ ");
-                if (dates.length == 2) {
-                    //处理前日期
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
-                    vo.setFrontDate(simpleDateFormat.parse(dates[0].trim()));
-                    //处理后日期
-                    Calendar calendar = simpleDateFormat.getCalendar();
-                    calendar.setTime(simpleDateFormat.parse(dates[1].trim()));
-                    calendar.add(Calendar.MONTH, 1);
-                    calendar.add(Calendar.MILLISECOND, -1);
-                    vo.setBackDate(calendar.getTime());
-                }
-            }
-            List<DetailRespVO> detailRespVOS = detailService.findAll(vo);
-            PageSerializable<DetailRespVO> pageInfo = new PageSerializable<>(detailRespVOS);
-            return new ResultInfo(true, pageInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("[method:getAll]" + e);
-            return new ResultInfo(false, e.getMessage());
-        }
+        List<DetailRespDTO> detailRespDTOS = detailService.findAll(vo);
+        PageSerializable<DetailRespDTO> pageInfo = new PageSerializable<>(detailRespDTOS);
+        return R.ok().data(pageInfo);
     }
 
-    @RequestMapping("/findOne")
-    public ResultInfo findOne(int id) {
-        Detail detail = detailService.findOneById(id);
-        return new ResultInfo(true, detail);
+    @GetMapping("/{id}")
+    public R findOne(@PathVariable Integer id) {
+        return R.ok().data(detailService.findOneById(id));
     }
 
-    @RequestMapping("/add")
-    public synchronized ResultInfo add(DetailFormReqVO form) {
+    @PostMapping("")
+    public synchronized R add(@RequestBody DetailFormReqDTO form) {
         try {
             detailService.insert(form);
-            return new ResultInfo(true, form.getId());
-        } catch (Exception e) {
-            log.error("[method:add]" + e);
-            e.printStackTrace();
-            return new ResultInfo(false, "添加失败！请确认所有的栏目都已填写");
+        } catch (DuplicateKeyException e) {
+            log.error("", e);
+            return R.fail().message("日期时间不允许重复, 请重新选择日期时间");
         }
+        return R.ok().data(form.getId());
     }
 
-    @RequestMapping("/update")
-    public synchronized ResultInfo update(DetailFormReqVO form) {
-        try {
-            detailService.update(form);
-        } catch (MyException e) {
-            log.error("[method:update]" + e);
-            return new ResultInfo(false, e.getMessage());
-        } catch (Exception e) {
-            log.error("[method:update]" + e);
-            return new ResultInfo(false, "修改失败!");
+    @PutMapping("")
+    public synchronized R update(@RequestBody DetailFormReqDTO form) throws Exception {
+        //处理null值
+        if (form.getEarning() == null) {
+            form.setEarning(new BigDecimal(0));
         }
-        return new ResultInfo(true);
-    }
-
-    @RequestMapping("/delete")
-    public synchronized ResultInfo delete(Detail form) {
-        try {
-            detailService.delete(form);
-            return new ResultInfo(true);
-        } catch (Throwable t) {
-            log.error("[method:delete]" + t);
-            return new ResultInfo(false, "删除失败!");
+        if (form.getExpense() == null) {
+            form.setExpense(new BigDecimal(0));
         }
-    }
-
-    @RequestMapping("/updateBalance")
-    public synchronized ResultInfo updateBalance() {
-        try {
-            detailService.updateAllBalance();
-            return new ResultInfo(true);
-        } catch (Throwable t) {
-            log.error("[method:updateBalance]" + t);
-            return new ResultInfo(false, "更新结存失败!");
+        if (form.getDescription() == null) {
+            form.setDescription("无");
         }
+        detailService.update(form);
+        return R.ok();
     }
 
-    @PostMapping("/addVouchers")
-    public synchronized ResultInfo addVouchers(MultipartFile file, Integer id) {
-        try {
-            detailService.insertVoucher(file, id);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:addVouchers] " + e);
-            e.printStackTrace();
-            return new ResultInfo(false);
-        }
+    @DeleteMapping("")
+    public synchronized R delete(@RequestBody Detail form) {
+        detailService.delete(form);
+        return R.ok();
     }
 
-    @PostMapping("/deleteVoucher")
-    public synchronized ResultInfo deleteVoucher(Integer voucherId) {
-        try {
-            detailService.deleteVoucher(voucherId);
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            log.error("[method:deleteVoucher] " + e);
-            e.printStackTrace();
-            return new ResultInfo(false, "删除凭证失败");
-        }
+    @PutMapping("/balance")
+    public synchronized R updateBalance() {
+        detailService.updateAllBalance();
+        return R.ok();
     }
 
-    @PostMapping("/vouchers")
-    public ResultInfo listVoucherByDetailId(Integer id) {
-        return new ResultInfo(true, detailService.listVoucherByDetailId(id));
+    @PostMapping("/voucher/{detailId}")
+    public synchronized R addVouchers(MultipartFile file, @PathVariable Integer detailId) throws Exception {
+        detailService.insertVoucher(file, detailId);
+        return R.ok();
     }
 
-    @GetMapping("/voucher/{fileName}")
-    public void listVoucherByUrl(@PathVariable String fileName, HttpServletResponse response) {
-        try {
-            detailService.listVoucherByUrl(fileName, response);
-        } catch (Exception e) {
-            log.error("[method:listVoucherByUrl] " + e);
-            e.printStackTrace();
-        }
+    @DeleteMapping("/voucher/{voucherId}")
+    public synchronized R deleteVoucher(@PathVariable Integer voucherId) {
+        detailService.deleteVoucher(voucherId);
+        return R.ok();
     }
 
-    @GetMapping("/excel/export/{accountId}")
-    public void export(HttpServletResponse response, @PathVariable Integer accountId) throws IOException {
-        try {
-            excelService.export(response,accountId);
-        } catch (Exception e) {
-            log.error("[method:export]" + e.getMessage());
-        }
+    @GetMapping("/voucher/{detailId}")
+    public R listVoucherByDetailId(@PathVariable Integer detailId) {
+        return R.ok().data(detailService.listVoucherByDetailId(detailId));
     }
 
-    @RequestMapping("/excel/importing")
-    public synchronized ResultInfo importing(MultipartFile file) throws IOException {
+    @GetMapping("/voucher/img/{fileName}")
+    public void getImg(@PathVariable String fileName, HttpServletResponse response) throws Exception {
+        detailService.getImg(fileName, response);
+    }
+
+    @GetMapping("/excel/{accountId}")
+    public void export(HttpServletResponse response, @PathVariable Integer accountId) throws Exception {
+        excelService.export(response, accountId);
+    }
+
+    @PostMapping("/excel")
+    public synchronized R importing(MultipartFile file) throws IOException, InstantiationException, IllegalAccessException, ParseException, NoSuchFieldException {
         if (file.isEmpty()) {
-            return new ResultInfo(false);
+            return R.fail().message("上传文件为空");
         }
         try {
             excelService.importing(file.getInputStream());
-            return new ResultInfo(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("[method:importing]" + e.getMessage());
-            return new ResultInfo(false, "导入失败!");
+            return R.ok();
         } finally {
             file.getInputStream().close();
         }

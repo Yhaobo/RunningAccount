@@ -1,10 +1,8 @@
 package erp.dao;
 
-import erp.dao.provider.VoucherDaoProvider;
 import erp.entity.Voucher;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
@@ -16,24 +14,22 @@ import java.util.List;
  */
 @Repository
 public interface VoucherDao {
-    @InsertProvider(type = VoucherDaoProvider.class, method = "insertByBatchSql")
-    void insertByBatch(List<Voucher> vouchers);
 
-    @Insert("insert into voucher(url,d_id) values(#{url},#{d_id})")
+    @Insert("insert into voucher(uri,detail_id) values(#{uri},#{detailId})")
     void insert(Voucher voucher);
 
-    @Select("select id, url from voucher where d_id=#{detailId}")
+    @Select("select id, uri,detail_id detailId from voucher where detail_id=#{detailId}")
     List<Voucher> listVoucher(Integer detailId);
 
     @Delete("delete from voucher where id=#{voucherId}")
     void deleteById(Integer voucherId);
 
-    @Select("select url from voucher where id=#{voucherId}")
+    @Select("select uri from voucher where id=#{voucherId}")
     String getUrlById(Integer voucherId);
 
-    @Delete("delete from voucher where d_id=#{detailId}")
+    @Delete("delete from voucher where detail_id=#{detailId}")
     void deleteByDetailId(Integer detailId);
 
-    @Select("select url from voucher where d_id=#{detailId}")
-    String[] listUrlByDetailId(Integer detailId);
+    @Select("select uri from voucher where detail_id=#{detailId}")
+    String[] listUriByDetailId(Integer detailId);
 }

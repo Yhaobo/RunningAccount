@@ -9,14 +9,14 @@ import lombok.Data;
 @Data
 public class Voucher {
     private Integer id;
-    private String url;
-    private Integer d_id;
+    private String uri;
+    private Integer detailId;
 
     public Voucher() {
     }
 
-    public Voucher(String filePath, Integer id) {
-        url = filePath;
-        d_id = id;
+    public Voucher(String uri, Integer detailId) {
+        this.uri = uri;
+        this.detailId = detailId;
     }
 }

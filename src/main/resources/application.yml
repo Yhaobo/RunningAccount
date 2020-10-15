@@ -33,6 +33,7 @@ spring:
       #要启用PSCache，必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true。 在Druid中，不会存在Oracle下PSCache占用内存过多的问题，可以把这个数值配置大一些，比如说100
       max-open-prepared-statements: 50
       max-pool-prepared-statement-per-connection-size: 5
+
   #静态资源配置
   resources:
     chain:
@@ -55,23 +56,6 @@ spring:
       max-file-size: 500KB
       # 一次请求大小限制
       max-request-size: 10MB
+
 server:
   port: 8080
-
-shiro:
-  # 开启 Shrio 配置，默认为 true
-  enabled: true
-  web:
-    # 开启 Shrio Web 配置，默认为 true
-    enabled: true
-  # 配置登录地址，默认为"login.jsp"
-  loginUrl: /index.html
-  # 配置登录成功地址，默认为"/"
-  successUrl: /detail_list.html
-  # 配置未获授权默认跳转地址
-  unauthorizedUrl: /unauthorized.json
-  sessionManager:
-    # 是否允许通过 URL 参数实现会话跟踪，默认为 true。如果网站支持 Cookie，可以关闭次选项。
-    sessionIdUrlRewritingEnabled: true
-    # 是否允许通过 Cookie 实现会话跟踪，默认为 true。
-    sessionIdCookieEnabled: true

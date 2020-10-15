@@ -1,6 +1,8 @@
 package erp.dao;
 
 import erp.entity.User;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
@@ -9,23 +11,24 @@ import java.util.List;
 
 @Repository
 public interface UserDao {
+    @Insert("insert into user(username,password,level) values(#{username},#{password},#{level})")
+    void insert(User user);
 
-    @Select("select * from user where u_username=#{u_username} and u_password=#{u_password}")
-    User getByUser(User form);
-
-    @Select("select * from user where u_username=#{username}")
+    @Select("select * from user where username=#{username}")
     User getByUsername(String username);
 
-    @Update("update user set u_password=#{u_password},u_username=#{u_username} where u_level=#{u_level}")
+    @Update("update user set password=#{password},username=#{username} where id=#{id}")
     void updateByUser(User user);
 
-    @Select("select u_username from user order by u_level")
+    @Select("select username from user order by level")
     List<String> listUsername();
 
-    @Select("select u_level from user where u_username=#{username}")
+    @Select("select level from user where username=#{username}")
     Integer getLevelByUsername(String username);
 
-    @Select("select u_username from user where u_level=#{level}")
-    String getUsernameByLevel(Integer level);
+    @Select("select username,id from user where level=#{level}")
+    List<User> getUsernameByLevel(Integer level);
 
+    @Delete("delete from user where username=#{username}")
+    void delete(String username);
 }
