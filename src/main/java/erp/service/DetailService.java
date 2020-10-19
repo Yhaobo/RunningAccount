@@ -1,11 +1,12 @@
 package erp.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import erp.dao.DetailDao;
-import erp.dao.ForeignTableDao;
-import erp.dao.VoucherDao;
+import erp.dao.OptionDao;
+import erp.dao.PictureDao;
 import erp.entity.Account;
 import erp.entity.Detail;
-import erp.entity.Voucher;
+import erp.entity.Picture;
 import erp.entity.dto.req.DetailQueryConditionDTO;
 import erp.entity.dto.resp.DetailRespDTO;
 import erp.util.MyException;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -32,26 +34,22 @@ public class DetailService {
     @Autowired
     private DetailDao detailDao;
     @Autowired
-    private VoucherDao voucherDao;
+    private PictureDao pictureDao;
     @Autowired
-    private ForeignTableDao foreignTableDao;
+    private OptionDao optionDao;
 
     @Value("${erp.home.location}")
     private String location;
 
-    private String parentPath = "voucher\\";
+    private final String parentPath = "picture\\";
 
     @Transactional(readOnly = true)
-    public List<DetailRespDTO> findAll(DetailQueryConditionDTO conditionDTO) {
-        List details = null;
-        if (conditionDTO.getJustNoVoucher()) {
-            //仅查询没有凭证的记录
-            details = detailDao.listByFilter(conditionDTO);
-        } else {
-            // 所有收支记录DO
-            details = detailDao.listByFilter(conditionDTO);
-            // 拥有凭证的收支记录的id集合
-            Set<Integer> detailIdFromVoucher = detailDao.listDetailIdFromVoucher();
+    public void findAll(DetailQueryConditionDTO conditionDTO, Page<List<DetailRespDTO>> page) {
+        // 所有收支记录DO
+        List details = detailDao.listByCondition(page, conditionDTO);
+        // 拥有图片信息的收支记录的id集合
+        Set<Integer> detailIdFromVoucher = pictureDao.listDetailIds();
+        if (detailIdFromVoucher.size() > 0) {
             for (int i = 0; i < details.size(); i++) {
                 Detail detail = (Detail) details.get(i);
                 // 用于返回前端的VO
@@ -60,21 +58,22 @@ public class DetailService {
                 BeanUtils.copyProperties(detail, detailRespDTO);
 
                 if (detailIdFromVoucher.contains(detail.getId())) {
-                    // 有凭证
+                    // 有图片信息
                     detailRespDTO.setHasVoucher(true);
                 } else {
-                    // 没有凭证
+                    // 没有图片信息
                     detailRespDTO.setHasVoucher(false);
                 }
                 details.set(i, detailRespDTO);
             }
         }
-        return details;
+
+        page.setRecords(details);
     }
 
     @Transactional(readOnly = true)
     public DetailRespDTO findOneById(int id) {
-        final Detail detail = detailDao.getById(id);
+        final Detail detail = detailDao.selectById(id);
         final DetailRespDTO detailRespDTO = new DetailRespDTO();
         BeanUtils.copyProperties(detail, detailRespDTO);
         return detailRespDTO;
@@ -83,8 +82,8 @@ public class DetailService {
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void insert(Detail form) {
         //处理空值
-        if (form.getDescription() == null || form.getDescription().length() < 1) {
-            form.setDescription("无");
+        if (form.getDigest() == null || form.getDigest().length() < 1) {
+            form.setDigest("无");
         }
         //处理null值
         if (form.getEarning() == null) {
@@ -113,7 +112,7 @@ public class DetailService {
     public void update(Detail form) throws Exception {
 
         //获取被修改之前的旧记录
-        Detail old = detailDao.getById(form.getId());
+        Detail old = detailDao.selectById(form.getId());
         //处理修改时间之后的结存不一致
         if (form.getDate().compareTo(old.getDate()) < 0) {
             //时间提前
@@ -143,13 +142,13 @@ public class DetailService {
      */
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void delete(Detail form) throws MyException {
-        // 删除本地凭证文件
-        String[] urls = voucherDao.listUriByDetailId(form.getId());
+        // 删除本地图片文件
+        String[] urls = pictureDao.listUriByDetailId(form.getId());
         deleteLocalVoucherFiles(urls);
-        // 删除凭证记录
-        voucherDao.deleteByDetailId(form.getId());
+        // 删除图片信息记录
+        pictureDao.deleteByDetailId(form.getId());
         // 删除明细记录
-        detailDao.delete(form.getId());
+        detailDao.deleteById(form.getId());
         //处理目标记录之后的记录的Balance
         handleLaterBalance(form.getDate(), form.getExpense().subtract(form.getEarning()), form.getAccount().getId());
     }
@@ -159,9 +158,9 @@ public class DetailService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateAllBalance() {
-        List<Account> accounts = foreignTableDao.listAccount();
+        List<Account> accounts = optionDao.listAccount();
         for (Account account : accounts) {
-            List<Detail> detailList = detailDao.listAllByAccountId(account.getId());
+            List<Detail> detailList = detailDao.listByAccountId(account.getId());
             BigDecimal balance = new BigDecimal(0);
             for (int i = detailList.size() - 1; i >= 0; i--) {
                 balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));
@@ -172,9 +171,9 @@ public class DetailService {
     }
 
     /**
-     * 上传图片凭证的保存和记录
+     * 上传图片的保存和记录
      *
-     * @param file     图片凭证文件
+     * @param file     图片文件
      * @param detailId 对应的一条记录的id
      */
     @Transactional(rollbackFor = Exception.class, timeout = 30)
@@ -184,7 +183,7 @@ public class DetailService {
         String filePath = getLocalVoucherFilePath(fileName);
 
         // 数据库记录关联
-        voucherDao.insert(new Voucher(fileName, detailId));
+        pictureDao.insert(new Picture(fileName, detailId));
 
         // 保存文件到磁盘
         File localFile = new File(filePath);
@@ -197,20 +196,20 @@ public class DetailService {
         }
 
         final FileOutputStream fileOutputStream = new FileOutputStream(localFile);
-        fileOutputStream.write(file.getBytes());
+        StreamUtils.copy(file.getInputStream(), fileOutputStream);
         fileOutputStream.close();
     }
 
     /**
      * @param dId detail的id
-     * @return 返回对应d_id的所有voucher图片的地址
+     * @return 返回对应d_id的所有图片的地址
      */
-    public List<Voucher> listVoucherByDetailId(Integer dId) {
-        return voucherDao.listVoucher(dId);
+    public List<Picture> listVoucherByDetailId(Integer dId) {
+        return pictureDao.list(dId);
     }
 
     /**
-     * @param fileName 对应voucher图片的文件名
+     * @param fileName 对应图片的文件名
      * @param response 直接返回文件流
      */
     public void getImg(String fileName, HttpServletResponse response) throws Exception {
@@ -228,17 +227,15 @@ public class DetailService {
     }
 
     /**
-     * 删除凭证本地文件和数据库记录
-     *
-     * @param voucherId
+     * 删除图片信息本地文件和数据库记录
      */
     @Transactional(rollbackFor = Exception.class, timeout = 30)
-    public void deleteVoucher(Integer voucherId) throws MyException {
+    public void deleteVoucher(Integer pictureId) throws MyException {
         // 获取文件名
-        String fileName = voucherDao.getUrlById(voucherId);
+        String fileName = pictureDao.getUrlById(pictureId);
 
         // 删除数据库记录
-        voucherDao.deleteById(voucherId);
+        pictureDao.deleteById(pictureId);
 
         // 删除本地文件
         deleteLocalVoucherFiles(fileName);
@@ -251,10 +248,12 @@ public class DetailService {
      */
     private void handleBalance(Detail detail) {
         //获取期初
-        Detail previous = detailDao.findBeforeOne(detail.getDate(), detail.getAccount().getId());
-        BigDecimal qi_chu = previous == null ? new BigDecimal(0) : previous.getBalance();
+        BigDecimal qiChu = detailDao.getBeforeOneBalance(detail.getDate(), detail.getAccount().getId());
+        if (qiChu == null) {
+            qiChu = new BigDecimal(0);
+        }
         //设置结存(当前结存=之前结存+当前收入-当前支出)
-        detail.setBalance(qi_chu.add(detail.getEarning()).subtract(detail.getExpense()));
+        detail.setBalance(qiChu.add(detail.getEarning()).subtract(detail.getExpense()));
     }
 
     /**
@@ -289,14 +288,14 @@ public class DetailService {
 
     /**
      * @param fileName
-     * @return 返回凭证文件的本地路径
+     * @return 返回图片文件的本地路径
      */
     private String getLocalVoucherFilePath(String fileName) {
         return location + parentPath + fileName.substring(0, fileName.indexOf("-")) + "\\" + fileName;
     }
 
     /**
-     * 删除多个本地凭证文件
+     * 删除多个本地图片文件
      *
      * @param fileNames 文件名
      * @throws MyException
@@ -307,7 +306,7 @@ public class DetailService {
             file = new File(getLocalVoucherFilePath(fileName));
             if (file.exists()) {
                 if (!file.delete()) {
-                    throw new MyException("凭证文件删除失败");
+                    throw new MyException("图片文件删除失败");
                 }
             }
         }

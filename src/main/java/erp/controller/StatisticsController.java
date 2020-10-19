@@ -1,10 +1,11 @@
 package erp.controller;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageSerializable;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import erp.entity.dto.req.StatisticsQueryConditionDTO;
 import erp.entity.dto.resp.MoneyStatisticsRespDTO;
+import erp.entity.dto.resp.ProportionStatisticsRespDTO;
 import erp.service.StatisticsService;
+import erp.util.MyPage;
 import erp.util.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +34,21 @@ public class StatisticsController {
         }
 
         // 分页
-        PageHelper.startPage(queryConditionDTO.getCurrentPage(), queryConditionDTO.getPageSize());
+        final Page<List<MoneyStatisticsRespDTO>> page = new MyPage<>(queryConditionDTO.getCurrentPage(), queryConditionDTO.getPageSize());
 
-        List<MoneyStatisticsRespDTO> detailList = service.listMoneyChange(queryConditionDTO);
-        PageSerializable<MoneyStatisticsRespDTO> pageInfo = new PageSerializable<>(detailList);
-        return R.ok().data(pageInfo);
+        service.listMoneyChange(queryConditionDTO, page);
+        return R.ok().data(page);
+    }
+
+    @GetMapping("proportion/department")
+    public R proportionDepartment(StatisticsQueryConditionDTO queryConditionDTO) {
+        List<ProportionStatisticsRespDTO> data=service.getDepartmentProportionData(queryConditionDTO);
+        return R.ok().data(data);
+    }
+
+    @GetMapping("proportion/category")
+    public R proportionCategory(StatisticsQueryConditionDTO queryConditionDTO) {
+        List<ProportionStatisticsRespDTO> data=service.getCategoryProportionData(queryConditionDTO);
+        return R.ok().data(data);
     }
 }

@@ -16,16 +16,15 @@ public class DetailQueryConditionDTO implements Serializable {
     private Date beginDate;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date endDate;
-    private String description;
+    private String digest;
     private Integer projectId;
     private Integer accountId;
     private Integer departmentId;
     private Integer categoryId;
-    private Boolean justNoVoucher=false;
     private Integer currentPage;
     private Integer pageSize;
 
-    public void setDescription(String description) {
-        this.description = "%" + description + "%";
+    public void setDigest(String digest) {
+        this.digest = "%" + digest + "%";
     }
 }

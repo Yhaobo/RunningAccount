@@ -33,7 +33,7 @@ public class ImportExcelUtil {
             //创建实体类并赋值
             Detail entity = new Detail();
             entity.setDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(row.getCell(0).getStringCellValue()));
-            entity.setDescription(row.getCell(1).getStringCellValue());
+            entity.setDigest(row.getCell(1).getStringCellValue());
             entity.setProject(new Project(row.getCell(2).getStringCellValue()));
             entity.setAccount(new Account(row.getCell(3).getStringCellValue()));
             entity.setDepartment(new Department(row.getCell(4).getStringCellValue()));

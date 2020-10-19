@@ -1,7 +1,6 @@
 /*.iml
 /target/
 /.idea/
-/src/test/
 /src/main/resources/static/test.html
 /src/main/resources/application-prod.yml
 /src/main/resources/application-dev.yml

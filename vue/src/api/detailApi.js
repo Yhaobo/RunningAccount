@@ -28,9 +28,9 @@ export default {
             data: {id, date, expense, earning, account}
         })
     },
-    deleteVoucher(voucherId) {
+    deleteVoucher(pictureId) {
         return axios({
-            url: `detail/voucher/${voucherId}`,
+            url: `detail/picture/${pictureId}`,
             method: 'delete'
         })
     },
@@ -52,7 +52,7 @@ export default {
 
     listVoucher(detailId) {
         return axios({
-            url: `detail/voucher/${detailId}`,
+            url: `detail/picture/${detailId}`,
             method: 'get',
         })
     }

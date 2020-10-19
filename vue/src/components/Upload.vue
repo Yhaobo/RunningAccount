@@ -12,9 +12,10 @@
              :with-credentials="true"
              :accept="accept"
              :multiple="multiple"
+             :limit="limit"
   >
     <el-button slot="trigger" size="small" type="success">点击上传</el-button>
-    <div slot="tip" class="el-upload__tip">只能上传图片文件，且不超过 500KB</div>
+    <div slot="tip" class="el-upload__tip" v-text="tipText"></div>
   </el-upload>
 </template>
 
@@ -25,7 +26,9 @@ export default {
     url: String,
     listType: {type: String, default: 'text'}, // text/picture/picture-card
     accept: String,  // ".jpg,.jpeg,.png,.gif,.bmp,.pdf,.JPG,.JPEG,.PBG,.GIF,.BMP,.PDF"
-    limitSize: Number //单位为KB
+    limit: Number, //最大上传文件数
+    limitSize:{type: Number, default: 512}, //文件大小限制 单位为KB
+    tipText: {type: String}
   },
   data() {
     return {
@@ -33,6 +36,9 @@ export default {
     }
   },
   created() {
+    // if (!this.tipText) {
+    //   this.tipText=`上传文件不得超过 ${this.limitSize}KB`
+    // }
   },
   methods: {
     reset() {
@@ -71,8 +77,8 @@ export default {
         showClose: true
       });
     },
-    handleExceed(files, fileList) {
-      this.$message.warning(`当前限制选择 ${this.limit} 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+    handleExceed() {
+      this.$message.info({message: `当前限制一次只能上传 ${this.limit} 个文件`, showClose: true})
     },
     beforeUpload(file) {
       if (file.size / 1024 > this.limitSize) {

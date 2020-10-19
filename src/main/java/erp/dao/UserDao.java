@@ -1,8 +1,8 @@
 package erp.dao;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import erp.entity.User;
 import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserDao {
-    @Insert("insert into user(username,password,level) values(#{username},#{password},#{level})")
-    void insert(User user);
+public interface UserDao extends BaseMapper<User> {
+//    @Insert("insert into user(username,password,level) values(#{username},#{password},#{level})")
+//    void insert(User user);
 
     @Select("select * from user where username=#{username}")
     User getByUsername(String username);

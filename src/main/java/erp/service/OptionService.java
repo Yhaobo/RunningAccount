@@ -1,6 +1,6 @@
 package erp.service;
 
-import erp.dao.ForeignTableDao;
+import erp.dao.OptionDao;
 import erp.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class OptionService {
     @Autowired
-    private ForeignTableDao dao;
+    private OptionDao dao;
 
     @Transactional(readOnly = true)
     public List<Category> findCategories() {

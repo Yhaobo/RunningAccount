@@ -10,7 +10,7 @@ import java.util.List;
  * 所有外表(detail表外键所指向的表)的通用CRU
  */
 @Repository
-public interface ForeignTableDao {
+public interface OptionDao {
     @Select("select id, name from account where id=#{id}")
     Account getAccountById(int id);
 
@@ -41,4 +41,7 @@ public interface ForeignTableDao {
 
     @Update("update ${tableName} set name=#{option.name} where id=#{option.id}")
     void update(@Param("tableName") String tableName, @Param("option") Option option);
+
+    @Select("select id from account where name=#{accountName}")
+    Integer getAccountId(String accountName);
 }

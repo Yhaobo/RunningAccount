@@ -8,4 +8,19 @@ export default {
             params: queryCondition
         })
     },
+    getDepartmentProportionData({beginDate,endDate}) {
+        return axios({
+            url: 'statistics/proportion/department',
+            method: 'get',
+            params: {beginDate,endDate}
+        })
+    },
+    getCategoryProportionData({beginDate,endDate}) {
+        return axios({
+            url: 'statistics/proportion/category',
+            method: 'get',
+            params: {beginDate,endDate}
+        })
+    },
+
 }

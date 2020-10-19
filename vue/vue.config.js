@@ -1,5 +1,5 @@
 module.exports = {
   productionSourceMap: false,
   assetsDir: 'static',
-  outputDir: 'dist/static'
+  outputDir: '../src/main/resources/static'
 }

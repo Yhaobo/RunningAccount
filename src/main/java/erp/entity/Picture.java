@@ -1,5 +1,7 @@
 package erp.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -7,15 +9,16 @@ import lombok.Data;
  * @date 2020/5/15
  */
 @Data
-public class Voucher {
+public class Picture {
+    @TableId(type = IdType.AUTO)
     private Integer id;
     private String uri;
     private Integer detailId;
 
-    public Voucher() {
+    public Picture() {
     }
 
-    public Voucher(String uri, Integer detailId) {
+    public Picture(String uri, Integer detailId) {
         this.uri = uri;
         this.detailId = detailId;
     }

@@ -1,13 +1,13 @@
 package erp.controller;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageSerializable;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import erp.entity.Detail;
 import erp.entity.dto.req.DetailFormReqDTO;
 import erp.entity.dto.req.DetailQueryConditionDTO;
 import erp.entity.dto.resp.DetailRespDTO;
 import erp.service.DetailService;
 import erp.service.ExcelService;
+import erp.util.MyPage;
 import erp.util.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +35,12 @@ public class DetailController {
     private ExcelService excelService;
 
     @GetMapping("")
-    public R getAll(DetailQueryConditionDTO vo) {
+    public R getAll(DetailQueryConditionDTO dto) {
         // 分页
-        PageHelper.startPage(vo.getCurrentPage(), vo.getPageSize());
+        Page<List<DetailRespDTO>> page = new MyPage<>(dto.getCurrentPage(), dto.getPageSize());
 
-        List<DetailRespDTO> detailRespDTOS = detailService.findAll(vo);
-        PageSerializable<DetailRespDTO> pageInfo = new PageSerializable<>(detailRespDTOS);
-        return R.ok().data(pageInfo);
+        detailService.findAll(dto, page);
+        return R.ok().data(page);
     }
 
     @GetMapping("/{id}")
@@ -69,8 +68,8 @@ public class DetailController {
         if (form.getExpense() == null) {
             form.setExpense(new BigDecimal(0));
         }
-        if (form.getDescription() == null) {
-            form.setDescription("无");
+        if (form.getDigest() == null) {
+            form.setDigest("无");
         }
         detailService.update(form);
         return R.ok();
@@ -88,31 +87,31 @@ public class DetailController {
         return R.ok();
     }
 
-    @PostMapping("/voucher/{detailId}")
+    @PostMapping("/picture/{detailId}")
     public synchronized R addVouchers(MultipartFile file, @PathVariable Integer detailId) throws Exception {
         detailService.insertVoucher(file, detailId);
         return R.ok();
     }
 
-    @DeleteMapping("/voucher/{voucherId}")
-    public synchronized R deleteVoucher(@PathVariable Integer voucherId) {
-        detailService.deleteVoucher(voucherId);
+    @DeleteMapping("/picture/{pictureId}")
+    public synchronized R deleteVoucher(@PathVariable Integer pictureId) {
+        detailService.deleteVoucher(pictureId);
         return R.ok();
     }
 
-    @GetMapping("/voucher/{detailId}")
+    @GetMapping("/picture/{detailId}")
     public R listVoucherByDetailId(@PathVariable Integer detailId) {
         return R.ok().data(detailService.listVoucherByDetailId(detailId));
     }
 
-    @GetMapping("/voucher/img/{fileName}")
+    @GetMapping("/picture/img/{fileName}")
     public void getImg(@PathVariable String fileName, HttpServletResponse response) throws Exception {
         detailService.getImg(fileName, response);
     }
 
-    @GetMapping("/excel/{accountId}")
-    public void export(HttpServletResponse response, @PathVariable Integer accountId) throws Exception {
-        excelService.export(response, accountId);
+    @GetMapping("/excel")
+    public void export(HttpServletResponse response, String accountName) throws Exception {
+        excelService.export(response, accountName);
     }
 
     @PostMapping("/excel")
@@ -121,10 +120,16 @@ public class DetailController {
             return R.fail().message("上传文件为空");
         }
         try {
-            excelService.importing(file.getInputStream());
+            System.out.println(file.getOriginalFilename());
+//            excelService.importing(file.getInputStream());
             return R.ok();
         } finally {
             file.getInputStream().close();
         }
+    }
+
+    @GetMapping("/excel/template")
+    public void getExcelTemplate(HttpServletResponse response) {
+        excelService.getTemplate(response);
     }
 }

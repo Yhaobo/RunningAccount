@@ -2,12 +2,10 @@
   <el-container>
     <el-header>
       <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" :router="true">
-        <el-submenu index="1" :show-timeout="0">
+        <el-submenu index="brand" :show-timeout="0">
           <template slot="title"><span v-text="brand" style="font-size: 20px;vertical-align:baseline;"></span>
           </template>
-          <el-menu-item v-if="currentUser.level<='1'" @click="openExportToExcelDialog"><i
-              class="el-icon-document-copy"></i>导出数据为Excel
-          </el-menu-item>
+
           <el-menu-item v-if="currentUser.level<='1'" @click="updateBalance">
             <i class="el-icon-refresh"></i>重新计算并更新所有结存
           </el-menu-item>
@@ -21,25 +19,36 @@
         <el-menu-item index="/detail">流水明细</el-menu-item>
         <el-menu-item index="/statistics">统计汇总</el-menu-item>
         <el-menu-item style="float: right" @click="openOptionSettingDialog" class="el-icon-setting">选项设置</el-menu-item>
+        <el-submenu index="excel" v-if="currentUser.level<='1'" style="float: right" :show-timeout="0">
+          <template slot="title">Excel</template>
+          <el-menu-item @click="openExportToExcelDialog"><i class="el-icon-document-copy"></i>导出数据为Excel</el-menu-item>
+          <el-menu-item @click="importFromExcelDialog.visible=true">从Excel导入数据</el-menu-item>
+        </el-submenu>
+
       </el-menu>
     </el-header>
 
 
-    <el-dialog title="导出为Excel" :visible.sync="exportToExcelDialog.visible"
-               @closed="exportToExcelDialog.accountId=null">
+    <el-dialog title="导出数据为Excel" :visible.sync="exportToExcelDialog.visible"
+               @closed="exportToExcelDialog.accountName=null">
       <el-form>
         <el-form-item>
-          <el-select v-model="exportToExcelDialog.accountId" placeholder="请选择要导出的账户">
+          <el-select v-model="exportToExcelDialog.accountName" placeholder="请选择要导出的账户">
             <el-option v-for="account in exportToExcelDialog.accountList" :key="account.id" :label="account.name"
-                       :value="account.id"></el-option>
+                       :value="account.name"></el-option>
           </el-select>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer" v-show="exportToExcelDialog.accountName">
         <el-button size="medium" @click="exportToExcelDialog.visible = false">取 消</el-button>
         <el-button size="medium" type="primary" @click="exportToExcel">确 定</el-button>
       </div>
-      <a ref="downloadElement" :href="exportToExcelDialog.downloadUrl" target="_blank" style="display: none"/>
+    </el-dialog>
+
+    <el-dialog title="从Excel导入数据" :visible.sync="importFromExcelDialog.visible">
+      <el-button @click="getExcelTemplate" style="margin-bottom: 20px">获取 Excel 模板</el-button>
+      <upload :url="exportToExcelDialog.downloadUrl" :limit="1" :multiple="false" accept=".xlsx"
+              :limit-size="1024"></upload>
     </el-dialog>
 
     <el-dialog title="用户管理" :visible.sync="userManagementDialog.visible"
@@ -103,21 +112,24 @@
       </el-card>
     </el-dialog>
 
-    <el-main style="margin-bottom: 50px;">
+    <el-main>
       <router-view :key="routerViewKey"/>
     </el-main>
 
     <el-backtop :right="10" :visibility-height="1000"><i class="el-icon-s-promotion"></i></el-backtop>
     <el-divider>我是有底线的</el-divider>
   </el-container>
+
 </template>
 
 <script>
 import userApi from "@/api/userApi";
 import detailApi from "@/api/detailApi";
 import optionApi from "@/api/optionApi";
+import upload from "@/components/Upload";
 
 export default {
+  components: {upload},
   data() {
     return {
       routerViewKey: 0,//修改此值实现刷新效果
@@ -139,11 +151,14 @@ export default {
           }
         }
       },
+      importFromExcelDialog: {
+        visible: false,
+      },
       exportToExcelDialog: {
         visible: false,
-        accountId: '',
+        accountName: '',
         accountList: [],
-        downloadUrl: '',
+        downloadUrl: `${process.env.VUE_APP_BaseURL}/detail/excel/`,
       },
       userManagementDialog: {
         user: {
@@ -212,6 +227,9 @@ export default {
   },
 
   methods: {
+    getExcelTemplate() {
+      window.open(this.exportToExcelDialog.downloadUrl + 'template')
+    },
     updateOption(data, node) {
       this.$prompt('请修改选项名', '修改选项', {
         confirmButtonText: '确定',
@@ -333,7 +351,6 @@ export default {
         }
       })
     },
-
     openExportToExcelDialog() {
       optionApi.listAccount().then((result) => {
         this.exportToExcelDialog.accountList = result.data;
@@ -342,9 +359,9 @@ export default {
     },
 
     exportToExcel() {
-      this.exportToExcelDialog.downloadUrl = `${process.env.VUE_APP_BaseURL}/detail/excel/${this.exportToExcelDialog.accountId}`
-      this.$refs.downloadElement.click()
-      this.exportToExcelDialog.visible = false;
+      const exportToExcelDialog = this.exportToExcelDialog;
+      window.open(exportToExcelDialog.downloadUrl + '?accountName=' + encodeURIComponent(exportToExcelDialog.accountName));
+      exportToExcelDialog.visible = false;
     },
 
     //用户管理中选中账号后的操作
@@ -459,6 +476,7 @@ export default {
             instance.confirmButtonText = '执行中...';
             userApi.delete(this.userManagementDialog.user)
                 .then(() => {
+                  this.$message.success({message: "删除账号成功", showClose: true})
                   this.userManagementDialog.visible = false
                   instance.confirmButtonLoading = false;
                   done();
@@ -486,14 +504,18 @@ export default {
 </script>
 
 <style>
-.transparent .el-input__inner, .transparent .el-range-input {
-  background-color: transparent;
-  color: white !important;
+section {
+  background-color: white;
 }
 
-.transparent .el-range-separator {
-  color: #909399 !important;
-}
+/*.transparent .el-input__inner, .transparent .el-range-input {*/
+/*  background-color: transparent;*/
+/*  color: white !important;*/
+/*}*/
+
+/*.transparent .el-range-separator {*/
+/*  color: #909399 !important;*/
+/*}*/
 
 .el-table .warning-row {
   background: oldlace;

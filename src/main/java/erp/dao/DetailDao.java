@@ -1,130 +1,72 @@
 package erp.dao;
 
-import erp.dao.provider.DetailDaoProvider;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import erp.dao.provider.DetailDaoSqlProvider;
 import erp.entity.Detail;
 import erp.entity.dto.req.DetailQueryConditionDTO;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.ResultMap;
+import org.apache.ibatis.annotations.SelectProvider;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Repository
-public interface DetailDao {
+public interface DetailDao extends BaseMapper<Detail> {
     /**
-     * 查询所有账户ID为accountId的记录
-     * @param accountId
-     * @return
+     * 插入一条记录
      */
-    @Select("SELECT * FROM detail WHERE a_id=#{accountId} ORDER BY d_date DESC")
-    @Results(id = "detailMap", value = {
-            @Result(id = true, column = "d_id", property = "id"),
-            @Result(column = "d_date", property = "date"),
-            @Result(column = "d_description", property = "description"),
-            @Result(column = "c_id", property = "category", one = @One(select = "erp.dao.ForeignTableDao.getCategoryById")),
-            @Result(column = "a_id", property = "account", one = @One(select = "erp.dao.ForeignTableDao.getAccountById")),
-            @Result(column = "p_id", property = "project", one = @One(select = "erp.dao.ForeignTableDao.getProjectById")),
-            @Result(column = "dep_id", property = "department", one = @One(select = "erp.dao.ForeignTableDao.getDepartmentById")),
-            @Result(column = "d_earning", property = "earning"),
-            @Result(column = "d_expense", property = "expense"),
-            @Result(column = "d_balance", property = "balance")
-    })
-    List<Detail> listAllByAccountId(Integer accountId);
-
-    /**
-     * 添加一条记录, 并返回自增主键的 id 给 detail
-     *
-     * @param detail
-     */
-    @Insert("insert into detail values(null,#{date},#{description},#{project.id},#{account.id},#{department.id},#{category.id}," +
-            "#{earning},#{expense},#{balance})")
-    @Options(useGeneratedKeys = true, keyColumn = "d_id", keyProperty = "id")
-    void insert(Detail detail);
+    @Override
+    int insert(Detail detail);
 
     /**
      * 从Excel文件导入多条记录
-     *
-     * @param details
      */
-    @InsertProvider(type = DetailDaoProvider.class, method = "addByBatchSql")
+    @InsertProvider(type = DetailDaoSqlProvider.class, method = "addByBatch")
     void insertFromExcelByBatch(List<Detail> details);
-
-    /**
-     * 根据id查找记录
-     *
-     * @param id
-     * @return
-     */
-    @Select("SELECT * FROM detail d WHERE d_id=#{id} ")
-    @ResultMap("detailMap")
-    Detail getById(int id);
 
     /**
      * 修改一条记录
      *
      * @param detail
      */
-    @Update("update detail set d_date=#{date},d_description=#{description},c_id=#{category.id}," +
-            "a_id=#{account.id},p_id=#{project.id},dep_id=#{department.id},d_earning=#{earning}," +
-            "d_expense=#{expense},d_balance=#{balance} " +
-            "where d_id=#{id} ")
     void update(Detail detail);
 
     /**
      * 修改两个时间之间(不包括边界值)的所有记录的结存
      *
-     * @param change
-     * @param late
-     * @param before
+     * @param change 变化值
+     * @param late   最大时间边界值
+     * @param before 最小时间边界值
      */
-    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{before} and d_date<#{late} and a_id=#{accountId}")
     void updateDuring(@Param("change") BigDecimal change, @Param("before") Date before, @Param("late") Date late, @Param("accountId") Integer accountId);
 
     /**
      * 修改date时间之后的所有账户ID为accountId记录的结存
      *
-     * @param change
-     * @param date
-     * @param accountId
+     * @param change    变化值
+     * @param date      最小时间边界值
+     * @param accountId 银行账户ID
      */
-    @Update("update detail set d_balance=d_balance+#{change} where d_date>#{date} and a_id=#{accountId}")
     void updateLater(@Param("change") BigDecimal change, @Param("date") Date date, @Param("accountId") Integer accountId);
 
     /**
      * 查询date之前的一条记录
      *
-     * @param date
-     * @return
+     * @param date 最大时间边界值
      */
-    @Select("select * from detail where d_date<#{date} and a_id=#{accountId} order by d_date DESC limit 1")
-    @ResultMap("detailMap")
-    Detail findBeforeOne(Date date,@Param("accountId")Integer accountId);
-
-    /**
-     * 根据id删除一条记录
-     *
-     * @param id
-     */
-    @Delete("delete from detail where d_id=#{id}")
-    void delete(int id);
+    BigDecimal getBeforeOneBalance(Date date, @Param("accountId") Integer accountId);
 
     /**
      * 根据查询条件来获取记录
-     *
-     * @param vo
-     * @return
      */
-    @SelectProvider(type = DetailDaoProvider.class, method = "listByFilterSql")
-    @ResultMap("detailMap")
-    List<Detail> listByFilter(DetailQueryConditionDTO vo);
+    @SelectProvider(type = DetailDaoSqlProvider.class, method = "listByCondition")
+    @ResultMap("detailResultMap")
+    List<Detail> listByCondition(Page<?> page, DetailQueryConditionDTO dto);
 
-    /**
-     * 返回拥有凭证的明细记录的id的Set集合
-     *
-     * @return
-     */
-    @Select("SELECT detail_id FROM voucher ")
-    Set<Integer> listDetailIdFromVoucher();
+    List<Detail> listByAccountId(Integer id);
 }

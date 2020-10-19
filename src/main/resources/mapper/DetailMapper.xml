@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="erp.dao.DetailDao">
+    <resultMap id="detailResultMap" type="erp.entity.Detail">
+        <id property="id" column="id"/>
+        <result property="date" column="date"/>
+        <result property="digest" column="digest"/>
+        <result property="earning" column="earning"/>
+        <result property="expense" column="expense"/>
+        <result property="balance" column="balance"/>
+        <association property="category" column="category_id" select="erp.dao.OptionDao.getCategoryById"/>
+        <association property="account" column="account_id" select="erp.dao.OptionDao.getAccountById"/>
+        <association property="project" column="project_id" select="erp.dao.OptionDao.getProjectById"/>
+        <association property="department" column="department_id" select="erp.dao.OptionDao.getDepartmentById"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into detail
+        values(null,#{date},#{digest},#{project.id},#{account.id},#{department.id},#{category.id},#{earning},#{expense},#{balance})
+    </insert>
+    <update id="update">
+        update detail
+        set `date`=#{date},digest=#{digest},category_id=#{category.id},account_id=#{account.id},project_id=#{project.id},department_id=#{department.id},earning=#{earning},expense=#{expense},balance=#{balance}
+        where id=#{id}
+    </update>
+    <update id="updateDuring">
+        update detail
+        set balance=balance+#{change}
+        where <![CDATA[ `date`>#{before} and `date`<#{late} ]]> and account_id=#{accountId}
+    </update>
+    <update id="updateLater">
+        update detail
+        set balance=balance+#{change}
+        where `date`>#{date} and account_id=#{accountId}
+    </update>
+    <select id="getBeforeOneBalance" resultType="java.math.BigDecimal">
+        select balance from detail
+        where <![CDATA[ `date`<#{date} and account_id=#{accountId} ]]>
+        order by `date` DESC limit 1
+    </select>
+    <select id="listByAccountId" resultType="erp.entity.Detail">
+        select id,date,digest,project_id,account_id,department_id,category_id,earning,expense,balance
+        from detail
+        where account_id=#{id}
+        order by `date` desc
+    </select>
+</mapper>

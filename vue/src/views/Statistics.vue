@@ -3,7 +3,7 @@
     <el-row :gutter="10" type="flex" align="middle" class="transparent" style="margin-bottom: 20px">
       <el-col :span="5.5">
         <el-date-picker
-            @change="loadData"
+            @change="loadData(false)"
             v-model="queryCondition.dateRange"
             type="daterange"
             align="right"
@@ -13,17 +13,16 @@
             end-placeholder="结束日期"
             :picker-options="queryCondition.datePickerOptions"
             :default-time="['00:00:00', '23:59:59']"
-        >
-        </el-date-picker>
+        ></el-date-picker>
       </el-col>
       <el-col :span="3">
-        <el-select v-model="queryCondition.groupPolicy" @change="loadData">
+        <el-select v-model="queryCondition.groupPolicy" @change="loadData(false)">
           <el-option label="按月汇总" value="month"></el-option>
           <el-option label="按年汇总" value="year"></el-option>
         </el-select>
       </el-col>
       <el-col :span="3">
-        <el-select v-model="queryCondition.accountId" @change="loadData">
+        <el-select v-model="queryCondition.accountId" @change="loadData(false)">
           <el-option
               v-for="item of selectionData.accountOptions"
               :key="item.id"
@@ -33,7 +32,7 @@
         </el-select>
       </el-col>
       <el-col :span="3">
-        <el-select v-model="queryCondition.projectId" placeholder="所有项目" @change="loadData" clearable>
+        <el-select v-model="queryCondition.projectId" placeholder="所有项目" @change="loadData(false)" clearable>
           <el-option
               v-for="item of selectionData.projectOptions"
               :key="item.id"
@@ -43,7 +42,7 @@
         </el-select>
       </el-col>
       <el-col :span="3">
-        <el-select v-model="queryCondition.departmentId" placeholder="所有部门" @change="loadData" clearable>
+        <el-select v-model="queryCondition.departmentId" placeholder="所有部门" @change="loadData(false)" clearable>
           <el-option
               v-for="item of selectionData.departmentOptions"
               :key="item.id"
@@ -53,7 +52,7 @@
         </el-select>
       </el-col>
       <el-col :span="3">
-        <el-select v-model="queryCondition.categoryId" placeholder="所有类别" @change="loadData" clearable>
+        <el-select v-model="queryCondition.categoryId" placeholder="所有类别" @change="loadData(false)" clearable>
           <el-option
               v-for="item of selectionData.categoryOptions"
               :key="item.id"
@@ -65,7 +64,7 @@
     </el-row>
     <el-tabs type="border-card" v-loading="tabsData.loading" :element-loading-text="loadingText"
              @tab-click="onTabClick">
-      <el-tab-pane label="表格">
+      <el-tab-pane label="表格数据">
         <el-table ref="table" :data="tabsData.data" style="width: 100%;" @row-click="onRowClick"
                   :summary-method="handleSummaries" show-summary :row-class-name="tableRowClassName">
           <template slot="empty" v-if="typeof queryCondition.accountId ==='string'"><span style="font-size: 18px"
@@ -109,9 +108,19 @@
                        style="text-align: left;margin-top: 20px;background-color: white;"
         ></el-pagination>
       </el-tab-pane>
-      <el-tab-pane label="图表" name="chart" :disabled="typeof queryCondition.accountId==='string'">
-        <div ref="chart" style="width: 100%;height:850px"></div>
+      <el-tab-pane label="收支变化图表" name="moneyChangedChart"
+                   :disabled="typeof queryCondition.accountId==='string'">
+        <div ref="moneyChangedChart" style="width: 100%;height:95vh"></div>
       </el-tab-pane>
+      <el-tab-pane label="类别支出占比图表" name="categoryProportionChart"
+                   :disabled="typeof queryCondition.accountId==='string'">
+        <div ref="categoryProportionChart" style="width: 100%;height:95vh"></div>
+      </el-tab-pane>
+      <el-tab-pane label="部门支出占比图表" name="departmentProportionChart"
+                   :disabled="typeof queryCondition.accountId==='string'">
+        <div ref="departmentProportionChart" style="width: 100%;height:95vh"></div>
+      </el-tab-pane>
+
     </el-tabs>
   </div>
 </template>
@@ -134,11 +143,11 @@ export default {
         categoryOptions: [],
       },
       echartsData: {
-        moneyChart: {
+        moneyChangedChart: {
           instance: null,
           option: {
             title: {
-              // text: ''
+              text: '收支结存变化'
             },
             tooltip: {
               trigger: 'axis'
@@ -155,6 +164,73 @@ export default {
             yAxis: {
               type: 'value'
             },
+          },
+        },
+        categoryProportionChart: {
+          instance: null,
+          option: {
+            title: {
+              text: '各类别支出占比',
+              left: 'center',
+            },
+
+            tooltip: {
+              trigger: 'item',
+              formatter: '{b} : {c} ({d}%)'
+            },
+            legend: {
+              orient: 'vertical',
+              left: 'left',
+              data: []
+            },
+            series: [
+              {
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '50%'],
+                data: [],
+                emphasis: {
+                  itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                  }
+                }
+              }
+            ]
+          },
+        },
+        departmentProportionChart: {
+          instance: null,
+          option: {
+            title: {
+              text: '各部门支出占比',
+              left: 'center',
+            },
+            tooltip: {
+              trigger: 'item',
+              formatter: '{b} : {c} ({d}%)'
+            },
+            legend: {
+              orient: 'vertical',
+              left: 'left',
+              data: []
+            },
+            series: [
+              {
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '50%'],
+                data: [],
+                emphasis: {
+                  itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                  }
+                }
+              }
+            ]
           },
         },
       },
@@ -243,7 +319,7 @@ export default {
           sums[index] = values.reduce((prev, curr) => {
             const value = Number(curr);
             if (!isNaN(value)) {
-              return prev + curr;
+              return (prev * 100 + curr * 100) / 100;
             } else {
               return prev;
             }
@@ -266,13 +342,31 @@ export default {
       return sums;
     },
     onTabClick(instance) {
-      if (instance.name === 'chart') {
-        if (!this.echartsData.moneyChart.instance) {
-          setTimeout(() => {
-            this.echartsData.moneyChart.instance = echarts.init(this.$refs.chart, null, {renderer: 'canvas'});
-            this.renderChart();
-          }, 200);
-        }
+      switch (instance.name) {
+        case 'moneyChangedChart':
+          if (!this.echartsData.moneyChangedChart.instance) {
+            setTimeout(() => {
+              this.echartsData.moneyChangedChart.instance = echarts.init(this.$refs.moneyChangedChart, null, {renderer: 'canvas'});
+              this.renderChart(this.echartsData.moneyChangedChart.instance);
+            }, 200);
+          }
+          break;
+        case 'categoryProportionChart':
+          if (!this.echartsData.categoryProportionChart.instance) {
+            setTimeout(() => {
+              this.echartsData.categoryProportionChart.instance = echarts.init(this.$refs.categoryProportionChart, null, {renderer: 'canvas'});
+              this.echartsData.categoryProportionChart.instance.setOption(this.echartsData.categoryProportionChart.option, true);
+            }, 200);
+          }
+          break;
+        case 'departmentProportionChart':
+          if (!this.echartsData.departmentProportionChart.instance) {
+            setTimeout(() => {
+              this.echartsData.departmentProportionChart.instance = echarts.init(this.$refs.departmentProportionChart, null, {renderer: 'canvas'});
+              this.echartsData.departmentProportionChart.instance.setOption(this.echartsData.departmentProportionChart.option, true);
+            }, 200);
+          }
+          break;
       }
     },
     dateFormat(date, fmt) {
@@ -280,12 +374,12 @@ export default {
     },
     handleCurrentPageChange(currentPage) {
       this.pageData.currentPage = currentPage
-      this.loadData()
+      this.loadData(true)
       window.scrollTo(0, 70)
     },
     handlePageSizeChange(pageSize) {
       this.pageData.pageSize = pageSize
-      this.loadData()
+      this.loadData(true)
     },
     sort(a, b) {
       return a.date > b.date ? 1 : (a.data < b.date ? -1 : 0)
@@ -320,7 +414,7 @@ export default {
         this.selectionData = result.data;
       })
     },
-    loadData() {
+    loadData(isPageChanging) {
       if (typeof this.queryCondition.accountId === "number") {
         this.tabsData.loading = true;
         //处理属性
@@ -336,17 +430,97 @@ export default {
 
         statisticsApi.money(queryCondition)
             .then((result) => {
-              this.tabsData.data = result.data.list;
-              this.pageData.total = result.data.total
-              this.renderChart()
-              this.tabsData.loading = false;
-            }).catch(() => this.tabsData.loading = false);
+                  this.tabsData.data = result.data.list;
+                  this.pageData.total = result.data.total
+                  if (isPageChanging) {
+                    //分页变化
+                    this.renderChart(this.echartsData.moneyChangedChart);
+                  } else {
+                    //过滤条件变化
+                    this.renderChart('all');
+                  }
+                  this.tabsData.loading = false;
+                }
+            ).catch(() => this.tabsData.loading = false);
       } else {
-        this.$message.warning({message: "请先选择银行账户!", showClose: true})
+        this.$message.warning({message: "请先选择银行账户!", showClose: true});
       }
     },
     // 渲染图表
-    renderChart() {
+    renderChart(chartInstance) {
+      const all = 'all';
+      switch (chartInstance) {
+        case all:
+          //为 'all' 则全部执行(case穿透)
+          // eslint-disable-next-line no-fallthrough
+        case this.echartsData.moneyChangedChart.instance:
+          this.handleMoneyChangedChartOption()
+          if (this.echartsData.moneyChangedChart.instance) {
+            // 第二个参数的意思为是否重新绘制(默认合并上一次绘制)
+            this.echartsData.moneyChangedChart.instance.setOption(this.echartsData.moneyChangedChart.option, true);
+          }
+          if (chartInstance !== all) {
+            break;
+          }
+          // eslint-disable-next-line no-fallthrough
+        case this.echartsData.categoryProportionChart.instance:
+          this.handleCategoryProportionChartOption().then(() => {
+            if (this.echartsData.categoryProportionChart.instance) {
+              // 第二个参数的意思为是否重新绘制(默认合并上一次绘制)
+              this.echartsData.categoryProportionChart.instance.setOption(this.echartsData.categoryProportionChart.option, true);
+            }
+          })
+          if (chartInstance !== all) {
+            break;
+          }
+          // eslint-disable-next-line no-fallthrough
+        case this.echartsData.departmentProportionChart.instance:
+          this.handleDepartmentProportionChartOption().then(() => {
+            if (this.echartsData.departmentProportionChart.instance) {
+              // 第二个参数的意思为是否重新绘制(默认合并上一次绘制)
+              this.echartsData.departmentProportionChart.instance.setOption(this.echartsData.departmentProportionChart.option, true);
+            }
+          })
+          if (chartInstance !== all) {
+            break;
+          }
+      }
+    },
+    handleDepartmentProportionChartOption() {
+      const queryCondition = {...this.queryCondition};
+      const dateRange = queryCondition.dateRange;
+      if (dateRange) {
+        queryCondition.beginDate = dateRange[0]
+        queryCondition.endDate = dateRange[1]
+      }
+      return statisticsApi.getDepartmentProportionData(queryCondition).then((result) => {
+        const data = result.data
+        this.echartsData.departmentProportionChart.option.series[0].data = data
+        const names = [];
+        data.forEach(data => {
+          names.push(data.name);
+        })
+        this.echartsData.departmentProportionChart.option.legend.data = names
+      });
+    },
+    handleCategoryProportionChartOption() {
+      const queryCondition = {...this.queryCondition};
+      const dateRange = queryCondition.dateRange;
+      if (dateRange) {
+        queryCondition.beginDate = dateRange[0]
+        queryCondition.endDate = dateRange[1]
+      }
+      return statisticsApi.getCategoryProportionData(queryCondition).then((result) => {
+        const data = result.data
+        const names = [];
+        this.echartsData.categoryProportionChart.option.series[0].data = data
+        data.forEach(data => {
+          names.push(data.name);
+        })
+        this.echartsData.categoryProportionChart.option.legend.data = names
+      })
+    },
+    handleMoneyChangedChartOption() {
       //处理数据
       const earnings = [];
       const expenses = [];
@@ -366,7 +540,7 @@ export default {
         dates.push(date);
       }
 
-      const option = this.echartsData.moneyChart.option
+      const option = this.echartsData.moneyChangedChart.option
       option.xAxis = {
         type: 'category',
         boundaryGap: true,
@@ -393,11 +567,6 @@ export default {
           data: balances
         }
       ]
-
-      // 第二个参数的意思为是否重新绘制(默认合并上一次绘制)
-      if (this.echartsData.moneyChart.instance) {
-        this.echartsData.moneyChart.instance.setOption(this.echartsData.moneyChart.option, true);
-      }
     }
   }
 }

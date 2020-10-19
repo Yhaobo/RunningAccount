@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-row type="flex" align="middle" class="transparent" :gutter="10" style="margin-bottom: 20px">
+    <el-row type="flex" align="middle" :gutter="10">
       <el-col :span="5.5">
         <el-date-picker
             @change="loadData"
@@ -57,45 +57,37 @@
         </el-select>
       </el-col>
       <el-col :span="3">
-        <el-input v-model="queryCondition.description" placeholder="摘要关键字" @change="loadData" clearable></el-input>
-      </el-col>
-      <el-col :span="1">
-        <el-tooltip effect="light" content="仅显示无凭证的记录" placement="top">
-          <el-switch
-              @change="loadData"
-              v-model="queryCondition.justNoVoucher"
-              active-color="#13ce66"
-              inactive-color="#ff4949">
-          </el-switch>
-        </el-tooltip>
+        <el-input v-model="queryCondition.digest" placeholder="摘要关键字" @change="loadData" clearable></el-input>
       </el-col>
     </el-row>
 
-    <el-table ref="table" :data="tableData.data" style="width: 100%;" @row-click="onRowClick"
-              v-loading="tableData.loading" :element-loading-text="loadingText" :row-class-name="tableRowClassName">
-      >
+    <el-table ref="table" :data="tableData.data" style="width: 100%;" @row-click="onTableRowClick" height="90vh"
+              v-loading="tableData.loading" :element-loading-text="loadingText" :row-class-name="tableRowClassName"
+              @selection-change="onTableSelectionChange" :select-on-indeterminate="false" @select="onTableSelect"
+              @select-all="onTableSelectAll">
+      <el-table-column type="selection" width="35"></el-table-column>
       <el-table-column type="expand">
         <template slot-scope="scope">
           <el-collapse value="digest">
             <el-collapse-item title="摘要" name="digest">
-              <div>{{ scope.row.description }}</div>
+              <div>{{ scope.row.digest }}</div>
             </el-collapse-item>
           </el-collapse>
-          <el-collapse @change="showVoucher($event,scope.row.id,scope.$index)" value="voucher">
-            <el-collapse-item :name="scope.row.vouchers?'voucher':''" :disabled="!scope.row.hasVoucher">
+          <el-collapse @change="showPicture($event,scope.row.id,scope.$index)" value="picture">
+            <el-collapse-item :name="scope.row.pictures?'picture':''" :disabled="!scope.row.hasPicture">
               <template slot="title">
-                <span v-show="!scope.row.hasVoucher">暂无凭证</span>
-                <span v-show="scope.row.hasVoucher">图片凭证</span>
+                <span v-show="!scope.row.hasPicture">暂无图片信息</span>
+                <span v-show="scope.row.hasPicture">图片信息</span>
                 <el-button style="margin-left: 10px" size="mini" type="success"
-                           @click.stop="openAddVoucherDialog(scope.row.id,scope.$index,true)">添加
+                           @click.stop="openAddPictureDialog(scope.row.id,scope.$index,true)">上传
                 </el-button>
               </template>
-              <div :element-loading-text="loadingText" v-loading="voucherCollapse.loading" style="height:inherit">
-                <el-tag v-for="voucher of scope.row.vouchers" :key="voucher.id" type="danger" effect="plain"
+              <div :element-loading-text="loadingText" v-loading="pictureCollapse.loading" style="height:inherit">
+                <el-tag v-for="picture of scope.row.pictures" :key="picture.id" type="danger" effect="plain"
                         :disable-transitions="true" style="height: max-content;margin: 5px;" closable
-                        @close="deleteVoucher(voucher,scope.row)">
-                  <el-image style="width: 300px" :previewSrcList="scope.row.vouchers | previewSrcListFilter"
-                            :src="voucher.url"
+                        @close="deletePicture(picture,scope.row)">
+                  <el-image style="width: 300px" :previewSrcList="scope.row.pictures | previewSrcListFilter"
+                            :src="picture.url"
                   ></el-image>
                 </el-tag>
               </div>
@@ -121,10 +113,15 @@
       <el-table-column label="结存" prop="balance" min-width="50">
         <template slot-scope="scope">{{ '￥' + scope.row.balance }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="150">
+      <el-table-column label="操作" width="167">
         <template slot="header">
           操作
-          <el-button size="small" type="success" style="margin-left: 10px" @click="addDialog.visible = true;">添加
+          <el-button v-show="tableData.multipleSelectionData.data.length===0" size="small" type="success"
+                     style="margin-left: 10px" @click="addDialog.visible = true;">添加记录
+          </el-button>
+          <el-button v-show="tableData.multipleSelectionData.data.length>0" size="small" type="primary"
+                     style="margin-left: 10px" @click="generateExpenseClaimForm"
+                     :loading="tableData.multipleSelectionData.loading">生成报销凭证
           </el-button>
         </template>
         <template slot-scope="scope">
@@ -144,7 +141,7 @@
                    :total="pageData.total"
                    :pager-count="9"
                    background
-                   style="text-align: left;margin-top: 20px;background-color: white;"
+                   style="text-align: left;margin-top: 20px;"
     ></el-pagination>
 
 
@@ -210,7 +207,7 @@
           <el-input
               type="textarea"
               placeholder="请输入内容"
-              v-model="updateDetailDialog.detail.description"
+              v-model="updateDetailDialog.detail.digest"
               maxlength="255"
               autosize
           ></el-input>
@@ -224,7 +221,7 @@
     <el-dialog :visible.sync="addDialog.visible" :close-on-click-modal="false" @closed="handleAddDialogClosed">
       <el-steps :active="addDialog.step" finish-status="success" process-status="finish" :align-center="true">
         <el-step title="添加记录"></el-step>
-        <el-step title="上传凭证"></el-step>
+        <el-step title="上传图片信息"></el-step>
       </el-steps>
       <el-form :key="addDialog.detailForm.key" ref="addDetailForm" label-width="84px"
                :model="addDialog.detailForm.data"
@@ -283,23 +280,24 @@
           <el-input-number v-model="addDialog.detailForm.data.expense" :precision="2" :step="1"
                            :controls="false" style="width: inherit"></el-input-number>
         </el-form-item>
-        <el-form-item label="摘要" prop="description">
+        <el-form-item label="摘要" prop="digest">
           <el-input
               type="textarea"
               placeholder="请输入内容"
-              v-model="addDialog.detailForm.data.description"
+              v-model="addDialog.detailForm.data.digest"
               maxlength="255"
               autosize
           ></el-input>
         </el-form-item>
       </el-form>
-      <upload :url="addDialog.voucherData.uploadUrl" ref="voucherUpload" list-type="picture" :limit-size="500"
+      <upload :url="addDialog.pictureData.uploadUrl" ref="pictureUpload" list-type="picture" :limit-size="512"
               accept=".jpg,.jpeg,.png,.gif,.bmp,.JPG,.JPEG,.PNG,.GIF,.BMP" v-show="addDialog.step===1"
+              tip-text="只能上传图片文件，且不超过 512KB"
       ></upload>
       <span slot="footer" class="dialog-footer">
         <el-button size="medium" type="primary" @click="addDetail" v-show="addDialog.step===0"
                    :loading="addDialog.loading">下一步</el-button>
-        <el-button size="medium" @click="addDialog.step=0" v-show="addDialog.step===1&&!addDialog.justAddVoucher"
+        <el-button size="medium" @click="addDialog.step=0" v-show="addDialog.step===1&&!addDialog.justAddPicture"
                    style="float:left;">上一步</el-button>
         <el-button size="medium" type="primary" @click="addDialog.visible=false"
                    v-show="addDialog.step===1">完 成</el-button>
@@ -337,7 +335,7 @@ export default {
         visible: false,
         loading: false,
         step: 0,
-        justAddVoucher: false,
+        justAddPicture: false,
         detailForm: {
           key: 0,
           data: {
@@ -347,7 +345,7 @@ export default {
             category: {}
           },
         },
-        voucherData: {
+        pictureData: {
           detailId: null,
           index: null,//临时存放table.data数组的下标(对应当前选中记录)
           uploadUrl: ''
@@ -380,7 +378,7 @@ export default {
         },
         index: null, //临时存放table.data数组的下标(对应当前选中记录)
       },
-      voucherCollapse: {
+      pictureCollapse: {
         loading: true,
       },
 
@@ -390,8 +388,7 @@ export default {
         accountId: null,
         departmentId: null,
         categoryId: null,
-        description: null,
-        justNoVoucher: false,
+        digest: null,
         datePickerOptions: {
           shortcuts: [{
             text: '最近一个月',
@@ -437,8 +434,15 @@ export default {
         },
       },
       tableData: {
+        data: [],
         loading: true,
+        generateExpenseClaimFormLoading: false,
         expandRow: null,
+        multipleSelectionData: {
+          loading: false,
+          data: [],
+          maxSelectedNum: 7
+        },
       }
     }
   },
@@ -449,13 +453,21 @@ export default {
   },
 
   methods: {
+    generateExpenseClaimForm() {
+      this.tableData.multipleSelectionData.loading = true;
+      detailApi.generateExpenseClaimForm(this.tableData.multipleSelectionData.data)
+          .then(() => {
+            this.tableData.multipleSelectionData.loading = false;
+            window.open(this.baseUrl+'/detail/expenseClaimForm')
+          }).catch(() => this.tableData.multipleSelectionData.loading = false);
+    },
     handleAddDialogClosed() {
-      if (this.$refs.voucherUpload.successUploadNum > 0) {
+      if (this.$refs.pictureUpload.successUploadNum > 0) {
         //上传成功之后更新数据
-        this.refreshVoucherData()
+        this.refreshPictureData()
       }
       //重置上传列表
-      this.$refs.voucherUpload.reset();
+      this.$refs.pictureUpload.reset();
       //置空数据
       this.addDialog.detailForm.data = {
         project: {},
@@ -463,7 +475,7 @@ export default {
         department: {},
         category: {}
       }
-      this.addDialog.justAddVoucher = false
+      this.addDialog.justAddPicture = false
       this.addDialog.step = 0
       this.addDialog.detailForm.key++
     },
@@ -482,17 +494,18 @@ export default {
           if (!detail.id) {
             //添加
             detailApi.add(detail).then((result) => {
+              this.$message.success({message: '添加记录成功', showClose: true})
               this.loadData()
               this.addDialog.detailForm.data.id = result.data
               this.addDialog.loading = false
-              this.openAddVoucherDialog(this.addDialog.detailForm.data.id, null)
+              this.openAddPictureDialog(this.addDialog.detailForm.data.id, null)
             });
           } else {
             //修改
             detailApi.update(detail).then(() => {
               this.loadData()
               this.addDialog.loading = false
-              this.openAddVoucherDialog(this.addDialog.detailForm.data.id, null)
+              this.openAddPictureDialog(this.addDialog.detailForm.data.id, null)
             })
           }
         });
@@ -501,11 +514,12 @@ export default {
     handleCurrentPageChange(currentPage) {
       this.pageData.currentPage = currentPage
       this.loadData()
-      window.scrollTo(0, 70)
+      window.scrollTo(0, 80)
     },
     handlePageSizeChange(pageSize) {
       this.pageData.pageSize = pageSize
       this.loadData()
+      window.scrollTo(0, 80)
     },
     loadData() {
       this.tableData.loading = true;
@@ -537,6 +551,7 @@ export default {
             const detail = this.updateDetailDialog.detail;
             detailApi.update(detail)
                 .then(() => {
+                  this.$message.success({message: "修改记录成功", showClose: true})
                   this.loadData()
                   this.updateDetailDialog.visible = false
                   instance.confirmButtonLoading = false;
@@ -592,8 +607,8 @@ export default {
       })
     },
 
-    deleteVoucher(voucher, detail) {
-      this.$confirm('此操作将永久删除此凭证, 是否继续?', '提示', {
+    deletePicture(picture, detail) {
+      this.$confirm('此操作将永久删除此图片, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
@@ -601,17 +616,17 @@ export default {
           if (action === 'confirm') {
             instance.confirmButtonLoading = true;
             instance.confirmButtonText = '执行中...';
-            detailApi.deleteVoucher(voucher.id)
+            detailApi.deletePicture(picture.id)
                 .then(() => {
                   //删除本地数据
-                  const vouchers = detail.vouchers;
-                  vouchers.splice(vouchers.indexOf(voucher), 1);
-                  if (vouchers.length === 0) {
-                    detail.hasVoucher = false
+                  const pictures = detail.pictures;
+                  pictures.splice(pictures.indexOf(picture), 1);
+                  if (pictures.length === 0) {
+                    detail.hasPicture = false
                   }
                   this.$refs.table.toggleRowExpansion(detail, false);
                   this.$refs.table.toggleRowExpansion(detail, true);
-                  this.$message.success({message: "删除凭证成功", showClose: true});
+                  this.$message.success({message: "删除图片成功", showClose: true});
                   instance.confirmButtonLoading = false;
                   done();
                 })
@@ -635,7 +650,7 @@ export default {
       }
     },
 
-    onRowClick(row) {
+    onTableRowClick(row) {
       if (this.tableData.expandRow === row) {
         //关闭
         this.$refs.table.toggleRowExpansion(row, false);
@@ -651,7 +666,28 @@ export default {
         this.tableData.expandRow = row;
       }
     },
-
+    onTableSelect(selection, row) {
+      if (selection.length > this.tableData.multipleSelectionData.maxSelectedNum) {
+        this.$message.info({
+          message: `最多只能选中${this.tableData.multipleSelectionData.maxSelectedNum}条记录`,
+          showClose: true
+        })
+        selection.splice(this.tableData.multipleSelectionData.maxSelectedNum);
+        this.$refs.table.toggleRowSelection(row, false)
+      }
+    },
+    onTableSelectAll(selection) {
+      selection.splice(this.tableData.multipleSelectionData.maxSelectedNum)
+    },
+    onTableSelectionChange(selection) {
+      if (selection.length > this.tableData.multipleSelectionData.maxSelectedNum) {
+        selection.splice(this.tableData.multipleSelectionData.maxSelectedNum);
+        this.tableData.multipleSelectionData.data = selection;
+      } else {
+        this.tableData.multipleSelectionData.data = selection
+      }
+      console.log(this.tableData.multipleSelectionData.data);
+    },
     sort(a, b) {
       return a.date > b.date ? 1 : (a.data < b.date ? -1 : 0)
     },
@@ -660,49 +696,49 @@ export default {
       return MyUitls.dateFormat(new Date(date), fmt)
     },
 
-    showVoucher(event, detailId, index) {
+    showPicture(event, detailId, index) {
       const detail = this.tableData.data[index];
-      if (detail.hasVoucher && event.length && !(detail.vouchers && detail.vouchers.length > 0)) {
-        //有凭证,没凭证数据,且是打开折叠面板
-        this.voucherCollapse.loading = true
-        detailApi.listVoucher(detailId).then((result) => {
+      if (detail.hasPicture && event.length && !(detail.pictures && detail.pictures.length > 0)) {
+        //有图片,没图片数据,且是打开折叠面板
+        this.pictureCollapse.loading = true
+        detailApi.listPicture(detailId).then((result) => {
           result.data.forEach((i) => {
             //生成url
-            i.url = `${this.baseUrl}/detail/voucher/img/${i.uri}`;
+            i.url = `${this.baseUrl}/detail/picture/img/${i.uri}`;
             i.uri = null
           });
-          detail.vouchers = result.data
-          this.voucherCollapse.loading = false
+          detail.pictures = result.data
+          this.pictureCollapse.loading = false
         })
       }
     },
-    openAddVoucherDialog(detailId, index,justAddVoucher) {
-      this.addDialog.voucherData.index = index;
-      this.addDialog.voucherData.detailId = detailId;
-      this.addDialog.voucherData.uploadUrl = `${this.baseUrl}/detail/voucher/${this.addDialog.voucherData.detailId}`
+    openAddPictureDialog(detailId, index, justAddPicture) {
+      this.addDialog.pictureData.index = index;
+      this.addDialog.pictureData.detailId = detailId;
+      this.addDialog.pictureData.uploadUrl = `${this.baseUrl}/detail/picture/${this.addDialog.pictureData.detailId}`
       this.addDialog.step = 1
-      this.addDialog.justAddVoucher = justAddVoucher
+      this.addDialog.justAddPicture = justAddPicture
       this.addDialog.visible = true
     },
-    refreshVoucherData() {
-      if (this.addDialog.voucherData.index != null) {
-        //已有记录添加凭证成功
-        this.voucherCollapse.loading = true;
-        detailApi.listVoucher(this.addDialog.voucherData.detailId).then((result) => {
+    refreshPictureData() {
+      if (this.addDialog.pictureData.index != null) {
+        //已有记录添加图片成功
+        this.pictureCollapse.loading = true;
+        detailApi.listPicture(this.addDialog.pictureData.detailId).then((result) => {
           //处理url
           result.data.forEach((i) => {
-            i.url = `${this.baseUrl}/detail/voucher/img/${i.uri}`;
+            i.url = `${this.baseUrl}/detail/picture/img/${i.uri}`;
             i.uri = null
           });
-          this.tableData.data[this.addDialog.voucherData.index].hasVoucher = true;
-          this.tableData.data[this.addDialog.voucherData.index].vouchers = result.data; //搞不懂这里为啥是响应式
-          this.voucherCollapse.loading = false
+          this.tableData.data[this.addDialog.pictureData.index].hasPicture = true;
+          this.tableData.data[this.addDialog.pictureData.index].pictures = result.data; //搞不懂这里为啥是响应式
+          this.pictureCollapse.loading = false
         });
       } else {
-        //新记录添加凭证成功
-        let tableDataIndex = this.handleTableDataIndex(this.addDialog.voucherData.index);
+        //新记录添加图片成功
+        let tableDataIndex = this.handleTableDataIndex(this.addDialog.pictureData.index);
         if (tableDataIndex != null) {
-          this.tableData.data[tableDataIndex].hasVoucher = true;
+          this.tableData.data[tableDataIndex].hasPicture = true;
         }
       }
     },
@@ -710,7 +746,7 @@ export default {
       //处理空值
       if (tableDataIndex == null) {
         this.tableData.data.forEach((value, index) => {
-          if (value.id === this.addDialog.voucherData.detailId) {
+          if (value.id === this.addDialog.pictureData.detailId) {
             tableDataIndex = index
             return false
           }
@@ -720,9 +756,9 @@ export default {
     }
   },
   filters: {
-    previewSrcListFilter(vouchers) {
+    previewSrcListFilter(pictures) {
       let previewSrcList = []
-      vouchers.forEach((item) => {
+      pictures.forEach((item) => {
         previewSrcList.push(item.url)
       })
       return previewSrcList;

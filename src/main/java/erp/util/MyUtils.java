@@ -43,7 +43,7 @@ public class MyUtils {
             for (j = 0; j < numberOfBatch; j++) {
                 Detail d = new Detail();
                 d.setDate(calendar.getTime());
-                d.setDescription("测试数据" + ((i + 1) * (j + 1)));
+                d.setDigest("测试数据" + ((i + 1) * (j + 1)));
                 d.setProject(new Project("项目1"));
                 d.setAccount(new Account("账户1"));
                 d.setDepartment(new Department("部门1"));
