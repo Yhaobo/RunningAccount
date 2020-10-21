@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-row :gutter="10" type="flex" align="middle" class="transparent" style="margin-bottom: 20px">
+    <el-row :gutter="10" type="flex" align="middle" style="margin-bottom: 20px">
       <el-col :span="5.5">
         <el-date-picker
             @change="loadData(false)"

@@ -9,5 +9,5 @@ import lombok.Data;
  */
 @Data
 public class DetailRespDTO extends Detail {
-    private Boolean hasVoucher;
+    private Boolean hasPicture;
 }

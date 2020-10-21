@@ -43,11 +43,12 @@ public class DetailService {
     private final String parentPath = "picture\\";
 
     @Transactional(readOnly = true)
-    public void findAll(DetailQueryConditionDTO conditionDTO, Page<List<DetailRespDTO>> page) {
+    public void listByCondition(DetailQueryConditionDTO conditionDTO, Page<List<DetailRespDTO>> page) {
         // 所有收支记录DO
         List details = detailDao.listByCondition(page, conditionDTO);
         // 拥有图片信息的收支记录的id集合
         Set<Integer> detailIdFromVoucher = pictureDao.listDetailIds();
+        System.out.println("-----------"+detailIdFromVoucher);
         if (detailIdFromVoucher.size() > 0) {
             for (int i = 0; i < details.size(); i++) {
                 Detail detail = (Detail) details.get(i);
@@ -58,10 +59,10 @@ public class DetailService {
 
                 if (detailIdFromVoucher.contains(detail.getId())) {
                     // 有图片信息
-                    detailRespDTO.setHasVoucher(true);
+                    detailRespDTO.setHasPicture(true);
                 } else {
                     // 没有图片信息
-                    detailRespDTO.setHasVoucher(false);
+                    detailRespDTO.setHasPicture(false);
                 }
                 details.set(i, detailRespDTO);
             }

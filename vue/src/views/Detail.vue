@@ -521,13 +521,13 @@ export default {
     handleCurrentPageChange(currentPage) {
       this.pageData.currentPage = currentPage
       this.loadData()
-      window.scrollTo(0, 80)
+      // window.scrollTo(0, 80)
       this.$refs.table.bodyWrapper.scrollTop = 0;
     },
     handlePageSizeChange(pageSize) {
       this.pageData.pageSize = pageSize
       this.loadData()
-      window.scrollTo(0, 80)
+      // window.scrollTo(0, 80)
       this.$refs.table.bodyWrapper.scrollTop = 0;
     },
     loadData() {

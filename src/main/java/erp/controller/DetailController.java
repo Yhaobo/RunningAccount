@@ -29,11 +29,11 @@ public class DetailController {
     private DetailService detailService;
 
     @GetMapping("")
-    public R getAll(DetailQueryConditionDTO dto) {
+    public R list(DetailQueryConditionDTO dto) {
         // 分页
         Page<List<DetailRespDTO>> page = new MyPage<>(dto.getCurrentPage(), dto.getPageSize());
 
-        detailService.findAll(dto, page);
+        detailService.listByCondition(dto, page);
         return R.ok().data(page);
     }
 
