@@ -14,7 +14,6 @@ import erp.util.MyUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
@@ -39,7 +38,7 @@ public class DetailService {
     private OptionDao optionDao;
 
     @Value("${erp.home.location}")
-    private String location;
+    private String homeLocation;
 
     private final String parentPath = "picture\\";
 
@@ -93,33 +92,24 @@ public class DetailService {
             form.setExpense(new BigDecimal(0));
         }
         //设置结存
-        handleBalance(form);
-
-        try {
-            //添加到数据库
-            detailDao.insert(form);
-        } catch (DuplicateKeyException e) {
-            //时间重复,则时间增加一秒, 再次插入
-            final Date date = form.getDate();
-            date.setTime(date.getTime() + 1000);
-            detailDao.insert(form);
-        }
+        setBalance(form);
+        //添加到数据库
+        detailDao.insert(form);
         //如果是插入时间是以前,就需要调整本次插入记录之后的所有记录的结存
         handleLaterBalance(form.getDate(), form.getEarning().subtract(form.getExpense()), form.getAccount().getId());
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void update(Detail form) throws Exception {
-
         //获取被修改之前的旧记录
         Detail old = detailDao.selectById(form.getId());
         //处理修改时间之后的结存不一致
         if (form.getDate().compareTo(old.getDate()) < 0) {
             //时间提前
-            handleAlterDate(form, old, true);
+            handleModifyDate(form, old, true);
         } else if (form.getDate().compareTo(old.getDate()) > 0) {
             //时间推后
-            handleAlterDate(form, old, false);
+            handleModifyDate(form, old, false);
         }
         //处理修改收入支出之后的结存不一致
         if (form.getEarning().compareTo(old.getEarning()) != 0 || form.getExpense().compareTo(old.getExpense()) != 0) {
@@ -131,7 +121,7 @@ public class DetailService {
             handleLaterBalance(form.getDate(), balanceDifference, form.getAccount().getId());
         }
         //更新当前记录
-        handleBalance(form);
+        setBalance(form);
         detailDao.update(form);
     }
 
@@ -161,12 +151,21 @@ public class DetailService {
         List<Account> accounts = optionDao.listAccount();
         for (Account account : accounts) {
             List<Detail> detailList = detailDao.listByAccountId(account.getId());
-            BigDecimal balance = new BigDecimal(0);
-            for (int i = detailList.size() - 1; i >= 0; i--) {
-                balance = balance.add(detailList.get(i).getEarning().subtract(detailList.get(i).getExpense()));
-                detailList.get(i).setBalance(balance);
-                detailDao.update(detailList.get(i));
-            }
+            updateBalance(detailList, new BigDecimal(0));
+        }
+    }
+
+    /**
+     * 更新指定时间及之后后的所有记录的结存
+     *
+     * @param date 指定时间(包含)
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateBalance(Date date) {
+        List<Account> accounts = optionDao.listAccount();
+        for (Account account : accounts) {
+            List<Detail> detailList = detailDao.listByAccountIdAndDate(account.getId(), date);
+            updateBalance(detailList, getPreviousBalance(date, account.getId()));
         }
     }
 
@@ -189,11 +188,7 @@ public class DetailService {
         File localFile = new File(filePath);
 
         // 自动创建上级目录
-        if (!localFile.getParentFile().exists()) {
-            if (!localFile.getParentFile().mkdirs()) {
-                throw new MyException("目录创建失败");
-            }
-        }
+        localFile.getParentFile().mkdirs();
 
         final FileOutputStream fileOutputStream = new FileOutputStream(localFile);
         StreamUtils.copy(file.getInputStream(), fileOutputStream);
@@ -243,17 +238,27 @@ public class DetailService {
 
     /**
      * 处理detail的结存
-     *
-     * @param detail
      */
-    private void handleBalance(Detail detail) {
+    private void setBalance(Detail detail) {
         //获取期初
-        BigDecimal qiChu = detailDao.getBeforeOneBalance(detail.getDate(), detail.getAccount().getId());
-        if (qiChu == null) {
-            qiChu = new BigDecimal(0);
-        }
+        final BigDecimal previousBalance = getPreviousBalance(detail.getDate(), detail.getAccount().getId());
         //设置结存(当前结存=之前结存+当前收入-当前支出)
-        detail.setBalance(qiChu.add(detail.getEarning()).subtract(detail.getExpense()));
+        detail.setBalance(previousBalance.add(detail.getEarning()).subtract(detail.getExpense()));
+    }
+
+    /**
+     * 获取指定时间之前的一条记录的结存
+     *
+     * @param date      指定时间
+     * @param accountId 银行账户id
+     * @return 如果不存在, 则返回 new BigDecimal(0)
+     */
+    private BigDecimal getPreviousBalance(Date date, Integer accountId) {
+        BigDecimal previousBalance = detailDao.getPreviousBalance(date, accountId);
+        if (previousBalance == null) {
+            previousBalance = new BigDecimal(0);
+        }
+        return previousBalance;
     }
 
     /**
@@ -263,7 +268,7 @@ public class DetailService {
      * @param previous  被修改之前的条目
      * @param isForward 日期是否往提前
      */
-    private void handleAlterDate(Detail current, Detail previous, boolean isForward) {
+    private void handleModifyDate(Detail current, Detail previous, boolean isForward) {
         //要修改的结存差值
         BigDecimal difference = previous.getEarning().subtract(previous.getExpense());
         if (isForward) {
@@ -291,7 +296,7 @@ public class DetailService {
      * @return 返回图片文件的本地路径
      */
     private String getLocalVoucherFilePath(String fileName) {
-        return location + parentPath + fileName.substring(0, fileName.indexOf("-")) + "\\" + fileName;
+        return homeLocation + parentPath + fileName.substring(0, fileName.indexOf("-")) + "\\" + fileName;
     }
 
     /**
@@ -309,6 +314,21 @@ public class DetailService {
                     throw new MyException("图片文件删除失败");
                 }
             }
+        }
+    }
+
+    /**
+     * 批量计算并更新结存
+     *
+     * @param detailList 按时间倒序的记录集合
+     * @param balance    期初
+     */
+    private void updateBalance(List<Detail> detailList, BigDecimal balance) {
+        for (int i = detailList.size() - 1; i >= 0; i--) {
+            final Detail detail = detailList.get(i);
+            balance = balance.add(detail.getEarning().subtract(detail.getExpense()));
+            detail.setBalance(balance);
+            detailDao.updateBalance(detail.getId(), balance);
         }
     }
 }

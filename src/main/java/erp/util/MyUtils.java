@@ -5,6 +5,8 @@ import erp.entity.*;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -15,11 +17,26 @@ public class MyUtils {
 
     /**
      * 获取随机的32位的16进制数的字符串
-     *
-     * @return
      */
     public static String getUUID() {
         return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    /**
+     * 获取随机的指定长度的16进制数的字符串
+     *
+     * @param len 指定长度
+     */
+    public static String getUUID(int len) {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, len);
+    }
+
+    /**
+     * 获取以当前时间命名的文件名, 格式为 "yyyy-MM-dd^A" <br/>
+     * 这些符号在系统路径中不允许: \  /  :  *  ?  "  <  >  |
+     */
+    public static String getFileNameWithCurrentTime() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd^A"));
     }
 
     /**

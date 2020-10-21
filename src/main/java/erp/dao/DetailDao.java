@@ -37,6 +37,13 @@ public interface DetailDao extends BaseMapper<Detail> {
     void update(Detail detail);
 
     /**
+     * 仅修改指定记录的结存
+     * @param detailId 指定记录的id
+     * @param newBalance 新结存
+     */
+    void updateBalance(Integer detailId, BigDecimal newBalance);
+
+    /**
      * 修改两个时间之间(不包括边界值)的所有记录的结存
      *
      * @param change 变化值
@@ -59,7 +66,7 @@ public interface DetailDao extends BaseMapper<Detail> {
      *
      * @param date 最大时间边界值
      */
-    BigDecimal getBeforeOneBalance(Date date, @Param("accountId") Integer accountId);
+    BigDecimal getPreviousBalance(Date date, @Param("accountId") Integer accountId);
 
     /**
      * 根据查询条件来获取记录
@@ -68,5 +75,18 @@ public interface DetailDao extends BaseMapper<Detail> {
     @ResultMap("detailResultMap")
     List<Detail> listByCondition(Page<?> page, DetailQueryConditionDTO dto);
 
+    /**
+     * 获取记录集合(不包含分类和摘要信息)
+     *
+     * @param id 银行账户id
+     */
     List<Detail> listByAccountId(Integer id);
+
+    /**
+     * 获取记录集合(不包含分类和摘要信息)
+     *
+     * @param id      银行账户id
+     * @param minDate 此时间之后的记录(包括)
+     */
+    List<Detail> listByAccountIdAndDate(Integer id, Date minDate);
 }

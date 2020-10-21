@@ -9,4 +9,7 @@ public class Project extends Option {
         this.name = name;
     }
 
+    public Project(Integer id) {
+        this.id = id;
+    }
 }

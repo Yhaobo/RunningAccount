@@ -18,18 +18,17 @@
         </el-submenu>
         <el-menu-item index="/detail">流水明细</el-menu-item>
         <el-menu-item index="/statistics">统计汇总</el-menu-item>
-        <el-menu-item style="float: right" @click="openOptionSettingDialog" class="el-icon-setting">选项设置</el-menu-item>
+        <el-menu-item v-if="currentUser.level<='1'" style="float: right" @click="openOptionSettingDialog" class="el-icon-setting">选项设置</el-menu-item>
         <el-submenu index="excel" v-if="currentUser.level<='1'" style="float: right" :show-timeout="0">
-          <template slot="title">Excel</template>
-          <el-menu-item @click="openExportToExcelDialog"><i class="el-icon-document-copy"></i>导出数据为Excel</el-menu-item>
-          <el-menu-item @click="importFromExcelDialog.visible=true">从Excel导入数据</el-menu-item>
+          <template slot="title">Excel 操作</template>
+          <el-menu-item @click="importFromExcelDialog.visible=true"><i class="el-icon-upload2"></i>导入数据 从Excel</el-menu-item>
+          <el-menu-item @click="openExportToExcelDialog"><i class="el-icon-download"></i>导出数据 为Excel</el-menu-item>
         </el-submenu>
-
       </el-menu>
     </el-header>
 
 
-    <el-dialog title="导出数据为Excel" :visible.sync="exportToExcelDialog.visible"
+    <el-dialog title="导出数据为 Excel" :visible.sync="exportToExcelDialog.visible"
                @closed="exportToExcelDialog.accountName=null">
       <el-form>
         <el-form-item>
@@ -45,9 +44,11 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="从Excel导入数据" :visible.sync="importFromExcelDialog.visible">
-      <el-button @click="getExcelTemplate" style="margin-bottom: 20px">获取 Excel 模板</el-button>
-      <upload :url="exportToExcelDialog.downloadUrl" :limit="1" :multiple="false" accept=".xlsx"
+    <el-dialog title="导入数据从 Excel" :visible.sync="importFromExcelDialog.visible" @closed="onImportExcelDialogClosed">
+      <el-tooltip class="item" effect="dark" content="请务必使用此模板来录入数据" placement="top">
+        <el-button @click="getExcelTemplate" style="margin-bottom: 20px">获取最新的 Excel 模板</el-button>
+      </el-tooltip>
+      <upload ref="uploadExcel" :url="exportToExcelDialog.downloadUrl" :limit="1" :multiple="false" accept=".xlsx"
               :limit-size="1024"></upload>
     </el-dialog>
 
@@ -133,7 +134,10 @@ export default {
   data() {
     return {
       routerViewKey: 0,//修改此值实现刷新效果
-      currentUser: {},
+      currentUser: {
+        level: sessionStorage.getItem('level'),
+        username:sessionStorage.getItem('username')
+      },
       activeIndex: `${this.$route.path}`,
       optionSettingDialog: {
         visible: false,
@@ -158,7 +162,7 @@ export default {
         visible: false,
         accountName: '',
         accountList: [],
-        downloadUrl: `${process.env.VUE_APP_BaseURL}/detail/excel/`,
+        downloadUrl: `${process.env.VUE_APP_BaseURL}/excel/`,
       },
       userManagementDialog: {
         user: {
@@ -222,11 +226,17 @@ export default {
     }
   },
   created() {
-    this.currentUser.level = sessionStorage.getItem('level');
-    this.currentUser.username = sessionStorage.getItem('username');
   },
 
   methods: {
+    onImportExcelDialogClosed() {
+      const excelUpload = this.$refs.uploadExcel;
+      if (excelUpload.successUploadNum > 0) {
+        //上传成功之后更新数据
+        this.routerViewKey++
+      }
+      excelUpload.reset()
+    },
     getExcelTemplate() {
       window.open(this.exportToExcelDialog.downloadUrl + 'template')
     },

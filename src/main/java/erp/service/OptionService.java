@@ -14,22 +14,22 @@ public class OptionService {
     private OptionDao dao;
 
     @Transactional(readOnly = true)
-    public List<Category> findCategories() {
+    public List<Category> listCategory() {
         return dao.listCategory();
     }
 
     @Transactional(readOnly = true)
-    public List<Department> findDepartments() {
+    public List<Department> listDepartment() {
         return dao.listDepartment();
     }
 
     @Transactional(readOnly = true)
-    public List<Account> findAccounts() {
+    public List<Account> listAccount() {
         return dao.listAccount();
     }
 
     @Transactional(readOnly = true)
-    public List<Project> findProjects() {
+    public List<Project> listProject() {
         return dao.listProject();
     }
 

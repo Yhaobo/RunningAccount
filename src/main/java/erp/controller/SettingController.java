@@ -28,16 +28,16 @@ public class SettingController {
     @GetMapping("/all")
     public R getAllOption() {
         Map<String, List> map = new HashMap<>(8);
-        map.put("accountOptions", optionService.findAccounts());
-        map.put("departmentOptions", optionService.findDepartments());
-        map.put("projectOptions", optionService.findProjects());
-        map.put("categoryOptions", optionService.findCategories());
+        map.put("accountOptions", optionService.listAccount());
+        map.put("departmentOptions", optionService.listDepartment());
+        map.put("projectOptions", optionService.listProject());
+        map.put("categoryOptions", optionService.listCategory());
         return R.ok().data(map);
     }
 
     @GetMapping("/category")
     public R findCategory() {
-        List<Category> categories = optionService.findCategories();
+        List<Category> categories = optionService.listCategory();
         return R.ok().data(categories);
     }
 
@@ -67,7 +67,7 @@ public class SettingController {
 
     @GetMapping("/department")
     public R findDepartments() {
-        List<Department> departments = optionService.findDepartments();
+        List<Department> departments = optionService.listDepartment();
         return R.ok().data(departments);
     }
 
@@ -97,7 +97,7 @@ public class SettingController {
 
     @GetMapping("/account")
     public R findAccounts() {
-        List<Account> accounts = optionService.findAccounts();
+        List<Account> accounts = optionService.listAccount();
         return R.ok().data(accounts);
     }
 
@@ -128,7 +128,7 @@ public class SettingController {
 
     @GetMapping("/project")
     public R findProjects() {
-        List<Project> projects = optionService.findProjects();
+        List<Project> projects = optionService.listProject();
         return R.ok().data(projects);
     }
 

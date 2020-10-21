@@ -9,4 +9,7 @@ public class Category extends Option {
         this.name = name;
     }
 
+    public Category(Integer id) {
+        this.id = id;
+    }
 }

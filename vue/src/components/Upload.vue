@@ -27,7 +27,7 @@ export default {
     listType: {type: String, default: 'text'}, // text/picture/picture-card
     accept: String,  // ".jpg,.jpeg,.png,.gif,.bmp,.pdf,.JPG,.JPEG,.PBG,.GIF,.BMP,.PDF"
     limit: Number, //最大上传文件数
-    limitSize:{type: Number, default: 512}, //文件大小限制 单位为KB
+    limitSize: {type: Number, default: 512}, //文件大小限制 单位为KB
     tipText: {type: String}
   },
   data() {
@@ -45,7 +45,7 @@ export default {
       this.successUploadNum = 0
       this.$refs.upload.clearFiles();
     },
-    handleSuccess(response, file) {
+    handleSuccess(response, file, fileList) {
       if (response.success) {
         this.successUploadNum++;
         this.$notify.success({
@@ -54,6 +54,7 @@ export default {
           showClose: true
         });
       } else if (response.message) {
+        fileList.splice(fileList.indexOf(file), 1);
         this.$notify.error({
           message: response.message,
           title: '提示',
@@ -61,6 +62,7 @@ export default {
           duration: 5 * 1000
         });
       } else {
+        fileList.splice(fileList.indexOf(file), 1);
         this.$notify.error({
           message: '请刷新页面后重试',
           title: '提示',

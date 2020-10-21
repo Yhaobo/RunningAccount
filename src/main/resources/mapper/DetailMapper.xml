@@ -33,15 +33,26 @@
         set balance=balance+#{change}
         where `date`>#{date} and account_id=#{accountId}
     </update>
-    <select id="getBeforeOneBalance" resultType="java.math.BigDecimal">
+    <update id="updateBalance">
+        update detail
+        set balance=#{newBalance}
+        where id=#{detailId}
+    </update>
+    <select id="getPreviousBalance" resultType="java.math.BigDecimal">
         select balance from detail
         where <![CDATA[ `date`<#{date} and account_id=#{accountId} ]]>
         order by `date` DESC limit 1
     </select>
     <select id="listByAccountId" resultType="erp.entity.Detail">
-        select id,date,digest,project_id,account_id,department_id,category_id,earning,expense,balance
+        select id,date,earning,expense,balance
         from detail
         where account_id=#{id}
+        order by `date` desc
+    </select>
+    <select id="listByAccountIdAndDate" resultType="erp.entity.Detail">
+        select id,date,earning,expense,balance
+        from detail
+        where account_id=#{id} and date>=#{minDate}
         order by `date` desc
     </select>
 </mapper>

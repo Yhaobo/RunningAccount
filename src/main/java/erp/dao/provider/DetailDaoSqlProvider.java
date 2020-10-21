@@ -45,10 +45,10 @@ public class DetailDaoSqlProvider {
         for (int i = 0; i < list.size(); i++) {
             sql.INTO_VALUES(
                     "#{list[" + i + "].date},#{list[" + i + "].digest}," +
-                            "(select id from project where name=#{list[" + i + "].project.name})," +
-                            "(select id from account where name=#{list[" + i + "].account.name})," +
-                            "(select id from department where name=#{list[" + i + "].department.name})," +
-                            "(select id from category where name=#{list[" + i + "].category.name})," +
+                            "#{list[" + i + "].project.id}," +
+                            "#{list[" + i + "].account.id}," +
+                            "#{list[" + i + "].department.id}," +
+                            "#{list[" + i + "].category.id}," +
                             "#{list[" + i + "].earning},#{list[" + i + "].expense}");
             sql.ADD_ROW();
         }

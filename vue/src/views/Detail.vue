@@ -65,7 +65,6 @@
               v-loading="tableData.loading" :element-loading-text="loadingText" :row-class-name="tableRowClassName"
               @selection-change="onTableSelectionChange" :select-on-indeterminate="false" @select="onTableSelect"
               @select-all="onTableSelectAll">
-      <el-table-column type="selection" width="35"></el-table-column>
       <el-table-column type="expand">
         <template slot-scope="scope">
           <el-collapse value="digest">
@@ -78,7 +77,7 @@
               <template slot="title">
                 <span v-show="!scope.row.hasPicture">暂无图片信息</span>
                 <span v-show="scope.row.hasPicture">图片信息</span>
-                <el-button style="margin-left: 10px" size="mini" type="success"
+                <el-button style="margin-left: 10px" size="mini" type="success" v-if="currentUserLevel<='1'"
                            @click.stop="openAddPictureDialog(scope.row.id,scope.$index,true)">上传
                 </el-button>
               </template>
@@ -113,14 +112,14 @@
       <el-table-column label="结存" prop="balance" min-width="50">
         <template slot-scope="scope">{{ '￥' + scope.row.balance }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="167">
+      <el-table-column label="操作" width="157" v-if="currentUserLevel<='1'">
         <template slot="header">
           操作
           <el-button v-show="tableData.multipleSelectionData.data.length===0" size="small" type="success"
                      style="margin-left: 10px" @click="addDialog.visible = true;">添加记录
           </el-button>
           <el-button v-show="tableData.multipleSelectionData.data.length>0" size="small" type="primary"
-                     style="margin-left: 10px" @click="generateExpenseClaimForm"
+                     style="margin-left: 0" @click="generateExpenseClaimForm"
                      :loading="tableData.multipleSelectionData.loading">生成报销凭证
           </el-button>
         </template>
@@ -131,6 +130,7 @@
           </el-button>
         </template>
       </el-table-column>
+      <el-table-column v-if="currentUserLevel<='1'" type="selection" width="40"></el-table-column>
     </el-table>
     <el-pagination @size-change="handlePageSizeChange"
                    @current-change="handleCurrentPageChange"
@@ -218,7 +218,7 @@
         <el-button size="medium" type="primary" @click="updateDetail">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog :visible.sync="addDialog.visible" :close-on-click-modal="false" @closed="handleAddDialogClosed">
+    <el-dialog :visible.sync="addDialog.visible" :close-on-click-modal="false" @closed="onAddDialogClosed">
       <el-steps :active="addDialog.step" finish-status="success" process-status="finish" :align-center="true">
         <el-step title="添加记录"></el-step>
         <el-step title="上传图片信息"></el-step>
@@ -311,6 +311,7 @@ import detailApi from "@/api/detailApi";
 import MyUitls from "@/utils/MyUitls";
 import upload from "@/components/Upload";
 import optionApi from "@/api/optionApi";
+import excelApi from "@/api/excelApi";
 
 export default {
   components: {
@@ -318,6 +319,7 @@ export default {
   },
   data() {
     return {
+      currentUserLevel: sessionStorage.getItem('level'),
       loadingText: '玩命加载中...',
       baseUrl: process.env.VUE_APP_BaseURL,
       pageData: {
@@ -455,13 +457,14 @@ export default {
   methods: {
     generateExpenseClaimForm() {
       this.tableData.multipleSelectionData.loading = true;
-      detailApi.generateExpenseClaimForm(this.tableData.multipleSelectionData.data)
+      excelApi.generateExpenseClaimForm(this.tableData.multipleSelectionData.data)
           .then(() => {
             this.tableData.multipleSelectionData.loading = false;
-            window.open(this.baseUrl+'/detail/expenseClaimForm')
-          }).catch(() => this.tableData.multipleSelectionData.loading = false);
+            window.open(this.baseUrl + '/excel/expenseClaimForm')
+          })
+          .catch(() => this.tableData.multipleSelectionData.loading = false);
     },
-    handleAddDialogClosed() {
+    onAddDialogClosed() {
       if (this.$refs.pictureUpload.successUploadNum > 0) {
         //上传成功之后更新数据
         this.refreshPictureData()
@@ -493,20 +496,24 @@ export default {
           const detail = this.addDialog.detailForm.data;
           if (!detail.id) {
             //添加
-            detailApi.add(detail).then((result) => {
-              this.$message.success({message: '添加记录成功', showClose: true})
-              this.loadData()
-              this.addDialog.detailForm.data.id = result.data
-              this.addDialog.loading = false
-              this.openAddPictureDialog(this.addDialog.detailForm.data.id, null)
-            });
+            detailApi.add(detail)
+                .then((result) => {
+                  this.$message.success({message: '添加记录成功', showClose: true})
+                  this.loadData()
+                  this.addDialog.detailForm.data.id = result.data
+                  this.addDialog.loading = false
+                  this.openAddPictureDialog(this.addDialog.detailForm.data.id, null)
+                })
+                .catch(() => this.addDialog.loading = false)
           } else {
             //修改
-            detailApi.update(detail).then(() => {
-              this.loadData()
-              this.addDialog.loading = false
-              this.openAddPictureDialog(this.addDialog.detailForm.data.id, null)
-            })
+            detailApi.update(detail)
+                .then(() => {
+                  this.loadData()
+                  this.addDialog.loading = false
+                  this.openAddPictureDialog(this.addDialog.detailForm.data.id, null)
+                })
+                .catch(() => this.addDialog.loading = false)
           }
         });
       }
@@ -515,11 +522,13 @@ export default {
       this.pageData.currentPage = currentPage
       this.loadData()
       window.scrollTo(0, 80)
+      this.$refs.table.bodyWrapper.scrollTop = 0;
     },
     handlePageSizeChange(pageSize) {
       this.pageData.pageSize = pageSize
       this.loadData()
       window.scrollTo(0, 80)
+      this.$refs.table.bodyWrapper.scrollTop = 0;
     },
     loadData() {
       this.tableData.loading = true;
@@ -533,11 +542,13 @@ export default {
       queryCondition.dateRange = null;
       queryCondition.total = null
       queryCondition.datePickerOptions = null
-      return detailApi.list(queryCondition).then((result) => {
-        this.tableData.data = result.data.list;
-        this.pageData.total = result.data.total
-        this.tableData.loading = false;
-      })
+      return detailApi.list(queryCondition)
+          .then((result) => {
+            this.tableData.data = result.data.list;
+            this.pageData.total = result.data.total
+            this.tableData.loading = false;
+          })
+          .catch(() => this.tableData.loading = false)
     },
     updateDetail() {
       this.$confirm('此操作将永久修改这条记录, 是否继续?', '提示', {
@@ -686,7 +697,6 @@ export default {
       } else {
         this.tableData.multipleSelectionData.data = selection
       }
-      console.log(this.tableData.multipleSelectionData.data);
     },
     sort(a, b) {
       return a.date > b.date ? 1 : (a.data < b.date ? -1 : 0)
@@ -701,15 +711,17 @@ export default {
       if (detail.hasPicture && event.length && !(detail.pictures && detail.pictures.length > 0)) {
         //有图片,没图片数据,且是打开折叠面板
         this.pictureCollapse.loading = true
-        detailApi.listPicture(detailId).then((result) => {
-          result.data.forEach((i) => {
-            //生成url
-            i.url = `${this.baseUrl}/detail/picture/img/${i.uri}`;
-            i.uri = null
-          });
-          detail.pictures = result.data
-          this.pictureCollapse.loading = false
-        })
+        detailApi.listPicture(detailId)
+            .then((result) => {
+              result.data.forEach((i) => {
+                //生成url
+                i.url = `${this.baseUrl}/detail/picture/img/${i.uri}`;
+                i.uri = null
+              });
+              detail.pictures = result.data
+              this.pictureCollapse.loading = false
+            })
+            .catch(() => this.pictureCollapse.loading = false)
       }
     },
     openAddPictureDialog(detailId, index, justAddPicture) {
@@ -724,16 +736,18 @@ export default {
       if (this.addDialog.pictureData.index != null) {
         //已有记录添加图片成功
         this.pictureCollapse.loading = true;
-        detailApi.listPicture(this.addDialog.pictureData.detailId).then((result) => {
-          //处理url
-          result.data.forEach((i) => {
-            i.url = `${this.baseUrl}/detail/picture/img/${i.uri}`;
-            i.uri = null
-          });
-          this.tableData.data[this.addDialog.pictureData.index].hasPicture = true;
-          this.tableData.data[this.addDialog.pictureData.index].pictures = result.data; //搞不懂这里为啥是响应式
-          this.pictureCollapse.loading = false
-        });
+        detailApi.listPicture(this.addDialog.pictureData.detailId)
+            .then((result) => {
+              //处理url
+              result.data.forEach((i) => {
+                i.url = `${this.baseUrl}/detail/picture/img/${i.uri}`;
+                i.uri = null
+              });
+              this.tableData.data[this.addDialog.pictureData.index].hasPicture = true;
+              this.tableData.data[this.addDialog.pictureData.index].pictures = result.data; //搞不懂这里为啥是响应式
+              this.pictureCollapse.loading = false
+            })
+            .catch(() => this.pictureCollapse.loading = false)
       } else {
         //新记录添加图片成功
         let tableDataIndex = this.handleTableDataIndex(this.addDialog.pictureData.index);

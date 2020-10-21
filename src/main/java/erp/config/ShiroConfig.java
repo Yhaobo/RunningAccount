@@ -60,8 +60,8 @@ public class ShiroConfig {
         //下面为自定义的路径匹配模式
         filterChainMap.put("/user/**::post,put,delete,get", "roles[admin]");
 
-        filterChainMap.put("/detail/excel/*::get", "roles[user]");
         filterChainMap.put("/**::post,put,delete", "roles[user]");
+        filterChainMap.put("/excel/**", "roles[user]");
 
         filterChainMap.put("/**", "authc");
         return filterChainMap;

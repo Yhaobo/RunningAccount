@@ -6,7 +6,6 @@ import erp.entity.dto.req.DetailFormReqDTO;
 import erp.entity.dto.req.DetailQueryConditionDTO;
 import erp.entity.dto.resp.DetailRespDTO;
 import erp.service.DetailService;
-import erp.service.ExcelService;
 import erp.util.MyPage;
 import erp.util.R;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -30,9 +27,6 @@ import java.util.List;
 public class DetailController {
     @Autowired
     private DetailService detailService;
-
-    @Autowired
-    private ExcelService excelService;
 
     @GetMapping("")
     public R getAll(DetailQueryConditionDTO dto) {
@@ -109,27 +103,4 @@ public class DetailController {
         detailService.getImg(fileName, response);
     }
 
-    @GetMapping("/excel")
-    public void export(HttpServletResponse response, String accountName) throws Exception {
-        excelService.export(response, accountName);
-    }
-
-    @PostMapping("/excel")
-    public synchronized R importing(MultipartFile file) throws IOException, InstantiationException, IllegalAccessException, ParseException, NoSuchFieldException {
-        if (file.isEmpty()) {
-            return R.fail().message("上传文件为空");
-        }
-        try {
-            System.out.println(file.getOriginalFilename());
-//            excelService.importing(file.getInputStream());
-            return R.ok();
-        } finally {
-            file.getInputStream().close();
-        }
-    }
-
-    @GetMapping("/excel/template")
-    public void getExcelTemplate(HttpServletResponse response) {
-        excelService.getTemplate(response);
-    }
 }

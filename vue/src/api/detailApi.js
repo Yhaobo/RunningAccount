@@ -28,7 +28,7 @@ export default {
             data: {id, date, expense, earning, account}
         })
     },
-    deleteVoucher(pictureId) {
+    deletePicture(pictureId) {
         return axios({
             url: `detail/picture/${pictureId}`,
             method: 'delete'
@@ -50,7 +50,7 @@ export default {
     },
 
 
-    listVoucher(detailId) {
+    listPicture(detailId) {
         return axios({
             url: `detail/picture/${detailId}`,
             method: 'get',

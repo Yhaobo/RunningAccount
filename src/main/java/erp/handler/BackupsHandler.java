@@ -46,11 +46,7 @@ public class BackupsHandler {
 
             File file = new File(filepath);
             // 自动创建父目录
-            if (!file.getParentFile().exists()) {
-                if (!file.getParentFile().mkdirs()) {
-                    throw new RuntimeException("创建备份目录失败");
-                }
-            }
+            file.getParentFile().mkdirs();
 
             in = process.getInputStream();
             out = new FileOutputStream(file);

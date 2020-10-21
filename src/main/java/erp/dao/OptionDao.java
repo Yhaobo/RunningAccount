@@ -35,6 +35,18 @@ public interface OptionDao {
     @Select("select id, name from project ")
     List<Project> listProject();
 
+    @Select("select name from account ")
+    List<String> listAccountName();
+
+    @Select("select name from category ")
+    List<String> listCategoryName();
+
+    @Select("select name from department ")
+    List<String> listDepartmentName();
+
+    @Select("select name from project ")
+    List<String> listProjectName();
+
     @Insert("insert into ${tableName}(name) values(#{option.name})")
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "option.id")
     void insert(@Param("tableName") String tableName, @Param("option") Option option);
