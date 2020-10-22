@@ -50,7 +50,7 @@ public interface DetailDao extends BaseMapper<Detail> {
      * @param late   最大时间边界值
      * @param before 最小时间边界值
      */
-    void updateDuring(@Param("change") BigDecimal change, @Param("before") Date before, @Param("late") Date late, @Param("accountId") Integer accountId);
+    void updateDuringBalance(@Param("change") BigDecimal change, @Param("before") Date before, @Param("late") Date late, @Param("accountId") Integer accountId);
 
     /**
      * 修改date时间之后的所有账户ID为accountId记录的结存
@@ -59,7 +59,7 @@ public interface DetailDao extends BaseMapper<Detail> {
      * @param date      最小时间边界值
      * @param accountId 银行账户ID
      */
-    void updateLater(@Param("change") BigDecimal change, @Param("date") Date date, @Param("accountId") Integer accountId);
+    void updateLaterBalance(@Param("change") BigDecimal change, @Param("date") Date date, @Param("accountId") Integer accountId);
 
     /**
      * 查询date之前的一条记录
@@ -89,4 +89,11 @@ public interface DetailDao extends BaseMapper<Detail> {
      * @param minDate 此时间之后的记录(包括)
      */
     List<Detail> listByAccountIdAndDate(Integer id, Date minDate);
+
+    /**
+     * 更新记录是否已报销的标志位
+     * @param isReimbursement
+     * @param detailId
+     */
+    void updateReimbursement(boolean isReimbursement,int detailId);
 }

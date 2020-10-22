@@ -8,6 +8,7 @@
         <result property="earning" column="earning"/>
         <result property="expense" column="expense"/>
         <result property="balance" column="balance"/>
+        <result property="reimbursement" column="reimbursement"/>
         <association property="category" column="category_id" select="erp.dao.OptionDao.getCategoryById"/>
         <association property="account" column="account_id" select="erp.dao.OptionDao.getAccountById"/>
         <association property="project" column="project_id" select="erp.dao.OptionDao.getProjectById"/>
@@ -15,20 +16,20 @@
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        insert into detail
-        values(null,#{date},#{digest},#{project.id},#{account.id},#{department.id},#{category.id},#{earning},#{expense},#{balance})
+        insert into detail(`date`,digest,project_id,account_id,department_id,category_id,earning,expense,balance,create_time)
+        values(#{date},#{digest},#{project.id},#{account.id},#{department.id},#{category.id},#{earning},#{expense},#{balance},#{createTime})
     </insert>
     <update id="update">
         update detail
-        set `date`=#{date},digest=#{digest},category_id=#{category.id},account_id=#{account.id},project_id=#{project.id},department_id=#{department.id},earning=#{earning},expense=#{expense},balance=#{balance}
+        set `date`=#{date},digest=#{digest},category_id=#{category.id},account_id=#{account.id},project_id=#{project.id},department_id=#{department.id},earning=#{earning},expense=#{expense},balance=#{balance},alter_time=#{alterTime}
         where id=#{id}
     </update>
-    <update id="updateDuring">
+    <update id="updateDuringBalance">
         update detail
         set balance=balance+#{change}
         where <![CDATA[ `date`>#{before} and `date`<#{late} ]]> and account_id=#{accountId}
     </update>
-    <update id="updateLater">
+    <update id="updateLaterBalance">
         update detail
         set balance=balance+#{change}
         where `date`>#{date} and account_id=#{accountId}
@@ -36,6 +37,11 @@
     <update id="updateBalance">
         update detail
         set balance=#{newBalance}
+        where id=#{detailId}
+    </update>
+    <update id="updateReimbursement">
+        update detail
+        set reimbursement=#{isReimbursement}
         where id=#{detailId}
     </update>
     <select id="getPreviousBalance" resultType="java.math.BigDecimal">

@@ -1,8 +1,7 @@
 package erp.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -26,4 +25,11 @@ public class Detail implements Serializable {
     private BigDecimal expense;
     private BigDecimal balance;
     private String digest;
+    private Boolean reimbursement;
+    @TableField(fill = FieldFill.INSERT)
+    @JsonIgnore
+    private Date createTime;
+    @TableField(fill = FieldFill.UPDATE)
+    @JsonIgnore
+    private Date alterTime;
 }

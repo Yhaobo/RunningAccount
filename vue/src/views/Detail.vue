@@ -63,7 +63,7 @@
 
     <el-table ref="table" :data="tableData.data" style="width: 100%;" @row-click="onTableRowClick" height="90vh"
               v-loading="tableData.loading" :element-loading-text="loadingText" :row-class-name="tableRowClassName"
-              @selection-change="onTableSelectionChange" :select-on-indeterminate="false" @select="onTableSelect"
+              :select-on-indeterminate="false" @select="onTableSelect"
               @select-all="onTableSelectAll">
       <el-table-column type="expand">
         <template slot-scope="scope">
@@ -461,6 +461,9 @@ export default {
           .then(() => {
             this.tableData.multipleSelectionData.loading = false;
             window.open(this.baseUrl + '/excel/expenseClaimForm')
+            this.tableData.multipleSelectionData.data.forEach(value => {
+              value.reimbursement = true
+            })
           })
           .catch(() => this.tableData.multipleSelectionData.loading = false);
     },
@@ -682,20 +685,35 @@ export default {
         this.$message.info({
           message: `最多只能选中${this.tableData.multipleSelectionData.maxSelectedNum}条记录`,
           showClose: true
-        })
+        });
         selection.splice(this.tableData.multipleSelectionData.maxSelectedNum);
-        this.$refs.table.toggleRowSelection(row, false)
+        this.$refs.table.toggleRowSelection(row, false);
+      } else if (row.reimbursement && selection.indexOf(row) >= 0) {
+        this.tableData.multipleSelectionData.data = selection;
+        this.$confirm('此记录已生成过费用报销单, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          beforeClose: (action, instance, done) => {
+            if (action === 'confirm') {
+              done();
+            } else {
+              this.tableData.multipleSelectionData.data.splice(this.tableData.multipleSelectionData.data.indexOf(row))
+              this.$refs.table.toggleRowSelection(row, false);
+              done();
+            }
+          }
+        })
+      } else {
+        this.tableData.multipleSelectionData.data = selection;
       }
     },
     onTableSelectAll(selection) {
-      selection.splice(this.tableData.multipleSelectionData.maxSelectedNum)
-    },
-    onTableSelectionChange(selection) {
-      if (selection.length > this.tableData.multipleSelectionData.maxSelectedNum) {
-        selection.splice(this.tableData.multipleSelectionData.maxSelectedNum);
-        this.tableData.multipleSelectionData.data = selection;
-      } else {
+      if (selection.length === 0) {
         this.tableData.multipleSelectionData.data = selection
+      } else {
+        //取消全选功能
+        selection.splice(0);
       }
     },
     sort(a, b) {
@@ -768,7 +786,8 @@ export default {
       }
       return tableDataIndex
     }
-  },
+  }
+  ,
   filters: {
     previewSrcListFilter(pictures) {
       let previewSrcList = []

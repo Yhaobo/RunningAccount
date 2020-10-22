@@ -14,7 +14,7 @@ public class DetailDaoSqlProvider {
 
     public String listByCondition(DetailQueryConditionDTO dto) {
         final SQL sql = new SQL();
-        sql.SELECT("id,date,digest,project_id,account_id,department_id,category_id,earning,expense,balance");
+        sql.SELECT("id,date,digest,project_id,account_id,department_id,category_id,earning,expense,balance,reimbursement");
         sql.FROM("detail");
         if (dto.getEndDate() != null && dto.getBeginDate() != null) {
             sql.WHERE("date between #{dto.beginDate} and #{dto.endDate}");
@@ -41,15 +41,12 @@ public class DetailDaoSqlProvider {
     public String addByBatch(List<Detail> list) {
         final SQL sql = new SQL();
         sql.INSERT_INTO("detail");
-        sql.INTO_COLUMNS("date,digest,project_id,account_id,department_id,category_id,earning,expense");
+        sql.INTO_COLUMNS("date,digest,project_id,account_id,department_id,category_id,earning,expense,create_time");
         for (int i = 0; i < list.size(); i++) {
-            sql.INTO_VALUES(
-                    "#{list[" + i + "].date},#{list[" + i + "].digest}," +
-                            "#{list[" + i + "].project.id}," +
-                            "#{list[" + i + "].account.id}," +
-                            "#{list[" + i + "].department.id}," +
-                            "#{list[" + i + "].category.id}," +
-                            "#{list[" + i + "].earning},#{list[" + i + "].expense}");
+            sql.INTO_VALUES("#{list[" + i + "].date}," + "#{list[" + i + "].digest}," + "#{list[" + i + "].project.id}," +
+                    "#{list[" + i + "].account.id}," + "#{list[" + i + "].department.id}," +
+                    "#{list[" + i + "].category.id}," + "#{list[" + i + "].earning},#{list[" + i + "].expense}," +
+                    "#{list[" + i + "].createTime}");
             sql.ADD_ROW();
         }
         return sql.toString();

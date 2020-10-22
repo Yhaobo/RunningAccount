@@ -133,7 +133,7 @@ public class ExcelService {
                 log.error("找不到模板: " + fileName);
                 return;
             }
-            ExcelUtils.setResponseHeaderWithExcel(response, fileName);
+            ExcelUtils.setResponseHeaderWithExcel(response, LocalDate.now().toString()+"_Excel导入模板");
             updateTemplate(resourceAsStream, response.getOutputStream());
         }
     }
@@ -179,6 +179,7 @@ public class ExcelService {
         workbook.close();
     }
 
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public XSSFWorkbook generateExpenseClaimForm(Detail[] details) throws IOException {
         final String fileName = "费用报销单模板.xlsx";
         final XSSFWorkbook workbook;
@@ -197,6 +198,9 @@ public class ExcelService {
             BigDecimal expenseSum = new BigDecimal(0);
             for (int i = 0; i < details.length; i++) {
                 final Detail detail = details[i];
+                //记录修改状态
+                detailDao.updateReimbursement(true, detail.getId());
+
                 expenseSum = expenseSum.add(detail.getExpense());
                 row = sheet.getRow(rowIndex + i);
 

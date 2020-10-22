@@ -48,7 +48,6 @@ public class DetailService {
         List details = detailDao.listByCondition(page, conditionDTO);
         // 拥有图片信息的收支记录的id集合
         Set<Integer> detailIdFromVoucher = pictureDao.listDetailIds();
-        System.out.println("-----------"+detailIdFromVoucher);
         if (detailIdFromVoucher.size() > 0) {
             for (int i = 0; i < details.size(); i++) {
                 Detail detail = (Detail) details.get(i);
@@ -274,10 +273,10 @@ public class DetailService {
         BigDecimal difference = previous.getEarning().subtract(previous.getExpense());
         if (isForward) {
             //日期提前
-            detailDao.updateDuring(difference, current.getDate(), previous.getDate(), current.getAccount().getId());
+            detailDao.updateDuringBalance(difference, current.getDate(), previous.getDate(), current.getAccount().getId());
         } else {
             //日期推后
-            detailDao.updateDuring(difference.negate(), previous.getDate(), current.getDate(), current.getAccount().getId());
+            detailDao.updateDuringBalance(difference.negate(), previous.getDate(), current.getDate(), current.getAccount().getId());
         }
     }
 
@@ -289,7 +288,7 @@ public class DetailService {
      * @param accountId         账户ID
      */
     private void handleLaterBalance(Date date, BigDecimal balanceDifference, Integer accountId) {
-        detailDao.updateLater(balanceDifference, date, accountId);
+        detailDao.updateLaterBalance(balanceDifference, date, accountId);
     }
 
     /**
