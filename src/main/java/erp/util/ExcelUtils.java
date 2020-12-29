@@ -23,9 +23,10 @@ public class ExcelUtils {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+(\\.\\d+)?$");
     private static final String CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-    public static void setResponseHeaderWithExcel(HttpServletResponse response, String fileName) throws UnsupportedEncodingException {
+    public static void setResponseHeaderWithExcel(HttpServletResponse response, String fileName,long fileLength) throws UnsupportedEncodingException {
         response.setContentType(CONTENT_TYPE);
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xlsx");
+        response.addHeader("Content-Length", String.valueOf(fileLength));
     }
 
     /**

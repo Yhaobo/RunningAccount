@@ -63,7 +63,7 @@
 
     <el-table ref="table" :data="tableData.data" style="width: 100%;" @row-click="onTableRowClick" height="90vh"
               v-loading="tableData.loading" :element-loading-text="loadingText" :row-class-name="tableRowClassName"
-              :select-on-indeterminate="false" @select="onTableSelect"
+              :select-on-indeterminate="false" @select="onTableRowSelect"
               @select-all="onTableSelectAll">
       <el-table-column type="expand">
         <template slot-scope="scope">
@@ -449,9 +449,8 @@ export default {
     }
   },
   created() {
-    this.loadData().then(() => {
-      this.loadSelectionData()
-    })
+    this.loadData()
+    this.loadSelectionData()
   },
 
   methods: {
@@ -459,13 +458,14 @@ export default {
       this.tableData.multipleSelectionData.loading = true;
       excelApi.generateExpenseClaimForm(this.tableData.multipleSelectionData.data)
           .then(() => {
-            this.tableData.multipleSelectionData.loading = false;
             window.open(this.baseUrl + '/excel/expenseClaimForm')
             this.tableData.multipleSelectionData.data.forEach(value => {
+              //修改标记为已报销
               value.reimbursement = true
             })
+
           })
-          .catch(() => this.tableData.multipleSelectionData.loading = false);
+          .finally(() => this.tableData.multipleSelectionData.loading = false);
     },
     onAddDialogClosed() {
       if (this.$refs.pictureUpload.successUploadNum > 0) {
@@ -545,7 +545,7 @@ export default {
       queryCondition.dateRange = null;
       queryCondition.total = null
       queryCondition.datePickerOptions = null
-      return detailApi.list(queryCondition)
+      detailApi.list(queryCondition)
           .then((result) => {
             this.tableData.data = result.data.list;
             this.pageData.total = result.data.total
@@ -680,7 +680,7 @@ export default {
         this.tableData.expandRow = row;
       }
     },
-    onTableSelect(selection, row) {
+    onTableRowSelect(selection, row) {
       if (selection.length > this.tableData.multipleSelectionData.maxSelectedNum) {
         this.$message.info({
           message: `最多只能选中${this.tableData.multipleSelectionData.maxSelectedNum}条记录`,

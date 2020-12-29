@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -51,18 +52,20 @@ public class ExcelController {
     }
 
     @GetMapping("/template")
-    public void getExcelTemplate(HttpServletResponse response) throws IOException {
+    public void downloadExcelTemplate(HttpServletResponse response) throws IOException {
         excelService.getTemplate(response);
     }
+
     @GetMapping("/expenseClaimForm")
-    public void getExpenseClaimForm(HttpServletResponse response) throws IOException {
+    public void downloadExpenseClaimForm(HttpServletResponse response) throws IOException {
         final Session session = SecurityUtils.getSubject().getSession();
-        final XSSFWorkbook expenseClaimFormWorkBook = (XSSFWorkbook) session.getAttribute("expenseClaimFormWorkBook");
-        session.removeAttribute("expenseClaimFormWorkBook");
-        ExcelUtils.setResponseHeaderWithExcel(response, LocalDate.now().toString()+"_费用报销单");
-        expenseClaimFormWorkBook.write(response.getOutputStream());
-        expenseClaimFormWorkBook.close();
+        final ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) session.getAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY);
+        session.removeAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY);
+        ExcelUtils.setResponseHeaderWithExcel(response, LocalDate.now().toString() + "_费用报销单", byteArrayOutputStream.size());
+        byteArrayOutputStream.writeTo(response.getOutputStream());
     }
+
+    private static final String EXPENSE_CLAIM_FORM_SESSION_KEY = "expenseClaimFormSessionKey";
 
     @PostMapping("/expenseClaimForm")
     public R generateExpenseClaimForm(@RequestBody Detail[] details) throws IOException {
@@ -74,7 +77,10 @@ public class ExcelController {
         if (workbook == null) {
             throw new MyException("生成费用报销单失败");
         }
-        session.setAttribute("expenseClaimFormWorkBook", workbook);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        workbook.write(byteArrayOutputStream);
+        workbook.close();
+        session.setAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY, byteArrayOutputStream);
         return R.ok();
     }
 }

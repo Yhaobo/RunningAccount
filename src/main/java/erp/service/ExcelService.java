@@ -50,13 +50,7 @@ public class ExcelService {
     private final String[] headers = {"日期", "项目", "账户", "部门", "类别", "收入", "支出", "结存", "摘要"};
 
     /**
-     * 导出
-     *
-     * @param response
-     * @throws InvocationTargetException
-     * @throws NoSuchMethodException
-     * @throws IllegalAccessException
-     * @throws IOException
+     * 导出数据为 Excel
      */
     @Transactional(readOnly = true)
     public void export(HttpServletResponse response, String accountName) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
@@ -64,8 +58,10 @@ public class ExcelService {
         condition.setAccountId(optionDao.getAccountId(accountName));
         List<Detail> data = detailDao.listByCondition(null, condition);
         String fileName = LocalDate.now().toString() + "_" + accountName;
-        ExcelUtils.setResponseHeaderWithExcel(response, fileName);
-        ExcelUtils.exportExcel2007(title, headers, data, response.getOutputStream());
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ExcelUtils.exportExcel2007(title, headers, data, byteArrayOutputStream);
+        ExcelUtils.setResponseHeaderWithExcel(response, fileName, byteArrayOutputStream.size());
+        byteArrayOutputStream.writeTo(response.getOutputStream());
     }
 
     /**
@@ -133,8 +129,10 @@ public class ExcelService {
                 log.error("找不到模板: " + fileName);
                 return;
             }
-            ExcelUtils.setResponseHeaderWithExcel(response, LocalDate.now().toString()+"_Excel导入模板");
-            updateTemplate(resourceAsStream, response.getOutputStream());
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            updateTemplate(resourceAsStream, byteArrayOutputStream);
+            ExcelUtils.setResponseHeaderWithExcel(response, LocalDate.now().toString() + "_Excel导入模板", byteArrayOutputStream.size());
+            byteArrayOutputStream.writeTo(response.getOutputStream());
         }
     }
 

@@ -38,7 +38,14 @@ public class BackupsHandler {
             //cmd命令拼接
             String cmd = "mysqldump -u" + username + " -p" + password + " " + database;
             //执行命令
-            Process process = Runtime.getRuntime().exec(cmd);
+            Process process;
+            try {
+                process = Runtime.getRuntime().exec(cmd);
+            } catch (IOException e) {
+                log.error("请先配置mysql服务的环境变量，否则无法自动备份数据", e);
+                return;
+            }
+
             // 生成的文件名
             String fileName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
             // 需要备份到的路径
@@ -57,20 +64,20 @@ public class BackupsHandler {
             }
             System.out.println(LocalDateTime.now() + "\t数据已备份:" + filepath);
         } catch (Exception e) {
-            log.error(e.getMessage(),e);
+            log.error(e.getMessage(), e);
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    log.error(e.getMessage(),e);
+                    log.error(e.getMessage(), e);
                 }
             }
             if (out != null) {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    log.error(e.getMessage(),e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

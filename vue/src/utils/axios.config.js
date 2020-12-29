@@ -24,6 +24,9 @@ axios.interceptors.request.use(
     }
 );
 
+// 登出提示信号量 (防止重复提示)
+let logoutNoticeSemaphore = 1;
+
 // Add a response interceptor
 axios.interceptors.response.use(
     response => {
@@ -35,21 +38,26 @@ axios.interceptors.response.use(
             console.log('errorResult: ' + response.data);
             switch (result.code) {
                 case 401:
-                    MessageBox.confirm(
-                        '你已被登出，可以取消继续留在该页面，或者重新登录',
-                        '提示',
-                        {
-                            confirmButtonText: '重新登录',
-                            cancelButtonText: '取消',
-                            type: 'warning',
-                        }
-                    ).then(() => {
-                        sessionStorage.clear()
-                        router.replace({
-                            path: "/login",
-                            query: {redirect: router.currentRoute.fullPath}
-                        })
-                    })
+                    if (logoutNoticeSemaphore > 0) {
+                        logoutNoticeSemaphore = 0
+                        MessageBox.confirm(
+                            '你已被登出，可以取消继续留在该页面，或者重新登录',
+                            '提示',
+                            {
+                                confirmButtonText: '重新登录',
+                                cancelButtonText: '取消',
+                                type: 'warning',
+                            }
+                        ).then(() => {
+                            sessionStorage.clear()
+                            router.replace({
+                                path: "/login",
+                                query: {redirect: router.currentRoute.fullPath}
+                            })
+                        }).finally(() => {
+                            logoutNoticeSemaphore = 1
+                        });
+                    }
                     break
                 case 403:
                     Notification({
