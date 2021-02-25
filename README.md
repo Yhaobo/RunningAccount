@@ -26,7 +26,7 @@ IDEA, Maven, MySQL8.0, Navicat, Git, Vue-cli
 
 6.财务数据自动备份(用户退出系统时)
 
-7.用户认证和权限管理
+7.用户认证和权限管理, 以及请求限流
 
 8.可导出流水记录为Excel, 或从Excel中导入新记录
 
