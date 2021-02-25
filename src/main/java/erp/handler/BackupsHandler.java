@@ -19,10 +19,10 @@ import java.util.Date;
 @Component
 public class BackupsHandler {
     // 数据库帐号
-    @Value("${spring.datasource.druid.username}")
+    @Value("${spring.datasource.username}")
     private String username;
     // 数据库密码
-    @Value("${spring.datasource.druid.password}")
+    @Value("${spring.datasource.password}")
     private String password;
     // 需要备份的数据库名
     @Value("${erp.datasource.database}")

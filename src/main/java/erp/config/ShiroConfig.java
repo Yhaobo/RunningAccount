@@ -43,7 +43,7 @@ public class ShiroConfig {
     /**
      * 配置过滤器的作用路径
      */
-    public Map<String, String> getFilterChainMap() {
+    private Map<String, String> getFilterChainMap() {
         Map<String, String> filterChainMap = new LinkedHashMap<>(32);
         filterChainMap.put("/index.html", "anon");
         filterChainMap.put("/", "anon");

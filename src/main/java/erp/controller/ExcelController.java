@@ -5,6 +5,7 @@ import erp.service.DetailService;
 import erp.service.ExcelService;
 import erp.util.ExcelUtils;
 import erp.util.MyException;
+import erp.util.MyUtils;
 import erp.util.R;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -20,6 +21,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Yhaobo
@@ -57,12 +60,12 @@ public class ExcelController {
     }
 
     @GetMapping("/expenseClaimForm")
-    public void downloadExpenseClaimForm(HttpServletResponse response) throws IOException {
+    public void downloadExpenseClaimForm(HttpServletResponse response, @RequestParam String formId) throws IOException {
         final Session session = SecurityUtils.getSubject().getSession();
-        final ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) session.getAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY);
-        session.removeAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY);
-        ExcelUtils.setResponseHeaderWithExcel(response, LocalDate.now().toString() + "_费用报销单", byteArrayOutputStream.size());
-        byteArrayOutputStream.writeTo(response.getOutputStream());
+        final Map<String, ByteArrayOutputStream> map = (Map<String, ByteArrayOutputStream>) session.getAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY);
+        ByteArrayOutputStream outputStream = map.remove(formId);
+        ExcelUtils.setResponseHeaderWithExcel(response, LocalDate.now().toString() + "_费用报销单", outputStream.size());
+        outputStream.writeTo(response.getOutputStream());
     }
 
     private static final String EXPENSE_CLAIM_FORM_SESSION_KEY = "expenseClaimFormSessionKey";
@@ -80,7 +83,17 @@ public class ExcelController {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         workbook.write(byteArrayOutputStream);
         workbook.close();
-        session.setAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY, byteArrayOutputStream);
-        return R.ok();
+
+        Object formIdToStreamMap = session.getAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY);
+        String formId = MyUtils.getUUID();
+        if (formIdToStreamMap == null) {
+            Map<String, ByteArrayOutputStream> map = new ConcurrentHashMap<>();
+            map.put(formId, byteArrayOutputStream);
+            session.setAttribute(EXPENSE_CLAIM_FORM_SESSION_KEY, map);
+        } else {
+            ((Map<String, ByteArrayOutputStream>) formIdToStreamMap).put(formId, byteArrayOutputStream);
+        }
+
+        return R.ok().data(formId);
     }
 }

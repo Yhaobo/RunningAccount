@@ -4,14 +4,11 @@ spring:
   #数据源基本配置
   datasource:
     name: druidDataSource
-    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/erp?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8
+    username: root
+#    password: xxx
     druid:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/erp?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8
-      username: root
-      #      password: xxx
-      #配置监控统计拦截的filters,wall用于防火墙
-      filters: stat,wall
       max-active: 5
       initial-size: 1
       max-wait: 60000
@@ -33,6 +30,23 @@ spring:
       #要启用PSCache，必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true。 在Druid中，不会存在Oracle下PSCache占用内存过多的问题，可以把这个数值配置大一些，比如说100
       max-open-prepared-statements: 50
       max-pool-prepared-statement-per-connection-size: 5
+
+      #后台监控servlet
+      stat-view-servlet:
+        enabled: true
+        login-username: admin
+        login-password: admin
+        reset-enable: true
+      #监控web应用功能
+      web-stat-filter:
+        enabled: false
+      filter:
+        #sql监控功能
+        stat:
+          enabled: true
+        #防火墙功能
+        wall:
+          enabled: false
 
   #静态资源配置
   resources:

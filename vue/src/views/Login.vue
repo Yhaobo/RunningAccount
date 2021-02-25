@@ -62,13 +62,14 @@ export default {
 <style>
 .login-card .el-card__header {
   font-size: 20px;
+  color: white;
 }
 
 .login-card {
   width: 473px;
-  margin: 16% auto;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  margin: 15% auto;
+  background: rgb(0, 0, 0, 0.6);
+  /*color: black;*/
 }
 
 .transparent .el-input__inner, .transparent .el-form-item__label {

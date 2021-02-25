@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @EnableTransactionManagement
 @SpringBootApplication
-@ServletComponentScan("erp.servletComponent")
+@ServletComponentScan("erp.web")
 public class ERPApplication {
     public static void main(String[] args) {
         SpringApplication.run(ERPApplication.class, args);

@@ -1,4 +1,4 @@
-package erp.servletComponent;
+package erp.web;
 
 import erp.handler.BackupsHandler;
 import org.springframework.beans.factory.annotation.Autowired;

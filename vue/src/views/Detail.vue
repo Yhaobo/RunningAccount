@@ -61,9 +61,9 @@
       </el-col>
     </el-row>
 
-    <el-table ref="table" :data="tableData.data" style="width: 100%;" @row-click="onTableRowClick" height="90vh"
+    <el-table ref="table" :data="tableData.data" style="width: 100%;margin-top: 10px" @row-click="onTableRowClick" height="90vh"
               v-loading="tableData.loading" :element-loading-text="loadingText" :row-class-name="tableRowClassName"
-              :select-on-indeterminate="false" @select="onTableRowSelect"
+              :select-on-indeterminate="false" @select="onTableRowSelect" :border="true"
               @select-all="onTableSelectAll">
       <el-table-column type="expand">
         <template slot-scope="scope">
@@ -94,22 +94,22 @@
           </el-collapse>
         </template>
       </el-table-column>
-      <el-table-column label="日期" min-width="50" :sortable="true" :sort-method="sort">
+      <el-table-column label="日期" :sortable="true" :sort-method="sort">
         <template slot-scope="scope">
           <span>{{ dateFormat(scope.row.date, 'yyyy-MM-dd') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="项目" prop="project.name" min-width="50"></el-table-column>
-      <el-table-column label="银行账户" prop="account.name" min-width="50"></el-table-column>
-      <el-table-column label="部门" prop="department.name" min-width="50"></el-table-column>
-      <el-table-column label="具体类别" prop="category.name" min-width="50"></el-table-column>
-      <el-table-column label="收入" prop="earning" min-width="50" :sortable="true">
+      <el-table-column label="项目" prop="project.name"></el-table-column>
+      <el-table-column label="银行账户" prop="account.name"></el-table-column>
+      <el-table-column label="部门" prop="department.name"></el-table-column>
+      <el-table-column label="具体类别" prop="category.name"></el-table-column>
+      <el-table-column label="收入" prop="earning" :sortable="true">
         <template slot-scope="scope">{{ '￥' + scope.row.earning }}</template>
       </el-table-column>
-      <el-table-column label="支出" prop="expense" min-width="50" :sortable="true">
+      <el-table-column label="支出" prop="expense" :sortable="true">
         <template slot-scope="scope">{{ '￥' + scope.row.expense }}</template>
       </el-table-column>
-      <el-table-column label="结存" prop="balance" min-width="50">
+      <el-table-column label="结存" prop="balance">
         <template slot-scope="scope">{{ '￥' + scope.row.balance }}</template>
       </el-table-column>
       <el-table-column label="操作" width="157" v-if="currentUserLevel<='1'">
@@ -457,8 +457,8 @@ export default {
     generateExpenseClaimForm() {
       this.tableData.multipleSelectionData.loading = true;
       excelApi.generateExpenseClaimForm(this.tableData.multipleSelectionData.data)
-          .then(() => {
-            window.open(this.baseUrl + '/excel/expenseClaimForm')
+          .then((result) => {
+            window.open(this.baseUrl + `/excel/expenseClaimForm?formId=${result.data}`)
             this.tableData.multipleSelectionData.data.forEach(value => {
               //修改标记为已报销
               value.reimbursement = true
