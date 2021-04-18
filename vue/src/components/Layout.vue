@@ -6,24 +6,28 @@
           <template slot="title"><span v-text="brand" style="font-size: 20px;vertical-align:baseline;"></span>
           </template>
 
-          <el-menu-item v-if="currentUser.level<='1'" @click="updateBalance">
+          <el-menu-item v-if="currentUser.groupId<='2'" @click="updateBalance">
             <i class="el-icon-refresh"></i>重新计算并更新所有结存
           </el-menu-item>
-          <el-menu-item v-if="currentUser.level==='0'" @click="userManagementDialog.visible=true">
-            <i class="el-icon-user"></i>用户管理
-          </el-menu-item>
+
           <el-menu-item @click="onLogout">
             <i class="el-icon-switch-button"></i>退出系统
           </el-menu-item>
         </el-submenu>
         <el-menu-item index="/detail">流水明细</el-menu-item>
         <el-menu-item index="/statistics">统计汇总</el-menu-item>
-        <el-menu-item v-if="currentUser.level<='1'" style="float: right" @click="openOptionSettingDialog" class="el-icon-setting">选项设置</el-menu-item>
-        <el-submenu index="excel" v-if="currentUser.level<='1'" style="float: right" :show-timeout="0">
+        <el-menu-item v-if="currentUser.groupId<='2'" style="float: right" @click="openOptionSettingDialog"
+                      class="el-icon-setting">选项设置
+        </el-menu-item>
+        <el-submenu index="excel" v-if="currentUser.groupId<='2'" style="float: right" :show-timeout="0">
           <template slot="title">Excel 操作</template>
-          <el-menu-item @click="importFromExcelDialog.visible=true"><i class="el-icon-upload2"></i>导入数据 从Excel</el-menu-item>
+          <el-menu-item @click="importFromExcelDialog.visible=true"><i class="el-icon-upload2"></i>导入数据 从Excel
+          </el-menu-item>
           <el-menu-item @click="openExportToExcelDialog"><i class="el-icon-download"></i>导出数据 为Excel</el-menu-item>
         </el-submenu>
+        <el-menu-item v-if="currentUser.groupId==='1'" style="float: right" @click="$router.push({path: '/rbac'})">
+          <i class="el-icon-user"></i>用户管理
+        </el-menu-item>
       </el-menu>
     </el-header>
 
@@ -52,38 +56,38 @@
               :limit-size="1024"></upload>
     </el-dialog>
 
-    <el-dialog title="用户管理" :visible.sync="userManagementDialog.visible"
-               :close-on-click-modal="false"
-               @closed="resetUserManagementDialog">
-      <el-form ref="userForm" :model="userManagementDialog.user" :rules="userManagementDialog.rules"
-               class="demo-ruleForm" status-icon label-width="70px">
-        <el-form-item label-width="auto">
-          <el-cascader :options="userManagementDialog.cascader.Options" clearable
-                       :key="userManagementDialog.cascader.key"
-                       :props="userManagementDialog.cascader.props" placeholder="请先选择账号类型"
-                       v-model="userManagementDialog.cascader.value" @change="onSelectUsername"></el-cascader>
-        </el-form-item>
-        <div v-show="userManagementDialog.user.level">
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="userManagementDialog.user.username"></el-input>
-          </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="userManagementDialog.user.password" autocomplete="off"></el-input>
-          </el-form-item>
-          <el-form-item label="确认密码" prop="checkPassword">
-            <el-input type="password" v-model="userManagementDialog.user.checkPassword" autocomplete="off"></el-input>
-          </el-form-item>
-        </div>
-      </el-form>
-      <div slot="footer" class="dialog-footer" v-show="userManagementDialog.user.level">
-        <el-button size="medium" type="warning" @click="updateUser">修 改</el-button>
-        <el-button size="medium" v-show="userManagementDialog.user.level>0" type="success" @click="addUser">新 增
-        </el-button>
-        <el-button size="medium" style="float: left" v-show="userManagementDialog.user.level>0" type="danger"
-                   @click="deleteUser">删 除
-        </el-button>
-      </div>
-    </el-dialog>
+    <!--    <el-dialog title="用户管理" :visible.sync="userManagementDialog.visible"-->
+    <!--               :close-on-click-modal="false"-->
+    <!--               @closed="resetUserManagementDialog">-->
+    <!--      <el-form ref="userForm" :model="userManagementDialog.user" :rules="userManagementDialog.rules"-->
+    <!--               class="demo-ruleForm" status-icon label-width="70px">-->
+    <!--        <el-form-item label-width="auto">-->
+    <!--          <el-cascader :options="userManagementDialog.cascader.Options" clearable-->
+    <!--                       :key="userManagementDialog.cascader.key"-->
+    <!--                       :props="userManagementDialog.cascader.props" placeholder="请先选择账号类型"-->
+    <!--                       v-model="userManagementDialog.cascader.value" @change="onSelectUsername"></el-cascader>-->
+    <!--        </el-form-item>-->
+    <!--        <div v-show="userManagementDialog.user.groupId">-->
+    <!--          <el-form-item label="用户名" prop="username">-->
+    <!--            <el-input v-model="userManagementDialog.user.username"></el-input>-->
+    <!--          </el-form-item>-->
+    <!--          <el-form-item label="密码" prop="password">-->
+    <!--            <el-input type="password" v-model="userManagementDialog.user.password" autocomplete="off"></el-input>-->
+    <!--          </el-form-item>-->
+    <!--          <el-form-item label="确认密码" prop="checkPassword">-->
+    <!--            <el-input type="password" v-model="userManagementDialog.user.checkPassword" autocomplete="off"></el-input>-->
+    <!--          </el-form-item>-->
+    <!--        </div>-->
+    <!--      </el-form>-->
+    <!--      <div slot="footer" class="dialog-footer" v-show="userManagementDialog.user.groupId">-->
+    <!--        <el-button size="medium" type="warning" @click="updateUser">修 改</el-button>-->
+    <!--        <el-button size="medium" v-show="userManagementDialog.user.groupId>0" type="success" @click="addUser">新 增-->
+    <!--        </el-button>-->
+    <!--        <el-button size="medium" style="float: left" v-show="userManagementDialog.user.groupId>0" type="danger"-->
+    <!--                   @click="deleteUser">删 除-->
+    <!--        </el-button>-->
+    <!--      </div>-->
+    <!--    </el-dialog>-->
 
     <el-dialog title="选项设置" :visible.sync="optionSettingDialog.visible" :close-on-click-modal="false" width="30%">
       <el-card shadow="never">
@@ -124,7 +128,7 @@
 </template>
 
 <script>
-import userApi from "@/api/userApi";
+import userApi from "@/api/rbac/userApi";
 import detailApi from "@/api/detailApi";
 import optionApi from "@/api/optionApi";
 import upload from "@/components/Upload";
@@ -135,8 +139,8 @@ export default {
     return {
       routerViewKey: 0,//修改此值实现刷新效果
       currentUser: {
-        level: sessionStorage.getItem('level'),
-        username:sessionStorage.getItem('username')
+        groupId: sessionStorage.getItem('groupId'),
+        username: sessionStorage.getItem('username')
       },
       activeIndex: `${this.$route.path}`,
       optionSettingDialog: {
@@ -164,62 +168,62 @@ export default {
         accountList: [],
         downloadUrl: `${process.env.VUE_APP_BaseURL}/excel/`,
       },
-      userManagementDialog: {
-        user: {
-          id: null,
-          level: '',
-          username: '',
-          password: '',
-          checkPassword: ''
-        },
-        rules: {
-          username: [
-            {validator: this.validateInput, trigger: ['blur', 'change']}
-          ],
-          password: [
-            {validator: this.validateInput, trigger: ['blur', 'change']}
-          ],
-          checkPassword: [
-            {validator: this.validateInput, trigger: 'blur'}
-          ]
-        },
-        visible: false,
-        cascader: {
-          key: 0,
-          value: null,
-          Options: [
-            {
-              value: '0',
-              label: '管理员',
-            },
-            {
-              value: '1',
-              label: '用户',
-            },
-            {
-              value: '2',
-              label: '参观者',
-            },
-          ],
-          props: {
-            lazy: true,
-            lazyLoad: this.cascaderLazyLoad
-          }
-        },
-      }
+      // userManagementDialog: {
+      //   user: {
+      //     id: null,
+      //     groupId: '',
+      //     username: '',
+      //     password: '',
+      //     checkPassword: ''
+      //   },
+      //   rules: {
+      //     username: [
+      //       {validator: this.validateInput, trigger: ['blur', 'change']}
+      //     ],
+      //     password: [
+      //       {validator: this.validateInput, trigger: ['blur', 'change']}
+      //     ],
+      //     checkPassword: [
+      //       {validator: this.validateInput, trigger: 'blur'}
+      //     ]
+      //   },
+      //   visible: false,
+      //   cascader: {
+      //     key: 0,
+      //     value: null,
+      //     Options: [
+      //       {
+      //         value: '0',
+      //         label: '管理员',
+      //       },
+      //       {
+      //         value: '1',
+      //         label: '用户',
+      //       },
+      //       {
+      //         value: '2',
+      //         label: '参观者',
+      //       },
+      //     ],
+      //     props: {
+      //       lazy: true,
+      //       lazyLoad: this.cascaderLazyLoad
+      //     }
+      //   },
+      // }
     };
   },
   computed: {
     brand() {
       let info = '';
-      switch (this.currentUser.level) {
-        case '0':
+      switch (this.currentUser.groupId) {
+        case '1':
           info = '管理员';
           break
-        case '1':
+        case '2':
           info = '用户'
           break
-        default:
+        case '3':
           info = '参观者'
       }
       return `财务流水管理系统 (${info})`
@@ -310,21 +314,7 @@ export default {
       })
       this.optionSettingDialog.visible = true
     },
-    cascaderLazyLoad(node, resolve) {
-      const {value} = node;
-      userApi.listUsername(value)
-          .then((result) => {
-            const userList = result.data;
-            let nodes = userList.map((user) => ({
-              value: user,
-              label: user.username,
-              leaf: true
-            }))
-            // 通过调用resolve将子节点数据返回，通知组件数据加载完成
-            resolve(nodes);
-          })
-          .catch(() => resolve())
-    },
+
     onLogout() {
       sessionStorage.clear()
       userApi.logout().then(() => {
@@ -374,141 +364,155 @@ export default {
       exportToExcelDialog.visible = false;
     },
 
+    // cascaderLazyLoad(node, resolve) {
+    //   const {value} = node;
+    //   userApi.listUsername(value)
+    //       .then((result) => {
+    //         const userList = result.data;
+    //         let nodes = userList.map((user) => ({
+    //           value: user,
+    //           label: user.username,
+    //           leaf: true
+    //         }))
+    //         // 通过调用resolve将子节点数据返回，通知组件数据加载完成
+    //         resolve(nodes);
+    //       })
+    //       .catch(() => resolve())
+    // },
     //用户管理中选中账号后的操作
-    onSelectUsername() {
-      let cascaderValue = this.userManagementDialog.cascader.value;
-      this.userManagementDialog.user.level = cascaderValue[0]
-      this.userManagementDialog.user.username = cascaderValue[1].username;
-      this.userManagementDialog.user.id = cascaderValue[1].id;
-    },
-
-    validateInput(rule, value, callback) {
-      switch (rule.field) {
-        case 'username':
-          if (!value) {
-            callback(new Error('用户名不能为空'));
-          } else if (value.length < 3) {
-            callback(new Error('用户名不能少于3位'))
-          } else if (!/^[a-zA-Z][a-zA-Z0-9_]{3,32}$/.test(value)) {
-            callback(new Error('用户名只允许[字母,数字,下划线],且不超过32位'));
-          } else {
-            callback()
-          }
-          break;
-        case 'password':
-          if (!value) {
-            callback(new Error('密码不能为空'));
-          } else if (value.length < 6) {
-            callback(new Error('密码不能少于6位'));
-          } else if (!/^[a-zA-Z0-9_ ]{6,32}$/.test(value)) {
-            callback(new Error('密码只允许[字母,数字,下划线,空格],且不超过32位'));
-          } else {
-            callback()
-          }
-          break
-        case 'checkPassword':
-          if (!value) {
-            callback(new Error('请输入密码'));
-          } else if (value !== this.userManagementDialog.user.password) {
-            callback(new Error('两次输入密码不一致!'));
-          } else {
-            callback();
-          }
-      }
-    },
-
-    updateUser() {
-      this.$refs.userForm.validate().then(() => {
-        this.$confirm('此操作将修改此账号, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          beforeClose: (action, instance, done) => {
-            if (action === 'confirm') {
-              instance.confirmButtonLoading = true;
-              instance.confirmButtonText = '执行中...';
-              this.userManagementDialog.updateLoading = true
-              userApi.update({...this.userManagementDialog.user})
-                  .then(() => {
-                    this.$message.success({message: '修改账号成功', showClose: true});
-                    this.userManagementDialog.visible = false
-                    instance.confirmButtonLoading = false;
-                    done();
-                  })
-                  .catch(() => {
-                    instance.confirmButtonLoading = false
-                    done();
-                  })
-            } else {
-              done();
-            }
-          }
-        })
-      })
-    },
-
-    addUser() {
-      this.$refs.userForm.validate().then(() => {
-        this.$confirm('此操作将新增一个账号, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          beforeClose: (action, instance, done) => {
-            if (action === 'confirm') {
-              instance.confirmButtonLoading = true;
-              instance.confirmButtonText = '执行中...';
-              userApi.add({...this.userManagementDialog.user})
-                  .then(() => {
-                    this.userManagementDialog.visible = false
-                    this.$message.success({message: '新增账号成功', showClose: true});
-                    instance.confirmButtonLoading = false;
-                    done();
-                  })
-                  .catch(() => {
-                    instance.confirmButtonLoading = false
-                    done();
-                  })
-            } else {
-              done();
-            }
-          }
-        })
-      })
-    },
-    deleteUser() {
-      this.$confirm('此操作将永久删除此账号, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-        beforeClose: (action, instance, done) => {
-          if (action === 'confirm') {
-            instance.confirmButtonLoading = true;
-            instance.confirmButtonText = '执行中...';
-            userApi.delete(this.userManagementDialog.user)
-                .then(() => {
-                  this.$message.success({message: "删除账号成功", showClose: true})
-                  this.userManagementDialog.visible = false
-                  instance.confirmButtonLoading = false;
-                  done();
-                })
-                .catch(() => {
-                  instance.confirmButtonLoading = false
-                  done();
-                })
-          } else {
-            done();
-          }
-        }
-      })
-    },
-    resetUserManagementDialog() {
-      this.$refs.userForm.resetFields();
-      this.userManagementDialog.cascader.value = null;
-      this.userManagementDialog.user.level = null
-      //组件key值自增(为了刷新缓存)
-      ++this.userManagementDialog.cascader.key
-    },
-
+    // onSelectUsername() {
+    //   let cascaderValue = this.userManagementDialog.cascader.value;
+    //   this.userManagementDialog.user.groupId = cascaderValue[0]
+    //   this.userManagementDialog.user.username = cascaderValue[1].username;
+    //   this.userManagementDialog.user.id = cascaderValue[1].id;
+    // },
+    //
+    // validateInput(rule, value, callback) {
+    //   switch (rule.field) {
+    //     case 'username':
+    //       if (!value) {
+    //         callback(new Error('用户名不能为空'));
+    //       } else if (value.length < 3) {
+    //         callback(new Error('用户名不能少于3位'))
+    //       } else if (!/^[a-zA-Z][a-zA-Z0-9_]{2,31}$/.test(value)) {
+    //         callback(new Error('用户名只允许[字母,数字,下划线],且不超过32位'));
+    //       } else {
+    //         callback()
+    //       }
+    //       break;
+    //     case 'password':
+    //       if (!value) {
+    //         callback(new Error('密码不能为空'));
+    //       } else if (value.length < 6) {
+    //         callback(new Error('密码不能少于6位'));
+    //       } else if (!/^[a-zA-Z0-9_ ]{6,32}$/.test(value)) {
+    //         callback(new Error('密码只允许[字母,数字,下划线,空格],且不超过32位'));
+    //       } else {
+    //         callback()
+    //       }
+    //       break
+    //     case 'checkPassword':
+    //       if (!value) {
+    //         callback(new Error('请输入密码'));
+    //       } else if (value !== this.userManagementDialog.user.password) {
+    //         callback(new Error('两次输入密码不一致!'));
+    //       } else {
+    //         callback();
+    //       }
+    //   }
+    // },
+    //
+    // updateUser() {
+    //   this.$refs.userForm.validate().then(() => {
+    //     this.$confirm('此操作将修改此账号, 是否继续?', '提示', {
+    //       confirmButtonText: '确定',
+    //       cancelButtonText: '取消',
+    //       type: 'warning',
+    //       beforeClose: (action, instance, done) => {
+    //         if (action === 'confirm') {
+    //           instance.confirmButtonLoading = true;
+    //           instance.confirmButtonText = '执行中...';
+    //           this.userManagementDialog.updateLoading = true
+    //           userApi.update({...this.userManagementDialog.user})
+    //               .then(() => {
+    //                 this.$message.success({message: '修改账号成功', showClose: true});
+    //                 this.userManagementDialog.visible = false
+    //                 instance.confirmButtonLoading = false;
+    //                 done();
+    //               })
+    //               .catch(() => {
+    //                 instance.confirmButtonLoading = false
+    //                 done();
+    //               })
+    //         } else {
+    //           done();
+    //         }
+    //       }
+    //     })
+    //   })
+    // },
+    //
+    // addUser() {
+    //   this.$refs.userForm.validate().then(() => {
+    //     this.$confirm('此操作将新增一个账号, 是否继续?', '提示', {
+    //       confirmButtonText: '确定',
+    //       cancelButtonText: '取消',
+    //       type: 'warning',
+    //       beforeClose: (action, instance, done) => {
+    //         if (action === 'confirm') {
+    //           instance.confirmButtonLoading = true;
+    //           instance.confirmButtonText = '执行中...';
+    //           userApi.add({...this.userManagementDialog.user})
+    //               .then(() => {
+    //                 this.userManagementDialog.visible = false
+    //                 this.$message.success({message: '新增账号成功', showClose: true});
+    //                 instance.confirmButtonLoading = false;
+    //                 done();
+    //               })
+    //               .catch(() => {
+    //                 instance.confirmButtonLoading = false
+    //                 done();
+    //               })
+    //         } else {
+    //           done();
+    //         }
+    //       }
+    //     })
+    //   })
+    // },
+    // deleteUser() {
+    //   this.$confirm('此操作将永久删除此账号, 是否继续?', '提示', {
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     type: 'warning',
+    //     beforeClose: (action, instance, done) => {
+    //       if (action === 'confirm') {
+    //         instance.confirmButtonLoading = true;
+    //         instance.confirmButtonText = '执行中...';
+    //         userApi.delete(this.userManagementDialog.user)
+    //             .then(() => {
+    //               this.$message.success({message: "删除账号成功", showClose: true})
+    //               this.userManagementDialog.visible = false
+    //               instance.confirmButtonLoading = false;
+    //               done();
+    //             })
+    //             .catch(() => {
+    //               instance.confirmButtonLoading = false
+    //               done();
+    //             })
+    //       } else {
+    //         done();
+    //       }
+    //     }
+    //   })
+    // },
+    // resetUserManagementDialog() {
+    //   this.$refs.userForm.resetFields();
+    //   this.userManagementDialog.cascader.value = null;
+    //   this.userManagementDialog.user.groupId = null
+    //   //组件key值自增(为了刷新缓存)
+    //   ++this.userManagementDialog.cascader.key
+    // },
   }
 }
 </script>

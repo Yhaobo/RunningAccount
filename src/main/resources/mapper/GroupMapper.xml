@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="erp.dao.rbac.GroupMapper">
+    <insert id="assignRole">
+        INSERT INTO rbac_group_role_relation
+        VALUES
+            (#{groupId}, #{roleId})
+    </insert>
+    <delete id="clearAssignedRoles">
+        DELETE
+        FROM
+            rbac_group_role_relation
+        WHERE
+            GROUP_ID = #{groupId}
+    </delete>
+    <select id="listRole" resultType="erp.entity.rbac.Role">
+        SELECT
+            ID
+        FROM
+            rbac_role
+        WHERE
+                ID IN (
+                SELECT
+                    role_id
+                FROM
+                    RBAC_GROUP_ROLE_RELATION
+                WHERE
+                    GROUP_ID = #{groupId}
+            )
+    </select>
+</mapper>

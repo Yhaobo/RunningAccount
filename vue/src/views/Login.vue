@@ -22,7 +22,7 @@
 
 <script>
 import CanvasNest from "@/components/CanvasNest";
-import userApi from "@/api/userApi";
+import userApi from "@/api/rbac/userApi";
 
 export default {
   name: 'login',
@@ -44,7 +44,7 @@ export default {
       userApi.login({...this.loginForm})
           .then((result) => {
             sessionStorage.setItem("username", result.data.username)
-            sessionStorage.setItem("level", result.data.level);
+            sessionStorage.setItem("groupId", result.data.groupId);
             let redirect = this.$route.query.redirect;
             if (redirect) {
               this.$router.replace({path: redirect + ''});
@@ -63,6 +63,7 @@ export default {
 .login-card .el-card__header {
   font-size: 20px;
   color: white;
+
 }
 
 .login-card {
@@ -70,6 +71,7 @@ export default {
   margin: 15% auto;
   background: rgb(0, 0, 0, 0.6);
   /*color: black;*/
+  text-align: center;
 }
 
 .transparent .el-input__inner, .transparent .el-form-item__label {

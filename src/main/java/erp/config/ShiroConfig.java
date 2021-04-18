@@ -1,10 +1,10 @@
 package erp.config;
 
+import erp.shiro.filter.RbacHttpMethodPermissionFilter;
 import erp.shiro.filter.RestFormAuthenticationFilter;
-import erp.shiro.filter.RestRolesAuthorizationFilter;
-import erp.shiro.filter.RestShiroFilterFactoryBean;
-import erp.shiro.realms.MyRealm;
+import erp.shiro.realms.MySqlRealm;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
@@ -20,6 +20,12 @@ import java.util.Map;
 /**
  * @author Yhaobo
  * @date 2020/3/14
+ * <p>
+ * 在ShiroConfig中做什么事情呢？
+ * 1 配置shiro安全管理器，向安全管理器中注入Realm域
+ * 2 配置Realm域：注入密码比较器
+ * 3 配置密码比较器
+ * 4 配置拦截路径和放行路径
  */
 @SpringBootConfiguration
 public class ShiroConfig {
@@ -32,12 +38,12 @@ public class ShiroConfig {
      * 配置自定义 realm
      */
     @Bean
-    public MyRealm realm() {
+    public MySqlRealm realm() {
         // 设置用于匹配密码的CredentialsMatcher
         HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher();
         credentialsMatcher.setHashIterations(hashIterations);
         credentialsMatcher.setHashAlgorithmName(algorithmName);
-        return new MyRealm(credentialsMatcher);
+        return new MySqlRealm(credentialsMatcher);
     }
 
     /**
@@ -49,19 +55,20 @@ public class ShiroConfig {
         filterChainMap.put("/", "anon");
         filterChainMap.put("/favicon.ico", "anon");
         filterChainMap.put("/static/**", "anon");
-        filterChainMap.put("/user/login", "anon");
-        filterChainMap.put("/user/logout", "anon");
+        filterChainMap.put("/rbac/user/login", "anon");
+        filterChainMap.put("/rbac/user/logout", "anon");
 
         filterChainMap.put("/swagger*/**", "anon");
         filterChainMap.put("/v2/api-docs/**", "anon");
         filterChainMap.put("/webjars/springfox-swagger-ui/**", "anon");
         filterChainMap.put("/druid/**", "anon");
 
-        //下面为自定义的路径匹配模式
-        filterChainMap.put("/user/**::post,put,delete,get", "roles[admin]");
-
-        filterChainMap.put("/**::post,put,delete", "roles[user]");
-        filterChainMap.put("/excel/**", "roles[user]");
+        //需要鉴权的资源
+        filterChainMap.put("/rbac/**", "rest[rbac]");
+        filterChainMap.put("/detail/**", "rest[detail]");
+        filterChainMap.put("/option/**", "rest[option]");
+        filterChainMap.put("/statistics/**", "rest[statistics]");
+        filterChainMap.put("/excel/**", "rest[excel]");
 
         filterChainMap.put("/**", "authc");
         return filterChainMap;
@@ -69,8 +76,7 @@ public class ShiroConfig {
 
     @Bean
     public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
-        // 创建自定义的 RestShiroFilterFactoryBean
-        ShiroFilterFactoryBean shiroFilterFactoryBean = new RestShiroFilterFactoryBean();
+        ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
 
         // 1、创建过滤器Map，用来装自定义过滤器
@@ -78,7 +84,7 @@ public class ShiroConfig {
 
         // 2、将自定义过滤器放入map中，如果实现了自定义授权过滤器，那就必须在这里注册，否则Shiro不会使用自定义的授权过滤器
         filterMap.put("authc", new RestFormAuthenticationFilter());
-        filterMap.put("roles", new RestRolesAuthorizationFilter());
+        filterMap.put("rest", new RbacHttpMethodPermissionFilter());
 
         // 3、将过滤器Ma绑定到shiroFilterFactoryBean上
         shiroFilterFactoryBean.setFilters(filterMap);
@@ -89,12 +95,15 @@ public class ShiroConfig {
     }
 
     /**
-     * 配置security并设置userReaml，避免xxxx required a bean named 'authorizer' that could not be found.的报错
+     * 配置SecurityManager
      */
     @Bean
     public SecurityManager securityManager() {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+        //设置realm
         securityManager.setRealm(realm());
+        //设置缓存（缓存当前用户拥有的权限或角色信息）
+        securityManager.setCacheManager(new MemoryConstrainedCacheManager());
         return securityManager;
     }
 
@@ -112,4 +121,11 @@ public class ShiroConfig {
         return defaultAdvisorAutoProxyCreator;
     }
 
+    public int getHashIterations() {
+        return hashIterations;
+    }
+
+    public String getAlgorithmName() {
+        return algorithmName;
+    }
 }

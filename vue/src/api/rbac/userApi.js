@@ -5,7 +5,7 @@ export default {
     login(loginForm) {
         loginForm.password = Base64.encode(loginForm.password);
         return axios({
-            url: 'user/login',
+            url: 'rbac/user/login',
             method: 'post',
             data: loginForm
         })
@@ -13,22 +13,16 @@ export default {
 
     logout() {
         return axios({
-            url: 'user/logout',
+            url: 'rbac/user/logout',
             method: 'delete',
         })
     },
 
-    listUsername(level) {
-        return axios({
-            url: `user/listUsername/${level}`,
-            method: 'get',
-        })
-    },
     update(user) {
         user.password = Base64.encode(user.password);
         user.checkPassword = null;
         return axios({
-            url: 'user',
+            url: 'rbac/user',
             method: 'put',
             data: user
         })
@@ -37,20 +31,16 @@ export default {
         user.password = Base64.encode(user.password);
         user.checkPassword = null;
         return axios({
-            url: 'user',
+            url: 'rbac/user',
             method: 'post',
             data: user
         })
     },
-    delete(user) {
-        user.password = null;
-        user.checkPassword = null;
+    delete(userId) {
         return axios({
-            url: 'user',
+            url: 'rbac/user',
             method: 'delete',
-            data: user
+            data: userId
         })
     },
-
-
 }

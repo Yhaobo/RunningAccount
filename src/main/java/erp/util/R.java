@@ -4,14 +4,28 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author Yhaobo
+ * 服务端统一返回的封装结果的对象
+ */
 @Data
 public class R implements Serializable {
 
+    /**
+     * 是否成功
+     */
     private boolean success;
+    /**
+     * 状态码
+     */
     private Integer code;
-
+    /**
+     * 消息
+     */
     private String message;
-
+    /**
+     * 数据
+     */
     private Object data;
 
     public R() {
@@ -76,3 +90,4 @@ public class R implements Serializable {
         return this;
     }
 }
+

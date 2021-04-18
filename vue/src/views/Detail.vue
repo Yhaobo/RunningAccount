@@ -77,7 +77,7 @@
               <template slot="title">
                 <span v-show="!scope.row.hasPicture">暂无图片信息</span>
                 <span v-show="scope.row.hasPicture">图片信息</span>
-                <el-button style="margin-left: 10px" size="mini" type="success" v-if="currentUserLevel<='1'"
+                <el-button style="margin-left: 10px" size="mini" type="success" v-if="currentUserGroupId<='1'"
                            @click.stop="openAddPictureDialog(scope.row.id,scope.$index,true)">上传
                 </el-button>
               </template>
@@ -112,7 +112,7 @@
       <el-table-column label="结存" prop="balance">
         <template slot-scope="scope">{{ '￥' + scope.row.balance }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="157" v-if="currentUserLevel<='1'">
+      <el-table-column label="操作" width="157" v-if="currentUserGroupId<='1'">
         <template slot="header">
           操作
           <el-button v-show="tableData.multipleSelectionData.data.length===0" size="small" type="success"
@@ -130,7 +130,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column v-if="currentUserLevel<='1'" type="selection" width="40"></el-table-column>
+      <el-table-column v-if="currentUserGroupId<='1'" type="selection" width="40"></el-table-column>
     </el-table>
     <el-pagination @size-change="handlePageSizeChange"
                    @current-change="handleCurrentPageChange"
@@ -319,7 +319,7 @@ export default {
   },
   data() {
     return {
-      currentUserLevel: sessionStorage.getItem('level'),
+      currentUserGroupId: sessionStorage.getItem('groupId'),
       loadingText: '玩命加载中...',
       baseUrl: process.env.VUE_APP_BaseURL,
       pageData: {
